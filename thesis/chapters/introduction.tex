@@ -1,14 +1,20 @@
 % Chapter: Introduction
 % Author: Tomáš Šimáček
 Virtualizace je technika, se kterou se dnes v IT můžeme setkat v mnoha podobách. Jednou z hlavních oblastí využití virtualizace je virtualizace serverů a mimo jiné se objevuje i v oblasti
-komunikačních sítí a desktopů. Tato technika umožňuje vytvořit virtuální prostředí nebo prostředky, které se mohou chovat jinak nebo k nim může být přistupováno jiným způsobem, než
-k těm fyzickým. 
+komunikačních sítí a desktopů. Tato technologie umožňuje vytvářet virtuální prostředí nebo prostředky na fyzickým hardware. Speciální softwarová vrstva zvaná virtualizační monitor (VMM)
+zajišťuje efektivní rozdělování prostředků fyzického systému mezi virtualizované subjekty.
 
-Virtualizace serverů  virtualizaci serverů můžeme jednoduše vytvořit více virtuálních počítačů na jednom fyzickém.
+Hlavním tématem této práce je virtualizace serverů, která umožňuje rozdělit jeden fyzický systém na několik nezávislých virtuálních prostředí zvaných virtuální počítač (VM).
+Možnost vytváření VM značně snižuje náklady na pořizování a provoz fyzických strojů, jelikož už není třeba dedikovaný server pro každou instanci OS. A konečně správným rozdělením
+VMs na fyzické servery můžeme docílit ideálního rozdělení zátěže a tím efektivně využít dostupné fyzické prostředky.
+
+Rostoucí počet virtualizovaných serverů může mít za následek obtížnější správu. Automatizované nasazování, instalace nebo zálohování VMs může být značným ulehčením vývoje software,
+testování nebo nasazování aplikací do produkčního prostředí. Tomuto tématu se tato práce věnuje v souvislosti s virtualizačním kontejnerem Solaris Zones.
+
 \section{Cíle práce}
 
-Prvním cílem této práce je popis virtualizační techniky Solaris Zones od firmy Oracle. Důraz je kladen na popis základních principů, které umožňují běh více zón v rámci jednoho
-sdíleného jádra OS.
+Prvním cílem této práce je seznámení se s operačním systémem Solaris a jeho funkcemi. Především jde o popis virtualizační techniky Solaris Zones. Důraz je kladen na popis
+základních principů, které umožňují běh více zón v rámci jednoho sdíleného jádra OS.
 
 Dalším cílem je detailní popis možností konfigurace zón, jejich instalace, zálohování a v neposlední řadě také integrace Solaris Zones s ostatními službami operačního systému
 Solaris.
@@ -20,4 +26,5 @@ lokální i vzdálené servery, náhradu existujících zón a jejich zálohová
 
 \section{Struktura práce}
 
+TODO
 
