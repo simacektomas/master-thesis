@@ -1,8 +1,16 @@
 % Virtualization chapter about concept, types, examples and implementation
-Přechod na virtualizovanou infrastrukturu může mít hned několik důvodů. Úvod následující kapitoly představuje důvody, které přechod několik základních scénářů, kdy je vhodné tento přechod učinit.
-Ve zbytku kapitoly jsou popsány jednotlivé typy virtualizace a základní virtualizační techniky.
+V dnešní době existuje mnoho různých typů virtualizace, jak již bylo zmíněno v úvodu. Následující kapitola zběžně představuje několik nejznámější typů virtualizace v IT a dále se věnuje hlavně
+tématu virtualizace serverů. V kapitole jsou popsány některé scénáře pro přechod z klasické infrastruktury na virtuální. Ve zbytku kapitoly jsou popsány obecné principy virtualizace a základy 
+virtualizace CPU, paměti a I/O zařízení.
+
+\section{Využití virtualizace v sítích}
+\section{Virtualizace desktopu}
+\section{Virtualizace serverů}
+
 \section{Definice pojmů}
 Pro potřeby popisu virtualizačních technik si definujeme základní pojmy a entity, které se ve virtuální infrastruktuře vyskytují.
+
+\textit{Fyzické prostředky} TODO
 
 \textit{Virtualizační monitor}, \textit{Virtual Machine Monitor - VMM} nebo také \textit{Hypervisor} je softwarová vrstva, která virtualizuje HW prostředky fyzického počítače a přiděluje je
 virtuálním strojům.
@@ -13,13 +21,89 @@ monitor a v některých případech může obsahovat i operační systém hosta 
 \textit{Virtuální stroj} nebo \textit{Virtual Machine - VM} je virtualizované prostředí vytvořené virtualizačním monitorem, ve kterém běží operační systém virtuálního počítače nazývaný \textit{Guest OS}.
 
 \section{Nasazení virtuální infrastruktury}
+Pro přechod k virtuální infrastruktuře serverů existuje v dnešní době několik dobrých důvodů. Jedním z hlavních benefitů virtualizace pro dnešní firmy a organizace je značná finanční úspora. Tato úspora se
+projevuje především ve snížení nákladů organizace na pořizování a provoz fyzických zařízení. 
+
+Mezi další benefity virtualizace patří především efektivní využití výpočetních zdrojů, vysoká dostupnost běžících aplikací nebo vytvoření oddělených a nezávislých prostředí pro vývoj, testování a nasazení software.
+
+Výhody zavedení virtuální infrastruktury jsou podrobněji popsány v následujících podkapitolách, které se zabývají základními scénáři pro nasazení virtuální infrastruktury.
+
+\subsection{Konsolidace}
+
+Konsolidace serverů je proces sjednocování více fyzických serverů na jeden fyzický server, který pro tyto servery poskytne virtuální prostředí pro jejich běh. Vstupem tohoto procesu je tedy několik fyzických serverů,
+na kterých běží různé aplikace. Vstup procesu je naznačen na obrázku \ref{consolidation} vlevo. Výstupem konsolidace je jeden fyzický server s dostatečnými prostředky, na kterém konsolidované servery běží jako virtuální počítače.
+Výstup můžeme vidět na obrázku \ref{consolidation} vpravo.
+
+\begin{figure}
+    \centering    
+    \caption{Konsolidace serverů}
+    \label{consolidation}
+\end{figure}
+
+\subsubsection*{Využití scénáře}
+
+Dnes je zcela běžnou praktikou provozovat jednu aplikaci na jednom dedikovaném serveru. Pokud aplikace využívá jen malé procento výpočetních zdrojů daného serveru, může administrátor sjednotit více takovýchto serverů
+do jednoho. Pro organizaci, která vlastní tisíce takovýchto serverů může konsolidace výrazně zmenšit požadavky na prostor, spotřebu energie a provoz fyzických serverů. Správnou konsolidací serverů může společnost docílit
+efektivního využití dostupných prostředků a tím výrazně snížit vynaložené finanční prostředky. \cite{reasons}
+
+Rychlý vývoj technologií v oblasti hadware zapříčiňuje rychlé stárnutí některých systémů a přechod ze staršího na nový může být složitý. Obzvláště v případě, kdy systém potřebuje ke svému běhu speciální hadware.
+Aby bylo možné provozovat služby poskytované těmito zastaralými systémy, můžeme je spustit jako virtuální počítač na modernějším hadware. Systém se bude chovat stejně jako kdyby běžel na zastaralém hadware, zatímco
+výkonost služby může těžit z novější a výkonnější hadwarové vrstvy. \cite{reasons}
 
 \subsection{Izolace}
-\subsection{Konsolidace}
+
+Dalším ze scénářů využití virtualizované infrastruktury je izolace aplikací. Proces izolace aplikací spočívá v oddělení dvou a více kritických aplikací běžících na jednom systému do nezávislých virtuálních prostředí.
+Vstupem je jeden systém s aplikacemi, které se mohou negativně ovlivňovat. Vstup izolačního scénáře je naznačen na obrázku \ref{izolation} vlevo. Výstupem je několik nezávislých virtuálních počítačů, ve kterých běží
+jednotlivé aplikace. Výstup izolace aplikací je ukázán na obrázku \ref{izolation} vpravo.
+
+\begin{figure}
+    \centering    
+    \caption{Izolace aplikací}
+    \label{izolation}
+\end{figure}
+
+\subsubsection*{Využití scénáře}
+
+V dnešní době jsou útoky na aplikace vystavené do internetu běžnou záležitostí. Pokud útočník využije nějaké zranitelnosti aplikace, může v některých případech získat kontrolu nad celým systémem. V takovém případě jsou
+ohroženy všechny data a aplikace, které na daném systému běží. Vhodným krokem v tomto případě je proto využití virtualizace a rozdělení aplikací do nezávislých prostředí.
+
+Jedním z příkladů ohrožení systému může být útok na výpočetní zdroje. Podstatou útoku je vyčerpání fyzických zdrojů systému, což má za následek nedostupnost jeho služeb a v některých případech i pád celého systému.
+Ve virtualizovaném prostředí lze přidělit každému VM pouze určitou část prostředků a tím chránit celý systém před jejich vyčerpáním. V případě napadení jednoho VM sice dojde k jeho vyřazení, ale ostatní VM a jejich služby
+mohou dále pokračovat v běhu.
+
 \subsection{Migrace}
 
-\section{Virtualizace sítí}
-\section{Virtualizace desktopu}
-\section{Virtualizace serverů}
-\section{Techniky virtualizace}
+\subsubsection*{Migrace virtuálního stroje}
+
+\begin{figure}
+    \centering    
+    \caption{Migrace virtuálního stroje}
+    \label{migration1}
+\end{figure}
+
+\subsubsection*{Migrace fyzického na virtuální stroj}
+
+\begin{figure}
+    \centering    
+    \caption{Migrace fyzického na virtuální stroj}
+    \label{migration2}
+\end{figure}
+
+\subsubsection*{Využití scénáře}
+
+fail-over / vysoká dostupnost
+
+eliminace legacy hw
+
+
+
+
+
+
 \section{Virtualizační monitor}
+\section{Techniky virtualizace}
+\section{Virtualizace CPU}
+\section{Virtualizace Paměti}
+\section{Virtualizace I/O zařízení}
+
+
