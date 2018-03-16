@@ -29,26 +29,27 @@ Mezi další benefity virtualizace patří především efektivní využití vý
 Výhody zavedení virtuální infrastruktury jsou podrobněji popsány v následujících podkapitolách, které se zabývají základními scénáři pro nasazení virtuální infrastruktury.
 
 \subsection{Konsolidace}
+\label{consolidation}
 
 Konsolidace serverů je proces sjednocování více fyzických serverů na jeden fyzický server, který pro tyto servery poskytne virtuální prostředí pro jejich běh. Vstupem tohoto procesu je tedy několik fyzických serverů,
-na kterých běží různé aplikace. Vstup procesu je naznačen na obrázku \ref{consolidation} vlevo. Výstupem konsolidace je jeden fyzický server s dostatečnými prostředky, na kterém konsolidované servery běží jako virtuální počítače.
-Výstup můžeme vidět na obrázku \ref{consolidation} vpravo.
+na kterých běží různé aplikace. Vstup procesu je naznačen na obrázku \ref{consolidation_img} vlevo. Výstupem konsolidace je jeden fyzický server s dostatečnými prostředky, na kterém konsolidované servery běží jako virtuální počítače.
+Výstup můžeme vidět na obrázku \ref{consolidation_img} vpravo.
 
 \begin{figure}
     \centering    
     \caption{Konsolidace serverů}
-    \label{consolidation}
+    \label{consolidation_img}
 \end{figure}
 
 \subsubsection*{Využití scénáře}
 
 Dnes je zcela běžnou praktikou provozovat jednu aplikaci na jednom dedikovaném serveru. Pokud aplikace využívá jen malé procento výpočetních zdrojů daného serveru, může administrátor sjednotit více takovýchto serverů
 do jednoho. Pro organizaci, která vlastní tisíce takovýchto serverů může konsolidace výrazně zmenšit požadavky na prostor, spotřebu energie a provoz fyzických serverů. Správnou konsolidací serverů může společnost docílit
-efektivního využití dostupných prostředků a tím výrazně snížit vynaložené finanční prostředky. \cite{reasons}
+efektivního využití dostupných prostředků a tím výrazně snížit vynaložené finanční prostředky \cite{reasons}.
 
 Rychlý vývoj technologií v oblasti hadware zapříčiňuje rychlé stárnutí některých systémů a přechod ze staršího na nový může být složitý. Obzvláště v případě, kdy systém potřebuje ke svému běhu speciální hadware.
 Aby bylo možné provozovat služby poskytované těmito zastaralými systémy, můžeme je spustit jako virtuální počítač na modernějším hadware. Systém se bude chovat stejně jako kdyby běžel na zastaralém hadware, zatímco
-výkonost služby může těžit z novější a výkonnější hadwarové vrstvy. \cite{reasons}
+výkonost služby může těžit z novější a výkonnější hadwarové vrstvy  \cite{reasons}.
 
 \subsection{Izolace}
 
@@ -73,7 +74,20 @@ mohou dále pokračovat v běhu.
 
 \subsection{Migrace}
 
-\subsubsection*{Migrace virtuálního stroje}
+Posledním diskutovaným scénářem nasazení virtualizované infrastruktury je migrace. Jedná se o proces přesunutí systému z jednoho počítače na druhý. V rámci virtualizace se budeme bavit o přesouvání systému na počítač s běžícím VMM,
+který zprostředkovává virtuální prostředí. Výstupem procesu je systém, který do něj zároveň vstupuje. Rozdíl je v tom, že daný systém na konci procesu běží ve virtuálním prostředí nějakého VMM. Dle typu migrovaného systému můžeme
+rozdělit scénář na následující typy.
+
+\subsubsection*{Migrace VM}
+
+Migrací virtuálního stroje se rozumí přesun VM mezi dvěma různými fyzickými stroji s VMM. Tento přesun byl dříve možný pouze v případě když oba stroje měli stejný HW, operační systém a procesor \cite{reasons}.
+Tato možnost administrátorovi umožňuje přesouvat virtualizované systémy na výkonnější hosty a tím umožňuje dynamicky regulovat využití fyzických prostředků v závislosti na aktuální zátěži systému.
+
+Další výhodou zavedení virtualizované architektury je zajištění vysoké dostupnosti služeb. Virtualizace umožňuje zajistit redundanci ve smyslu spuštění služby na více serverech najednou. Ve virtualizované architektuře můžou
+nastat dva typy selhání. Prvním typem je selhání VM uvnitř VMM. Pokud dojde k selhání některé VM, jiná VM převezme obsluhu požadavků a v minimálním čase dojde k obnovení služby. Druhým typem je selhání celého VMM nebo hosta.
+V tomto případě je nutné provozovat více redundantních hostů pro VM, které v případě HW chyby převezmou obsluhu služby.
+
+Proces migrace VM je představen na obrázku \ref{migration1}, kde můžeme vidět konfiguraci před migrací (vlevo) a po provedení migrace VM (vpravo).
 
 \begin{figure}
     \centering    
@@ -81,7 +95,13 @@ mohou dále pokračovat v běhu.
     \label{migration1}
 \end{figure}
 
-\subsubsection*{Migrace fyzického na virtuální stroj}
+\subsubsection*{Migrace fyzického stoje na VM}
+
+Migrace fyzického stroje na virtuální stroj je proces, kdy dochází k přesunu a virtualizaci systému z fyzického stroje. Vstupem je tedy systém běžící na stroji bez VMM, jak je naznačeno na obrázku \ref{migration2} vlevo. 
+Výstupem tohoto procesu je opět virtuální stroj běžící ve virtuálním prostředí VMM.
+
+Virtualizací serverů dochází k uvolňování fyzického HW a stejně jako v případě konsolidace tak společnost může značně ušetřit na nákladech nutných k provozu a správě fyzických serverů. Obecně lze říct, že tento scénář přináší 
+podobné benefity jako v případě konsolidace popsané v kapitole \ref{consolidation}.
 
 \begin{figure}
     \centering    
@@ -89,11 +109,7 @@ mohou dále pokračovat v běhu.
     \label{migration2}
 \end{figure}
 
-\subsubsection*{Využití scénáře}
 
-fail-over / vysoká dostupnost
-
-eliminace legacy hw
 
 
 
