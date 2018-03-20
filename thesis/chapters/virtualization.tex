@@ -167,23 +167,51 @@ Z úlohy virtualizačního monitoru při virtualizaci systémů plyne několik z
 
 Operační systém běžící ve virtuálním prostředí virtualizačího monitoru by se neměl dozvědět o existenci VMM ani jiných VM, se kterými ve skutečnosti sdílí prostředky hosta.
 
-VMM tedy zachytává systémové volání operačních systémů na HW zařízení nebo na čtení z paměti a transparentně je vyřizuje. 
+VMM tedy zachytává systémové volání operačních systémů na HW zařízení nebo na čtení z paměti a transparentně je vyřizuje. Operační systém virtuálního počítače si tak myslí, že komunikuje přímo s HW. V této fázi VMM využívá 
+některých technik virtualizace CPU, paměti nebo I/O zařízení, aby mohl sdílet prostředky mezi virtuální stroje. Některé základní techniky virtualizace jsou popsány v kapitole \ref{virt_techniques}.
 
 \subsubsection*{Izolace}
 
-Virtualizační monitor 
+Virtualizační monitor vytváří virtuální prostředí, které by mělo izolovat jednotlivé instance OS od sebe. Každý virtuální stroj má svůj kontext procesoru i svoji virtuální paměť mapovanou do jiných oblastí fyzické paměti.
+Jinak řečeno jednotlivé VM se nemohou vzájemně ovlivňovat svoji činnost a pád jedné VM by neměl ovlivnit činnost ostatních.
+
 
 \subsubsection*{Ochrana}
 
-Virtualizační monitor by měl být chráněn proti všem vyšším vrstvám 
+Virtualizační monitor by měl být chráněn proti všem vyšším vrstvám virtuální počítačů. Operační systém virtuálního stroje běží v privilegovaném režimu úrovně 1 (ring 1) a VMM běží v nejvíce privilegovaném režimu úrovně 0.
+Pro operační systém virtuálního počítače to znamená, že nemůže přistupovat do paměti mapované pro VMM a privilegované instrukce vyvolají volání do virtualizačního monitoru, který emuluje jejich chování. 
 
 
 \subsection{Typy VMM}
+
+V následujících třech podkapitolách jsou představeny tři typické architektury VMM, které se liší ve způsobu přístupu k fyzickým prostředkům systému. Obecně lze tyto způsoby rozdělit na přímý a nepřímý přístup.
+
 \subsubsection*{Nativní VMM}
+
+\begin{figure}
+    \centering    
+    \caption{Nativní (Bare-Metal) VMM}
+    \label{native_vmm}
+\end{figure}
+
 \subsubsection*{Hostovaný VMM}
+
+\begin{figure}
+    \centering    
+    \caption{Hostovaný VMM}
+    \label{hosted_vmm}
+\end{figure}
+
 \subsubsection*{Servisní VM}
 
+\begin{figure}
+    \centering    
+    \caption{Hybridní VMM}
+    \label{hybrid_vmm}
+\end{figure}
+
 \section{Techniky virtualizace}
+\label{virt_techniques}
 
 
 
