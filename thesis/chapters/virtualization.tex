@@ -1,19 +1,20 @@
 % Virtualization chapter about concept, types, examples and implementation
+Virtualizace je proces vytváření virtuální reprezentace nějaký objektů. V IT se typicky jedná o virtualizaci aplikací, serverů, sítí nebo i fyzických prostředků jako například CPU, paměť nebo I/O zařízení.
+
 V dnešní době existuje mnoho různých typů virtualizace, jak již bylo zmíněno v úvodu. Následující kapitola zběžně představuje několik nejznámější typů virtualizace v IT a dále se věnuje hlavně
 tématu virtualizace serverů. V kapitole jsou popsány některé scénáře pro přechod z klasické infrastruktury na virtuální. Ve zbytku kapitoly jsou popsány obecné principy virtualizace a základy 
 virtualizace CPU, paměti a I/O zařízení.
 
-TODO general definition of virtualization
-
 \section{Definice pojmů}
 Pro potřeby popisu virtualizačních technik si definujeme základní pojmy a entity, které se ve virtuální infrastruktuře vyskytují.
 
-\textit{Fyzické prostředky} počítače jsou TODO
+\textit{Fyzické prostředky} počítače jsou dostupné prostředky a služby poskytované HW počítače. Tyto prostředky určují celkový výpočetní výkon daného stroje.
 
 \textit{Virtualizační monitor}, \textit{Virtual Machine Monitor - VMM} nebo také \textit{Hypervisor} je softwarová vrstva, která virtualizuje HW prostředky fyzického počítače a přiděluje je
 virtuálním strojům.
 
-\textit{Virtuální prostředky} TODO
+\textit{Virtuální prostředky} jsou virtuální reprezentace fyzických prostředků. Tyto prostředky využívají virtuální stroje skrze VMM. Často tyto prostředky reprezentují pouze nějakou část jejich fyzických ekvivalentů. Například 
+část adresního prostoru fyzické paměti nebo určité procento výpočetního času CPU.
 
 \textit{Host} je HW a SW platforma, která poskytuje virtuálním strojům své fyzické prostředky. Softwarové vybavení hosta obsahuje virtualizační
 monitor a v některých případech může obsahovat i operační systém hosta tzv. \textit{Host OS}
