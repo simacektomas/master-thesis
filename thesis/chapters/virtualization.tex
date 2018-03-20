@@ -3,24 +3,41 @@ V dnešní době existuje mnoho různých typů virtualizace, jak již bylo zmí
 tématu virtualizace serverů. V kapitole jsou popsány některé scénáře pro přechod z klasické infrastruktury na virtuální. Ve zbytku kapitoly jsou popsány obecné principy virtualizace a základy 
 virtualizace CPU, paměti a I/O zařízení.
 
-\section{Využití virtualizace v sítích}
-\section{Virtualizace desktopu}
-\section{Virtualizace serverů}
-
 \section{Definice pojmů}
 Pro potřeby popisu virtualizačních technik si definujeme základní pojmy a entity, které se ve virtuální infrastruktuře vyskytují.
 
-\textit{Fyzické prostředky} TODO
+\textit{Fyzické prostředky} počítače jsou TODO
 
 \textit{Virtualizační monitor}, \textit{Virtual Machine Monitor - VMM} nebo také \textit{Hypervisor} je softwarová vrstva, která virtualizuje HW prostředky fyzického počítače a přiděluje je
 virtuálním strojům.
 
-\textit{Host} je HW a SW platforma, která poskytuje virtuálním strojům výpočetní výkon, paměť, úložiště, síťové připojení a další fyzické prostředky. Softwarové vybavení hosta obsahuje virtualizační
+\textit{Host} je HW a SW platforma, která poskytuje virtuálním strojům své fyzické prostředky. Softwarové vybavení hosta obsahuje virtualizační
 monitor a v některých případech může obsahovat i operační systém hosta tzv. \textit{Host OS}
 
 \textit{Virtuální stroj} nebo \textit{Virtual Machine - VM} je virtualizované prostředí vytvořené virtualizačním monitorem, ve kterém běží operační systém virtuálního počítače nazývaný \textit{Guest OS}.
 
+\section{Virtualizace serverové infrastruktury}
+
+První a pravděpodobně nejvýznamnější oblastí využití virtualizace, je oblast výpočetních serverů. Výpočetní server je fyzický počítač s operačním systémem a výpočetními prostředky, který může poskytovat nějaké služby svému okolí.
+V dnešní době se s těmito servery setkáváme každý den a to v podobě webových serverů, serverů poskytujících službu DNS a mnohých dalších.
+
+Proces virtualizace serverů spočívá v přenesení systémů a jejich služeb z fyzických serverů do virtuálního prostředí. Toto virtuální prostředí je vytvořeno virtualizačním monitorem běžícím na jiném fyzickém stroji a následně poskytováno virtuálním strojům.
+Virtualizační monitor nebo také VMM je detailněji popsán v kapitole \ref{vmm}, kde jsou představeny jeho typy a funkce. Serverová architektura využívající virtualizace se skládá především z tzv. virtualizačních serverů, které slouží jako zdroj fyzických
+prostředků pro virtuální počítače. Tyto servery se vyznačují především velkým množstvím operační paměti a vysokým výpočetním výkonem, který je díky VMM rozdělován mezi hostované virtuální stroje.
+
+Tato práce se zaměřuje právě na techniky virtualizace, které jsou v dnešní době aktuální a využívají se k virtualizaci serverů. Práce podrobně představuje virtualizační techniku Solaris Zones of firmy Oracle, která slouží pro
+vyváření virtuálních strojů (zón), které sdílejí jedno jádro OS.
+
+\section{Využití virtualizace v sítích}
+
+
+
+\section{Virtualizace desktopu}
+
+
+
 \section{Nasazení virtuální infrastruktury}
+
 Pro přechod k virtuální infrastruktuře serverů existuje v dnešní době několik dobrých důvodů. Jedním z hlavních benefitů virtualizace pro dnešní firmy a organizace je značná finanční úspora. Tato úspora se
 projevuje především ve snížení nákladů organizace na pořizování a provoz fyzických zařízení. 
 
@@ -31,8 +48,8 @@ Výhody zavedení virtuální infrastruktury jsou podrobněji popsány v násled
 \subsection{Konsolidace}
 \label{consolidation}
 
-Konsolidace serverů je proces sjednocování více fyzických serverů na jeden fyzický server, který pro tyto servery poskytne virtuální prostředí pro jejich běh. Vstupem tohoto procesu je tedy několik fyzických serverů,
-na kterých běží různé aplikace. Vstup procesu je naznačen na obrázku \ref{consolidation_img} vlevo. Výstupem konsolidace je jeden fyzický server s dostatečnými prostředky, na kterém konsolidované servery běží jako virtuální počítače.
+Konsolidace serverů je proces sjednocování systémů z více fyzických serverů na jeden fyzický server, který pro tyto systémy poskytne virtuální prostředí pro jejich běh. Vstupem tohoto procesu je tedy několik systémů na fyzických serverech,
+na kterých běží různé aplikace. Vstup procesu je naznačen na obrázku \ref{consolidation_img} vlevo. Výstupem konsolidace je jeden fyzický server s dostatečnými prostředky, na kterém konsolidované systémy běží jako virtuální počítače.
 Výstup můžeme vidět na obrázku \ref{consolidation_img} vpravo.
 
 \begin{figure}
@@ -109,15 +126,15 @@ podobné benefity jako v případě konsolidace popsané v kapitole \ref{consoli
     \label{migration2}
 \end{figure}
 
-
-
-
-
-
-
-
 \section{Virtualizační monitor}
+\label{vmm}
+
+
+
 \section{Techniky virtualizace}
+
+
+
 \section{Virtualizace CPU}
 \section{Virtualizace Paměti}
 \section{Virtualizace I/O zařízení}
