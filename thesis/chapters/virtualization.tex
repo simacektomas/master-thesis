@@ -3,6 +3,8 @@ V dnešní době existuje mnoho různých typů virtualizace, jak již bylo zmí
 tématu virtualizace serverů. V kapitole jsou popsány některé scénáře pro přechod z klasické infrastruktury na virtuální. Ve zbytku kapitoly jsou popsány obecné principy virtualizace a základy 
 virtualizace CPU, paměti a I/O zařízení.
 
+TODO general definition of virtualization
+
 \section{Definice pojmů}
 Pro potřeby popisu virtualizačních technik si definujeme základní pojmy a entity, které se ve virtuální infrastruktuře vyskytují.
 
@@ -10,6 +12,8 @@ Pro potřeby popisu virtualizačních technik si definujeme základní pojmy a e
 
 \textit{Virtualizační monitor}, \textit{Virtual Machine Monitor - VMM} nebo také \textit{Hypervisor} je softwarová vrstva, která virtualizuje HW prostředky fyzického počítače a přiděluje je
 virtuálním strojům.
+
+\textit{Virtuální prostředky} TODO
 
 \textit{Host} je HW a SW platforma, která poskytuje virtuálním strojům své fyzické prostředky. Softwarové vybavení hosta obsahuje virtualizační
 monitor a v některých případech může obsahovat i operační systém hosta tzv. \textit{Host OS}
@@ -21,22 +25,35 @@ monitor a v některých případech může obsahovat i operační systém hosta 
 První a pravděpodobně nejvýznamnější oblastí využití virtualizace, je oblast výpočetních serverů. Výpočetní server je fyzický počítač s operačním systémem a výpočetními prostředky, který může poskytovat nějaké služby svému okolí.
 V dnešní době se s těmito servery setkáváme každý den a to v podobě webových serverů, serverů poskytujících službu DNS a mnohých dalších.
 
-Proces virtualizace serverů spočívá v přenesení systémů a jejich služeb z fyzických serverů do virtuálního prostředí. Toto virtuální prostředí je vytvořeno virtualizačním monitorem běžícím na jiném fyzickém stroji a následně poskytováno virtuálním strojům.
+Proces virtualizace serverů spočívá v přenesení systémů a jejich služeb z fyzických serverů do virtuálního prostředí, které je nezávislé na nižších vrstvách. Toto virtuální prostředí je vytvořeno virtualizačním monitorem běžícím na jiném fyzickém stroji a následně poskytováno virtuálním strojům.
 Virtualizační monitor nebo také VMM je detailněji popsán v kapitole \ref{vmm}, kde jsou představeny jeho typy a funkce. Serverová architektura využívající virtualizace se skládá především z tzv. virtualizačních serverů, které slouží jako zdroj fyzických
-prostředků pro virtuální počítače. Tyto servery se vyznačují především velkým množstvím operační paměti a vysokým výpočetním výkonem, který je díky VMM rozdělován mezi hostované virtuální stroje.
+prostředků pro virtuální počítače. Tyto servery se vyznačují především velkým množstvím operační paměti a vysokým výpočetním výkonem, který je díky VMM rozdělován mezi hostované virtuální stroje. Výhody nasazení virtuální infrastruktury jsou dále
+popsány v kapitole \ref{vm_deployment}
 
 Tato práce se zaměřuje právě na techniky virtualizace, které jsou v dnešní době aktuální a využívají se k virtualizaci serverů. Práce podrobně představuje virtualizační techniku Solaris Zones of firmy Oracle, která slouží pro
 vyváření virtuálních strojů (zón), které sdílejí jedno jádro OS.
 
 \section{Využití virtualizace v sítích}
 
+Oblast komunikačních sítí je další neméně významnou oblastí pro využití virtualizačních technik. Bez síťové infrastruktury by mezi sebou počítače nemohli komunikovat, a tudíž by jejich využití nemělo takový potenciál. V dnešní době
+je tato infrastruktura značně rozsáhlá a to její správu ztěžuje. S virtualizací přichází do sítí možnost dynamické konfigurace sítě a to i její topologie. To vše lze uskutečnit z jednoho místa a bez nutnosti zasahovat do fyzických zařízení sítě.
 
+
+Virtualizace sítí je koncept, který se v mnoha ohledech podobná virtualizaci serverů. V případě serverů, se VMM stará o reprodukci vlastností fyzických prostředků v SW. Podobně je to tomu i v případě virtualizace sítí, kde existuje funkční ekvivalent VMM,
+který reprodukuje síťové komponenty v SW. Administrátor má tak možnost za chodu vytvářet virtuální síťové komponenty jako je switch, router, firewall nebo load balancer a to vše v rámci desítek sekund. Tento síťový hypervisor
+také umožňuje spravovat nové virtuální sítě, které zahrnují všechny standardní síťové služby a kvalitu služeb.\cite{vn}
 
 \section{Virtualizace desktopu}
 
+Společně s virtualizací serverů a sítí je virtualizace desktopu posledním typem virtualizace, která stojí za zmínku. Pod pojmem desktop si představme klasický stolní počítač, který má obrazovku, myš a klávesnici.
 
+S desktopem je klasicky spojeno grafické uživatelské prostředí, pomocí kterého uživatel ovládá počítač, instaluje aplikace nebo přizpůsobuje prostředí. Bez využití virtualizace nebo další podpůrných systémů jsou všechny informace o uživatelském nastavení uloženy
+na desktopu a uživatel se k nim dostane pouze z toho samého stroje. Virtualizací desktopu je rozuměno oddělení uživatelského prostředí a nastavení od fyzického stroje. Jednou z možností je přesunutí tohoto prostředí do virtuálního stroje, který je centrálně spravován a
+spouštěn, když uživatel potřebuje. Tento koncept umožňuje uživateli přístup ke svému prostředí téměř bez ohledu na lokalitu nebo platformu. Mezi další benefity zavedení virtualizovaného desktopu patří zvýšení bezpečnosti a zjednodušení správy
+celého systému. Tyto výhody pramení především z centralizaci tohoto řešení.
 
 \section{Nasazení virtuální infrastruktury}
+\label{vm_deployment}
 
 Pro přechod k virtuální infrastruktuře serverů existuje v dnešní době několik dobrých důvodů. Jedním z hlavních benefitů virtualizace pro dnešní firmy a organizace je značná finanční úspora. Tato úspora se
 projevuje především ve snížení nákladů organizace na pořizování a provoz fyzických zařízení. 
