@@ -6,6 +6,8 @@ tématu virtualizace serverů. V kapitole jsou popsány některé scénáře pro
 virtualizace CPU, paměti a I/O zařízení.
 
 \section{Definice pojmů}
+\label{definitions}
+
 Pro potřeby popisu virtualizačních technik si definujeme základní pojmy a entity, které se ve virtuální infrastruktuře vyskytují.
 
 \textit{Fyzické prostředky} počítače jsou dostupné prostředky a služby poskytované HW počítače. Tyto prostředky určují celkový výpočetní výkon daného stroje.
@@ -147,7 +149,39 @@ podobné benefity jako v případě konsolidace popsané v kapitole \ref{consoli
 \section{Virtualizační monitor}
 \label{vmm}
 
+Jak již bylo zmíněno v definici z kapitoly \ref{definitions}, virtualizační monitor je softwarová starající se o virtualizaci fyzických prostředků hosta. Vytváří tedy virtuální prostředí pro běh virtuální počítačů.
+Jinak řečeno VMM vytváří iluzi pro každý virtuální počítač, který si myslí že přímo ovládá HW fyzického systému.
 
+V klasickém nevirtualizovaném prostředí se OS stává po zavedení do hlavní paměti hlavním řídícím programem, který spravuje běh aplikací a vyřizuje požadavky aplikací na HW zařízení pomocí ovladačů. Operační systém tedy pracuje
+v nejvíce privilegovaném režimu procesoru známého jako \textit{ring 0} a může využívat všechny instrukce instrukční sady.
+
+Druhým případem je prostředí s VMM nebo také virtualizované prostředí. V tomto prostředí přebírá roli hlavního řídícího programu VMM, který je po startu systému zaveden do hlavní paměti. Od té chvíle pracuje VMM v nejvíce privilegovaném
+režimu CPU a spravuje všechny hostované OS (guest OS). Ovladače k jednotlivým HW zařízení nyní nejsou součástí těchto OS, ale jsou součástí samotného VMM. Každý OS si sám spravuje vlastní aplikace a chová se jako kdyby nebyl izolován virtualizačním monitorem
+ve virtuálním prostředí.\cite{vmm1}
+
+\subsection{Požadavky na VMM}
+
+Z úlohy virtualizačního monitoru při virtualizaci systémů plyne několik základních požadavků, které by měl VMM splňovat. Specifikace těchto požadavků je převzata z \cite{virt2}.
+
+\subsubsection*{Transparentnost}
+
+Operační systém běžící ve virtuálním prostředí virtualizačího monitoru by se neměl dozvědět o existenci VMM ani jiných VM, se kterými ve skutečnosti sdílí prostředky hosta.
+
+VMM tedy zachytává systémové volání operačních systémů na HW zařízení nebo na čtení z paměti a transparentně je vyřizuje. 
+
+\subsubsection*{Izolace}
+
+Virtualizační monitor 
+
+\subsubsection*{Ochrana}
+
+Virtualizační monitor by měl být chráněn proti všem vyšším vrstvám 
+
+
+\subsection{Typy VMM}
+\subsubsection*{Nativní VMM}
+\subsubsection*{Hostovaný VMM}
+\subsubsection*{Servisní VM}
 
 \section{Techniky virtualizace}
 
