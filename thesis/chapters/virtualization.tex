@@ -178,8 +178,8 @@ Jinak řečeno jednotlivé VM se nemohou vzájemně ovlivňovat svoji činnost a
 
 \subsubsection*{Ochrana}
 
-Virtualizační monitor by měl být chráněn proti všem vyšším vrstvám virtuální počítačů. Operační systém virtuálního stroje běží v privilegovaném režimu úrovně 1 (ring 1) a VMM běží v nejvíce privilegovaném režimu úrovně 0.
-Pro operační systém virtuálního počítače to znamená, že nemůže přistupovat do paměti mapované pro VMM a privilegované instrukce vyvolají volání do virtualizačního monitoru, který emuluje jejich chování. 
+Virtualizační monitor by měl být chráněn proti všem vyšším vrstvám virtuální počítačů. Operační systém virtuálního stroje běží v privilegovaném režimu úrovně 1 (ring 1) a VMM běží v nejvíce privilegovaném režimu \footnote[1]{Současné procesory podporují plnou virtualizaci v HW. Mají speciální 
+režim ochrany úrovně -1 speciálně pro VMM \cite{virt2}} úrovně 0. Pro operační systém virtuálního počítače to znamená, že nemůže přistupovat do paměti mapované pro VMM a privilegované instrukce vyvolají volání do virtualizačního monitoru, který emuluje jejich chování. 
 
 
 \subsection{Typy VMM}
@@ -187,6 +187,12 @@ Pro operační systém virtuálního počítače to znamená, že nemůže přis
 V následujících třech podkapitolách jsou představeny tři typické architektury VMM, které se liší ve způsobu přístupu k fyzickým prostředkům systému. Obecně lze tyto způsoby rozdělit na přímý a nepřímý přístup.
 
 \subsubsection*{Nativní VMM}
+
+Virtualizační monitor se nazývá nativní nebo také Bare-Metal, pokud má přímý přístup k HW pomocí vlastních ovladačů. Obvykle se nativní VMM implementuje ve firmwaru počítače nebo jako hlavní program, který se po startu
+systému  zavede do hlavní paměti a je mu předáno řízení. Tento přístup poskytuje nejvíce kontroly nad systémem a je také nejefektivnější, protože VMM přístup k HW zařizuje přímo. Architektura nativního VMM je ukázána na 
+obrázku \ref{native_vmm}
+
+Pokud hypervisor nepodporuje určité typy procesorů nebo periferních zařízení některých HW plaforem, může softwarové vybavení VMM limitovat přenositelnost na tyto platformy.\cite{vmm1}
 
 \begin{figure}
     \centering    
@@ -196,6 +202,13 @@ V následujících třech podkapitolách jsou představeny tři typické archite
 
 \subsubsection*{Hostovaný VMM}
 
+Druhým typem architektury VMM se nazývá hostovaný, protože využívá ke svému běhu existující a běžící operační systém, který mu poskytuje rozhraní s HW. Virtualizační monitor v tomto případě neobsahuje ovladače k HW, protože jsou
+součástí operačního systému hosta. Aby mohl hostovaný VMM správně pracovat, běží některé jeho části (kernel) v privilegovaném režimu procesoru společně s operačním systémem hosta. Požadavky na HW zařízení jsou jádrem VMM přesměrovány
+do komponenty VMM, která neběží v privilegovaném režimu. Tato komponenta dále zavolá nativní rozhraní OS a požadavek je vyřízen OS hosta. Jednotlivé komponenty hostovaného VMM jsou naznačeny na obrázku \ref{hosted_vmm}.
+
+Tento typ virtualizace je v dnešní době velice populární, protože umožňuje používat virtualizaci na systémech s běžícím operačním systémem a to především desktopech. Přenositelnost hostovaného VMM je zcela určena přenositelností 
+dané implementace mezi jednotlivými typy OS. Na druhou stranu tento typ VMM není vhodný pro nasazení do prostředí s vysokými výpočetními nároky, jelikož díky další vrstvě mezi HW a VMM není tak efektivní jako nativní VMM.
+
 \begin{figure}
     \centering    
     \caption{Hostovaný VMM}
@@ -203,6 +216,8 @@ V následujících třech podkapitolách jsou představeny tři typické archite
 \end{figure}
 
 \subsubsection*{Servisní VM}
+
+
 
 \begin{figure}
     \centering    
