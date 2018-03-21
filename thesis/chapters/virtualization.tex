@@ -21,7 +21,7 @@ virtuálním strojům.
 \textit{Host} je HW a SW platforma, která poskytuje virtuálním strojům své fyzické prostředky. Softwarové vybavení hosta obsahuje virtualizační
 monitor a v některých případech může obsahovat i operační systém hosta tzv. \textit{Host OS}
 
-\textit{Virtuální stroj} nebo \textit{Virtual Machine - VM} je virtualizované prostředí vytvořené virtualizačním monitorem, ve kterém běží operační systém virtuálního počítače nazývaný \textit{Guest OS}.
+\textit{Virtuální stroj} nebo \textit{Virtual Machine - VM} je virtualizované prostředí vytvořené virtualizačním monitorem, ve kterém běží operační systém virtuálního počítače nazývaný \textit{Guest OS} společně se svými aplikacemi.
 
 \section{Virtualizace serverové infrastruktury}
 
@@ -230,26 +230,54 @@ naznačen na obrázku \ref{servise_vmm}.
 \section{Techniky virtualizace}
 \label{virt_techniques}
 
-Z definice virtualizačního monitoru je zřejmé, že si klade za cíl souběžný běh více instancí OS na jednom fyzickém stroji. Jednou z hlavních rolí VMM při správě více instancí OS je sdílení fyzických výpočetních prostředků a přidělování jejich částí 
-jednotlivým VM. Právě pro tento účel musí VMM implementovat techniky pro virtualizaci instrukční sady CPU, multiplexování CPU, virtualizaci paměti a I/O zařízení.
+O pár odstavců výše jsme si popsali podstatu virtualizačního monitoru a také jsme si představili jeho základní typy. Nyní se pokusíme popsat techniky a principy, které VMM používá pro práci s HW, aby docílil vytvoření virtuálního prostředí.  
+
+Na chvilku se oprostíme od VMM a podíváme se na HW počítače z pohledu OS. Přesněji chceme vědět, co potřebuje OS ke svému běhu, abychom byli schopni vytvořit virtuální prostředí pro jeho běh. Důležité je zmínit, že chceme na jednom
+fyzickém systému provozovat více VM, tedy více instancí OS.
+
+Operační systém je v konečném součtu jenom soubor instrukcí, kterým procesor rozumí a umí je vykonávat. Abychom mohli na fyzickém systému provozovat operační systém nebo jakýkoli jiný program, je nutné aby využíval jen instrukce z
+dostupné instrukční sady (ISA) procesoru. Pokud je tento požadavek splněn, může být OS na tomto systému provozován bez dalších opatření. Na druhou stranu pokud požadavek splněn není a instrukce programu jsou napsané v jiné instrukční sadě, 
+je nutné tuto sadu emulovat. Jinými slovy musíme zajistit překlad z jedné instrukční sady do druhé. Tomuto tématu se více věnuje kapitola \ref{isa_emulation}. Vedle překladu instrukcí je nutné zajistit sdílení procesoru mezi jednotlivými
+virtuálními stroji.
+
+Vedle vykonávání instrukcí potřebuje OS někde uchovávat svoje datové struktury a svůj kód. To samozřejmě vede k hlavní paměti počítače a nutnosti sdílení této paměti mezi virtuálními počítači.
 
 Nemusíme chodit daleko a podobný princip sdílení prostředků mezi více entit můžeme najít v dnešních operačních systémech. V roli virtuálních počítačů si můžeme představit klasické procesy a roli VMM převezme OS, který má za úkol
 přidělovat prostředky procesům \cite{virt1}. Stejně jako v případě virtuálních strojů spolu procesy musí sdílet procesorový čas a hlavní paměť, a proto jsou techniky virtualizace počítačů podobné těm, které se používají v OS pro 
 souběžný běh více procesů.
 
-V následujících podkapitolách jsou představeny základní principy virtualizace hlavních komponent fyzického počítače. 
+V neposlední řadě OS potřebuje ovládat zařízení a periferie připojené k fyzickému systému. K čemu by nám jinak byl počítač, kdybychom nevěděli co nám vlastně říká nebo ho dokonce nemohli ovládat. 
+
+Všechny výše zmíněné problémy musí VMM řešit, pokud chce vytvořit prostředí pro běh více OS na jednom fyzickém stroji. Ve zkratce můžeme říct, že virtualizační monitor musí implementovat multiplexování CPU, virtualizaci paměti,
+virtualizaci I/O zařízení a v některých případech i emulaci ISA.
+
+Následujících podkapitoly představují základní techniky, které by měl VMM v nějaké podobě implementovat. Pro lepší pochopení této problematiky si definujeme několik pojmů.
+
+\begin{definition}
+Kernel mód
+\end{definition}
+
+\begin{definition}
+User mod
+\end{definition}
+
+
 
 \subsection{Virtualizace CPU}
 
 
 
-\subsubsection*{Virtualizace instrukční sady}
-
-\cite{virt3}
-
 \subsubsection*{Multiplexování CPU}
 
 \cite{vmm_book}
+
+
+\subsubsection*{Emulace instrukční sady}
+\label{isa_emulation}
+
+\cite{virt3}
+
+
 
 \subsection{Virtualizace Paměti}
 \subsection{Virtualizace I/O zařízení}
