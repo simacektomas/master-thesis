@@ -204,7 +204,7 @@ Pokud hypervisor nepodporuje určité typy procesorů nebo periferních zaříze
 
 Druhým typem architektury VMM se nazývá hostovaný, protože využívá ke svému běhu existující a běžící operační systém, který mu poskytuje rozhraní s HW. Virtualizační monitor v tomto případě neobsahuje ovladače k HW, protože jsou
 součástí operačního systému hosta. Aby mohl hostovaný VMM správně pracovat, běží některé jeho části (kernel) v privilegovaném režimu procesoru společně s operačním systémem hosta. Požadavky na HW zařízení jsou jádrem VMM přesměrovány
-do komponenty VMM, která neběží v privilegovaném režimu. Tato komponenta dále zavolá nativní rozhraní OS a požadavek je vyřízen OS hosta. Jednotlivé komponenty hostovaného VMM jsou naznačeny na obrázku \ref{hosted_vmm}.
+do komponenty VMM, která neběží v privilegovaném režimu. Tato komponenta dále zavolá nativní rozhraní OS a požadavek je vyřízen operačním systémem hosta \cite{vmm1}. Jednotlivé komponenty hostovaného VMM jsou naznačeny na obrázku \ref{hosted_vmm}.
 
 Tento typ virtualizace je v dnešní době velice populární, protože umožňuje používat virtualizaci na systémech s běžícím operačním systémem a to především desktopech. Přenositelnost hostovaného VMM je zcela určena přenositelností 
 dané implementace mezi jednotlivými typy OS. Na druhou stranu tento typ VMM není vhodný pro nasazení do prostředí s vysokými výpočetními nároky, jelikož díky další vrstvě mezi HW a VMM není tak efektivní jako nativní VMM.
@@ -217,21 +217,41 @@ dané implementace mezi jednotlivými typy OS. Na druhou stranu tento typ VMM ne
 
 \subsubsection*{Servisní VM}
 
-
+Některé typy nativních VMM vyžadují pro svoji plnou funkčnost jednu nebo více speciálních instancí VM. Tato instance většinou slouží pro správu VMM a ostatních instancí VM. Nicméně existují i hypervisory, které využívají výhody
+existujících OS a především jejich podpory velké škály HW ovladačů. V tomto případě je OS spuštěn ve speciální instanci VM a je společně s jeho ovladači využíván jako komponenta VMM \cite{vmm1}. Tento typ architektury je 
+naznačen na obrázku \ref{servise_vmm}.
 
 \begin{figure}
     \centering    
-    \caption{Hybridní VMM}
-    \label{hybrid_vmm}
+    \caption{VMM se servisním OS}
+    \label{servise_vmm}
 \end{figure}
 
 \section{Techniky virtualizace}
 \label{virt_techniques}
 
+Z definice virtualizačního monitoru je zřejmé, že si klade za cíl souběžný běh více instancí OS na jednom fyzickém stroji. Jednou z hlavních rolí VMM při správě více instancí OS je sdílení fyzických výpočetních prostředků a přidělování jejich částí 
+jednotlivým VM. Právě pro tento účel musí VMM implementovat techniky pro virtualizaci instrukční sady CPU, multiplexování CPU, virtualizaci paměti a I/O zařízení.
+
+Nemusíme chodit daleko a podobný princip sdílení prostředků mezi více entit můžeme najít v dnešních operačních systémech. V roli virtuálních počítačů si můžeme představit klasické procesy a roli VMM převezme OS, který má za úkol
+přidělovat prostředky procesům \cite{virt1}. Stejně jako v případě virtuálních strojů spolu procesy musí sdílet procesorový čas a hlavní paměť, a proto jsou techniky virtualizace počítačů podobné těm, které se používají v OS pro 
+souběžný běh více procesů.
+
+V následujících podkapitolách jsou představeny základní principy virtualizace hlavních komponent fyzického počítače. 
+
+\subsection{Virtualizace CPU}
 
 
-\section{Virtualizace CPU}
-\section{Virtualizace Paměti}
-\section{Virtualizace I/O zařízení}
+
+\subsubsection*{Virtualizace instrukční sady}
+
+\cite{virt3}
+
+\subsubsection*{Multiplexování CPU}
+
+\cite{vmm_book}
+
+\subsection{Virtualizace Paměti}
+\subsection{Virtualizace I/O zařízení}
 
 
