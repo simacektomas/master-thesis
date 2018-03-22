@@ -261,6 +261,10 @@ Kernel mód
 User mod
 \end{definition}
 
+\begin{definition}
+PC
+\end{definition}
+
 \subsection{Virtualizace CPU}
 
 Nyní se opět podíváme na fyzický stroj z pohledu virtualizačního monitoru a na jeho práci s procesorem. Spustit operační systém ve virtuální prostředí nutně musí znamenat, že se nějakým způsobem začnou vykonávat jeho instrukce.
@@ -281,11 +285,87 @@ způsobem a podporují plnou virtualizaci v HW \cite{virt2}.
 Výsledkem je tedy znemožnění přístupu programů s nižší úrovní ochrany k paměti alokované programem z vyšší úrovně ochrany. Paměť VMM je ve virtualizované architektuře chráněna proti přístupu z OS virtuálního počítače a stejně tak je
 chráněna paměť OS virtuálního počítače před přístupem z jeho procesů.
 
-\subsubsection*{Privilegované instrukce}
-
 \subsubsection*{Multiplexování CPU}
 
-\cite{vmm_book}
+Zjednodušeně můžeme říct, že spuštění virtuálního počítače v prostředí virtualizačního monitoru zařídíme skokem na adresu první instrukce OS.
+
+Pro jednoduchost předpokládejme, že máme k dispozici jedno výpočetní jádro CPU a chceme ho sdílet dvěma virtuálními stroji. Oba virtuální stroje mají svojí instanci OS a běží na nich jejich aplikace. Princip střídání virtuálních strojů
+na CPU je velmi podobný s principem střídání běžících procesů v OS. Operační systém provádí tzv. změnu kontextu (context switch), kdy je přerušen běh aktuálního procesu a procesor je přidělen jinému. V případě VMM je nutné provést tzv. změnu stroje (machine switch).
+Při tomto procesu dojde nejprve k uložení celého stavu virtuálního stroje, což zahrnuje uložení registrů, PC a na rozdíl od změny kontextu je nutné uložit i aktuální stav HW. Dále je obnoven stav virtuálního stroje, kterému plánovač přidělil procesor
+a poté je proveden skok na adresu instrukce uvedené v PC \cite{vmm_book}. Tímto krokem je proces změny virtuálního stroje na CPU dokončen.
+
+V případě systému s více procesorovými jádry je situace velmi podobná. Jelikož je k dispozici více jader CPU, může v jednom okamžiku běžet více VM. Z tohoto důvodu je nutné synchronizovat přístup těchto virtuálních strojů k HW systému.
+
+\subsubsection*{Virtualizace privilegovaných instrukcí}
+
+Instrukční sadu procesoru můžeme rozdělit na dvě části. V první části jsou neprivilegované instrukce, které mohou být prováděny v každém režimu ochrany CPU. Tyto instrukce jsou využívány především uživatelskými programy a ve virtualizovaném
+prostředí je můžeme přímo provádět na CPU bez nutnosti nějakých opatření. Pokud aplikace nebo OS virtuálního počítače potřebují vykonávat tento typ instrukcí, dojde k jejich provedení na CPU bez nutnosti zásahu VMM.
+
+Druhou částí ISA, jsou tzv. privilegované instrukce, které mohou být prováděny pouze v privilegovaných režimech CPU. Některé privilegované instrukce mohou přímo skryté paměti cache, TLB, vyvolávat přerušení nebo
+jiným způsobem ovlivňovat běh systému. Operační systém ve virtualizovaném prostředí nemůže mít možnost vykonávat privilegované instrukce, protože by pak ovládal fyzický systém a od toho je na systému přítomen VMM.
+Z tohoto důvodu musí virtualizační monitor nějakým způsobem zachytávat pokusy o vykonávání privilegovaných operací a zajistit jejich správné provedení.
+
+Jedním z případů, kdy VMM musí reagovat na volání privilegované instrukce, je situace, kdy se proces operačního systému snaží provést systémové volání. Příkladem systémového volání může být volání funkce \verb|open()| pro otevření
+souboru na disku, volání funkce \verb|write()| pro zápis dat do souboru nebo třeba volání funkce \verb|exec()| pro vytvoření dalšího procesu v systému.
+
+Nejprve se podíváme na to, jak funguje systémové volání v klasických systémech bez virtualizace. Konkrétně se podíváme na architekturu x86, kde se pro dosažení systémového volání používá speciální instrukce přerušení \verb|int| s argumentem 
+\verb|0x80|. V ukázce \ref{code:syscall} je zobrazen kód assembleru ze systému FreeBSD \cite{freebsd_syscall}, který spouští systémové volání funkce \verb|open()| pro otevření souboru. Z kódu \ref{code:syscall} je vidět, že volání funkce \verb|open()|
+potřebuje tři parametry a to konkrétně mód otevření souboru, příznaky a cestu k souboru na disku. Typ systémového volání je určen díky poslednímu parametru na zásobníku, kterým je v tomto číslo 5 \cite{vmm_book}. A konečně na posledním řádku ukázky se
+volá zmíněná instrukce \verb|int|, která vyvolá přerušení.
+
+\begin{lstlisting}[language={[x86masm]Assembler},caption={Systémové volání na FreeBSD},label={code:syscall}]
+open:
+       push    dword mode
+       push    dword flags
+       push    dword path
+       mov     eax, 5
+       push    eax
+       int     80h
+\end{lstlisting}
+
+Z pohledu virtualizačního monitoru je důležité, co se děje po vyvolání přerušení. Jelikož se jedná o privilegovanou instrukci, dojde k přepnutí procesoru z uživatelského režimu (user) do privilegovaného režimu (kernel) a kontrolu dostane operační systém.
+Konkrétně je řízení předáno rutině starající se o obsluhu přerušení, která byla zaregistrována v HW operačním systémem při jeho prvním startu \cite{vmm_book}. Po obsloužení systémového požadavku je řízení vráceno zpět volajícímu procesu.
+Posloupnost volání je naznačena v tabulce \ref{table:syscall_nonvirt} společně s přepínáním režimu ochrany procesoru.
+
+\begin{table}
+    \centering        
+    \begin{tabularx}{\textwidth}{XXX}
+    Proces & Hardware & Operační systém \\
+    \hline    
+    1. Systémové volání: && \\ Vyvolání přerušení; && \\
+    & 2. Kernel mód: & \\ & Skok na obsluhu přerušení; & \\
+    && 3. Obsluha přerušení:  \\ && Dekódování přerušení a spuštění odpovídající rutiny OS;\\ && Návrat z OS; \\
+    & 4. User mód: & \\ & Návrat z obsluhy; & \\
+    5. Obnova běhu; && \\
+    \end{tabularx}
+    \caption[Sytémové volání bez virtualizace]{Sytémové volání bez virtualizace \cite{vmm_book}}
+    \label{table:syscall_nonvirt}
+\end{table}
+
+Je logické, že případě virtualizace bude nutné přidat několik kroků do posloupnosti volání. Rozdílem oproti předchozímu případu je fakt, že OS nemá nad systémem plnou kontrolu a neběží v plně privilegovaném režimu. Tuto funkci nyní plní VMM, který
+má v HW zaregistrovanou rutinu pro obsluhu přerušení. Pokud tedy nějaký uživatelský proces chce provádět systémové volání, bude postupovat stejně jako v předchozím případě. Nicméně zpráva o přerušení se nedostane k OS ale k VMM, jak je naznačeno v
+druhém kroku v tabulce \ref{table:syscall_virt}. Virtualizační monitor nemůže přímo vyřídit systémové volání, protože mu nerozumí a neví co má dělat (není OS). Tuto funkci plnil operační systém a jeho rutina pro obsluhu přerušení. Jak již bylo zmíněno,
+při prvním startu OS se systém pokusí registrovat v HW rutinu pro obsluhu přerušení, což je ale privilegovaná operace \cite{vmm_book}. Tento pokus VMM odchytí a ke každému běžícímu OS si zaznamená adresu těchto rutin. Virtualizačnímu monitoru tedy stačí
+spustit rutinu korespondující OS v méně privilegovaném režimu a počkat na její dokončení. V okamžiku ukončení obsluhy systémového OS opět provede privilegovanou instrukci a řízení je předá zpět VMM, jak je ukázáno ve čtvrtém kroku tabluky \ref{table:syscall_virt}.
+Konečně VMM přepne procesor do uživatelského režimu a vrátí řízení zpět uživatelskému programu, čímž je systémové volání ukončeno. V tabulce \ref{table:syscall_virt} jsou z důvodu úspory místa vynechány operace HW, které přepínají režimy procesoru.
+
+Z obou tabulek je patrné, že při virtualizaci se musí vykonat více kroků, čímž se zvyšuje doba vykonávání privilegovaných instrukcí a to může mít za následek zhoršení výkonu systému \cite{vmm_book}.
+
+\begin{table}
+    \centering    
+    \begin{tabularx}{\textwidth}{XXX}
+    Proces & Operační systém & Virtualizační monitor \\
+    \hline
+    1. Systémové volání: && \\ Vyvolání přerušení; && \\
+    && 2. Obsluha přerušení: \\ && Skok na obsluhu přerušení odpovídajícího OS (snížení privilegií) \\    
+    & 3. Obsluha přerušení: & \\ & Dekódování přerušení a obsloužení systémového volání; & \\ & Návrat z OS; & \\
+    && 4. Obsluha ukončena: \\ && Provedení reálného návratu;\\
+    5. Obnova běhu; &&\\
+    \end{tabularx}
+
+    \caption[Sytémové volání s virtualizací]{Sytémové volání s virtualizací \cite{vmm_book}}
+    \label{table:syscall_virt}
+\end{table}
 
 
 \subsubsection*{Emulace instrukční sady}
