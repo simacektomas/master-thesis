@@ -31,6 +31,44 @@ je tedy od začátku své existence úzce spojena s operačním systémem Solari
 
 \section{Služby}
 
+Hlavní předností operačního systému je kvalita ale i kvantita jeho služeb. Tyto služby umožňují nasazení toho OS i ve scénářích, kdy by ostatní OS selhaly nebo by nemohly být vůbec použity.  
+
+\subsection{Service Management Facility}
+
+Service Management Facility neboli SMF je systém, který v operačním systému Solaris spravuje systémové služby. Nahrazuje tím tradiční způsob spravování služeb pomocí tzv. \textit{init} skriptů, který byl běžný v ostatních unixových operačních systémech
+a dokonce i v dřívějších verzích OS Solaris. Hlavním rozdílem oproti staršímu způsobu je možnost u služby definovat závislosti na ostatních službách. Na rozdíl od sériového spouštění \textit{init} skriptů z adresáře je díky tomuto zlepšení možné při startu systému
+paralelně spouštět více nezávislých služeb najednou, a tím urychlit start systému \cite{cvut:biadu:sysstart}. Pro účel startu jsou v systému definovány speciální služby tzv. \textit{milestone}, které ve skutečnosti nic nedělají. Mají definovaný pouze seznam závislostí,
+který určuje jaké služby se mají spustit. Při startu se určí do kterého \textit{milestone} má systém nastartovat a tím je přesně určeno, které služby se mají spustit.
+
 \subsection{Souborový systém ZettaByte}
 
+Pro ukládání na disk používá Solaris souborový systém ZettaByte neboli ZFS. Je to pokročilý systém, který byl vyvinut společností Sun Microsystems a integrován do operačního systému Solaris. ZFS dokáže spravovat velké množství dat díky své 128-bitové 
+architektuře \cite{cvut:thesis:mythesis}. Mezi hlavní funkce ZFS patří ověřování integrity dat, vlastní softwarový RAID nebo šifrování dat. Díky principu \textit{copy on write} dokáže udržet data neustále konzistentní, což některé souborové systémy nedokážou nebo tento problém řeší složitě.
+Architektura tohoto souborového systému umožňuje klonování jednotlivých svazků nebo rychlou a elegantní tvorbu obrazů disku tzv. \textit{snapshot}, které z počátku nezabírají téměř žádné místo na disku. Datové bloky jsou totiž zduplikovány až v okamžiku,
+kdy se zdrojový blok nebo jeho klon změní. Tento způsob uchovávání dat společně s možností \textit{deduplikace} stejných datových bloků značně snižuje nároky na diskové místo.
+
+Principů a funkcí ZFS hojně využívají další služby operačního systému Solaris. Jako příklad můžeme uvést virtualizační techniku Solaris Zones, která je hlavním tématem této diplomové práce.
+
 \subsection{Virtualizace}
+
+Dle specifikace \cite{oracle:solaris:virtualization} nabízí operační systém Solaris ve verzi 11.3 několik technik virtualizace. Tyto modely se liší zejména ve způsobu izolace virtualizovaných prostředí a ve flexibilitě přidělování prostředků
+těmto prostředím. Čím více model izoluje prostředí od sebe, tím nabízí menší flexibilitu v přidělování prostředků.
+
+\subsubsection{Solaris Zones}
+
+Jedním z modelů virtualizace nabízené operačním systémem Solaris je virtualizace na úrovni OS. Tento model umožňuje vytvořit jedno nebo více izolovaných prostředí (zón) pro běh programů v rámci jedné instance OS. Takto vytvořené prostředí jsou
+izolovány na úrovni procesů, souborového systému a síťových rozhraní. Každá zóna má vlastní lokální pohled na systémové prostředky, které mohou být dále virtualizované operačním systémem. Virtualizace na úrovni operačního systému poskytuje vysoký výkon a flexibilitu,
+protože nezanechává tak velkou stopu na diku, paměti nebo CPU na rozdíl od zbylých dvou modelů. 
+
+Operační systém Solaris poskytuje tento model virtualizace skrz službu Solaris Zones, která je přímo integrována to jádra OS.
+
+TODO\ref{chapter:virtualization}
+
+\subsubsection{Virtuální počítače}
+
+
+\ref{chapter:virtualization}
+
+\subsubsection{Hardware partitions}
+
+\ref{chapter:virtualization}
