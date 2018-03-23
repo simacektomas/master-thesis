@@ -1,4 +1,5 @@
 % Virtualization chapter about concept, types, examples and implementation
+\label{chapter:virtualization}
 Virtualizace je proces vytváření virtuální reprezentace nějaký objektů. V IT se typicky jedná o virtualizaci aplikací, serverů, sítí nebo i fyzických prostředků jako například CPU, paměť nebo I/O zařízení.
 
 V dnešní době existuje mnoho různých typů virtualizace, jak již bylo zmíněno v úvodu. Následující kapitola zběžně představuje několik nejznámější typů virtualizace v IT a dále se věnuje hlavně
@@ -272,7 +273,7 @@ Jelikož OS virtuálního počítače neví o existenci VMM, předpokládá, že
 volání privilegovaných instrukcí. Dále je třeba zajistit ochranu paměti alokované VMM před neprivilegovaným přístupem. Neprivilegovaný přístup znamená, že se OS virtuálního počítače nebo procesy v něm běžící pokusí přistoupit k paměti, 
 která je alokovaná virtualizačním monitorem.
 
-\subsubsection*{Režimy ochrany CPU}
+\subsubsection{Režimy ochrany CPU}
 
 Moderní procesory mají 4 režimy ochrany paměti, které se značí čísly od 0 do 3. Nejvyšší režim ochrany má číslo 0 a je označován jako režim kernel. Procesor běžící v tomto režimu má přístup ke všem instrukcím instrukční sady a může přistupovat
 k jakékoli paměti. Číslo 3 naopak znamená režim nejnižší ochrany a může využívat jen část instrukční sady, které se někdy přezdívá uživatelská ISA. Tomuto režimu se říká user. Většina operačních systémů používá právě dva výše zmíněné režimy ochrany
@@ -285,7 +286,7 @@ způsobem a podporují plnou virtualizaci v HW \cite{virt2}.
 Výsledkem je tedy znemožnění přístupu programů s nižší úrovní ochrany k paměti alokované programem z vyšší úrovně ochrany. Paměť VMM je ve virtualizované architektuře chráněna proti přístupu z OS virtuálního počítače a stejně tak je
 chráněna paměť OS virtuálního počítače před přístupem z jeho procesů.
 
-\subsubsection*{Multiplexování CPU}
+\subsubsection{Multiplexování CPU}
 
 Zjednodušeně můžeme říct, že spuštění virtuálního počítače v prostředí virtualizačního monitoru zařídíme skokem na adresu první instrukce OS.
 
@@ -296,7 +297,7 @@ a poté je proveden skok na adresu instrukce uvedené v PC \cite{vmm_book}. Tím
 
 V případě systému s více procesorovými jádry je situace velmi podobná. Jelikož je k dispozici více jader CPU, může v jednom okamžiku běžet více VM. Z tohoto důvodu je nutné synchronizovat přístup těchto virtuálních strojů k HW systému.
 
-\subsubsection*{Virtualizace privilegovaných instrukcí}
+\subsubsection{Virtualizace privilegovaných instrukcí}
 
 Instrukční sadu procesoru můžeme rozdělit na dvě části. V první části jsou neprivilegované instrukce, které mohou být prováděny v každém režimu ochrany CPU. Tyto instrukce jsou využívány především uživatelskými programy a ve virtualizovaném
 prostředí je můžeme přímo provádět na CPU bez nutnosti nějakých opatření. Pokud aplikace nebo OS virtuálního počítače potřebují vykonávat tento typ instrukcí, dojde k jejich provedení na CPU bez nutnosti zásahu VMM.
@@ -332,11 +333,11 @@ Posloupnost volání je naznačena v tabulce \ref{table:syscall_nonvirt} společ
     \begin{tabularx}{\textwidth}{XXX}
     Proces & Hardware & Operační systém \\
     \hline    
-    1. Systémové volání: && \\ Vyvolání přerušení; && \\
-    & 2. Kernel mód: & \\ & Skok na obsluhu přerušení; & \\
-    && 3. Obsluha přerušení:  \\ && Dekódování přerušení a spuštění odpovídající rutiny OS;\\ && Návrat z OS; \\
-    & 4. User mód: & \\ & Návrat z obsluhy; & \\
-    5. Obnova běhu; && \\
+    1. \textit{Systémové volání:} && \\ Vyvolání přerušení; && \\
+    & 2. \textit{Kernel mód:} & \\ & Skok na obsluhu přerušení; & \\
+    && 3. \textit{Obsluha přerušení:}  \\ && Dekódování přerušení a spuštění odpovídající rutiny OS;\\ && Návrat z OS; \\
+    & 4. \textit{User mód:} & \\ & Návrat z obsluhy; & \\
+    5. \textit{Obnova běhu;} && \\
     \end{tabularx}
     \caption[Sytémové volání bez virtualizace]{Sytémové volání bez virtualizace \cite{vmm_book}}
     \label{table:syscall_nonvirt}
@@ -356,11 +357,11 @@ Z obou tabulek je patrné, že při virtualizaci se musí vykonat více kroků, 
     \begin{tabularx}{\textwidth}{XXX}
     Proces & Operační systém & Virtualizační monitor \\
     \hline
-    1. Systémové volání: && \\ Vyvolání přerušení; && \\
-    && 2. Obsluha přerušení: \\ && Skok na obsluhu přerušení odpovídajícího OS (snížení privilegií) \\    
-    & 3. Obsluha přerušení: & \\ & Dekódování přerušení a obsloužení systémového volání; & \\ & Návrat z OS; & \\
-    && 4. Obsluha ukončena: \\ && Provedení reálného návratu;\\
-    5. Obnova běhu; &&\\
+    1. \textit{Systémové volání:} && \\ Vyvolání přerušení; && \\
+    && 2. \textit{Obsluha přerušení:} \\ && Skok na obsluhu přerušení odpovídajícího OS (snížení privilegií) \\    
+    & 3. \textit{Obsluha přerušení:} & \\ & Dekódování přerušení a obsloužení systémového volání; & \\ & Návrat z OS; & \\
+    && 4. \textit{Obsluha ukončena:} \\ && Provedení reálného návratu;\\
+    5. \textit{Obnova běhu;} &&\\
     \end{tabularx}
 
     \caption[Sytémové volání s virtualizací]{Sytémové volání s virtualizací \cite{vmm_book}}
@@ -368,8 +369,23 @@ Z obou tabulek je patrné, že při virtualizaci se musí vykonat více kroků, 
 \end{table}
 
 
-\subsubsection*{Emulace instrukční sady}
+\subsubsection{Emulace instrukční sady}
 \label{isa_emulation}
+
+Doposud jsme se bavili o situaci, kdy stroje běžící ve virtualizovaném prostředí zpracovávaly instrukce stejné architektury jako host. Nyní se krátce podíváme na situaci, kdy virtuální stroje zpracovávají instrukce
+jiné architektury než fyzický stroj.
+
+V tomto případě procesor nerozumí instrukcím VM a je nutné zajistit překlad z jedné ISA do druhé. Tato technika se nazývá emulace instrukční sady a spočívá v navození iluze, že virtuální stroj běží
+na HW podporující jeho instrukční sadu. 
+
+
+
+\begin{itemize}
+ \item Přímá interpretace
+ \item Binární překlad
+ \item Inkrementální binární překlad za běhu
+\end{itemize}
+
 
 \cite{virt3}
 
