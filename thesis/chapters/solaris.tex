@@ -51,24 +51,35 @@ Principů a funkcí ZFS hojně využívají další služby operačního systém
 
 \subsection{Virtualizace}
 
-Dle specifikace \cite{oracle:solaris:virtualization} nabízí operační systém Solaris ve verzi 11.3 několik technik virtualizace. Tyto modely se liší zejména ve způsobu izolace virtualizovaných prostředí a ve flexibilitě přidělování prostředků
+Dle specifikace \cite{oracle:solaris:virtualization} nabízí operační systém Solaris ve verzi 11.3 následující techniky virtualizace.
+
+\begin{itemize}
+ \item Virtualizace na úrovni OS
+ \item Virtuální počítače
+ \item Hardware partitions
+\end{itemize}
+
+Tyto modely se liší zejména ve způsobu izolace virtualizovaných prostředí a ve flexibilitě přidělování prostředků
 těmto prostředím. Čím více model izoluje prostředí od sebe, tím nabízí menší flexibilitu v přidělování prostředků.
 
 \subsubsection{Solaris Zones}
 
-Jedním z modelů virtualizace nabízené operačním systémem Solaris je virtualizace na úrovni OS. Tento model umožňuje vytvořit jedno nebo více izolovaných prostředí (zón) pro běh programů v rámci jedné instance OS. Takto vytvořené prostředí jsou
+Jedním z modelů virtualizace nabízené operačním systémem Solaris je \textit{virtualizace na úrovni OS}. Tento model umožňuje vytvořit jedno nebo více izolovaných prostředí (zón) pro běh programů v rámci jedné instance OS. Takto vytvořené prostředí jsou
 izolovány na úrovni procesů, souborového systému a síťových rozhraní. Každá zóna má vlastní lokální pohled na systémové prostředky, které mohou být dále virtualizované operačním systémem. Virtualizace na úrovni operačního systému poskytuje vysoký výkon a flexibilitu,
 protože nezanechává tak velkou stopu na diku, paměti nebo CPU na rozdíl od zbylých dvou modelů. 
 
 Operační systém Solaris poskytuje tento model virtualizace skrz službu Solaris Zones, která je přímo integrována to jádra OS.
 
-TODO\ref{chapter:virtualization}
-
 \subsubsection{Virtuální počítače}
 
+Model \textit{virtuálních počítačů} popsaný v kapitole \ref{section:vm} umožňuje souběžný běh více instancí operačního systému na jednom fyzickém stroji. Konkrétně každý virtuální počítač má svojí instanci operačního systému, který nemusí být stejný ve všech virtuálních strojích. Tento typ virtualizace je
+umožněn díky virtualizačnímu monitoru, který vytváří pro operační systémy iluzi, že jsou na fyzickém stroji samy. Virtuální počítače poskytují na rozdíl od virtualizace na úrovni OS menší flexibilitu rozdělování prostředků, ale naopak poskytuje větší úroveň izolace.
 
-\ref{chapter:virtualization}
+Tento typ virtualizace je v OS Solaris 11.3 podporován produkty Oracle VM Server for x86, Oracle VM Server for SPARC a Oracle VM VirtualBox. Každá z těchto implementací se zaměřuje na jinou architekturu nebo používá jiný typ virtualizačního monitoru.
 
 \subsubsection{Hardware partitions}
 
-\ref{chapter:virtualization}
+Posledním modelem, který je ne přímo podporovaný operačním systémem Solaris, jsou tzv. \textit{hardware partitions}. Je to technika, která fyzicky odděluje běh OS na oddělených částech fyzických prostředků. Tohoto způsobu virtualizace je dosaženo
+bez pomocí hypervisoru, a tudíž tato technika poskytuje reálný výkon systému. Hardware partitions je technika poskytující běžícím operačním systémům největší izolaci, ale na druhou stranu není tak flexibilní v konfiguraci prostředků jako výše zmíněné modely.
+
+Tato technika není z logických důvodů poskytována OS Solaris, jelikož se jedná o virtualizaci na HW úrovni. Pro účely nasazení tohoto OS s touto virtualizační technikou používá Oracle speciální servery  SPARC M-Series.
