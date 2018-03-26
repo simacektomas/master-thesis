@@ -1,40 +1,89 @@
 % Bibliography for master thesis
-@online{ virt1,
-  author = {Jiří Kašpar and Pavel Tvrdík},
-  title = {\textit{Techniky virtualizace I.} [online]},
-  url = {https://edux.fit.cvut.cz/courses/MI-POA/_media/lectures/mi-poa08.pdf},
-  note = {Praha, České vysoké učení technické v~Praze, Fakulta informačních technologií [cit. 2018-03-12]},
-  urldate = {12.3.2018}
-}
+%%-------------------------------------CHAPTER VIRTUALIZATION----------------------------------------------%%
+  %% oxford %%
+  @online{ oxford:dictionary:virtual,
+    author = {Oxford University},
+    title = {\textit{Definition of virtual in English} [online]},
+    url = {https://en.oxforddictionaries.com/definition/virtual},
+    note = {[cit. 2018-03-26]},
+    urldate = {26.3.2018}
+  }
 
-@online{ virt2,
-  author = {Jiří Kašpar and Pavel Tvrdík},
-  title = {\textit{Techniky virtualizace II.} [online]},
-  url = {https://edux.fit.cvut.cz/courses/MI-POA/_media/lectures/mi-poa09.pdf},
-  note = {Praha, České vysoké učení technické v~Praze, Fakulta informačních technologií [cit. 2018-03-12]},
-  urldate = {12.3.2018}
-}
+  %% books, articles, thesis %%
+  @ARTICLE{ book:iee:vm_architecture,
+    author =      {J. E. Smith and Ravi Nair},
+    journal       {Computer},
+    title =       {The architecture of virtual machines},
+    year =        {2005},
+    volume =      {38},
+    number =      {5},
+    pages =       {32-38},
+    keywords =    {application program interfaces;computer architecture;formal specification;hardware-software codesign;multiprocessing systems;multiprogramming;virtual machines;HW/SW interface;abstraction level;application binary interface;application programming interface;hardware resources;instruction set architecture;real system;virtual machine architecture;Application software;Computer architecture;Computer interfaces;Hardware;Instruction sets;Microprocessors;Operating systems;Virtual machining;Virtual manufacturing;Voice mail;VM taxonomy;computer architectures;disk storage;software systems;virtual machines;virtualization technology},
+    doi =         {10.1109/MC.2005.173},
+    ISSN =        {0018-9162},
+    month =       {Květen}
+  }
+  
+  @Book{ vmm_book,
+    author =      {Remzi H. Arpaci-Dusseau and Andrea C. Arpaci-Dusseau},
+    title =       "{Operating Systems: Three Easy Pieces}",
+    publisher =   {Arpaci-Dusseau Books},
+    month =       "Květen",
+    year =        {2015},
+    edition =     {0.91},
+    url =         {http://www.ostep.org}
+  }
+  
+  @thesis{ thesis:cvut:mythesis,
+    author =      {Tomáš Šimáček},
+    title =       {Nástroj pro správu a monitorování systému souborů ZettaByte},
+  }
+  
+  @online{ article:vmware:network_virtualization,
+    author = {VMware staff},
+    title = {\textit{The Virtues of Network Virtualization} [online]},
+    url = {https://www.vmware.com/ciovantage/article/the-virtues-of-network-virtualization},
+    note = {[cit. 2018-03-26]},
+    urldate = {26.3.2018}
+  }
+  
+  %% presentations %%
 
-@online{ virt3,
-  author =      {Jiří Kašpar and Pavel Tvrdík},
-  title =       {\textit{Techniky virtualizace III.} [online]},
-  url =         {https://edux.fit.cvut.cz/courses/MI-POA/_media/lectures/mi-poa10.pdf},
-  note =        {Praha, České vysoké učení technické v~Praze, Fakulta informačních technologií [cit. 2018-03-12]},
-  urldate =     {12.3.2018}
-}
+  @online{ virt1,
+    author = {Jiří Kašpar and Pavel Tvrdík},
+    title = {\textit{Techniky virtualizace I.} [online]},
+    url = {https://edux.fit.cvut.cz/courses/MI-POA/_media/lectures/mi-poa08.pdf},
+    note = {Praha, České vysoké učení technické v~Praze, Fakulta informačních technologií [cit. 2018-03-12]},
+    urldate = {12.3.2018}
+  }
 
-@online{ cvut:biadu:sysstart,
-  author =      {Zdeněk Muzikář and Jan Žďárek},
-  title =       {\textit{Start systému, proces init,  Solaris Service Management Facility} [online]},
-  url =         {https://edux.fit.cvut.cz/courses/BI-ADU/_media/lectures/07/biadu_p07_start.pdf},
-  note =        {Praha, České vysoké učení technické v~Praze, Fakulta informačních technologií [cit. 2018-03-23]},
-  urldate =     {23.3.2018}
-}
+  @online{ virt2,
+    author = {Jiří Kašpar and Pavel Tvrdík},
+    title = {\textit{Techniky virtualizace II.} [online]},
+    url = {https://edux.fit.cvut.cz/courses/MI-POA/_media/lectures/mi-poa09.pdf},
+    note = {Praha, České vysoké učení technické v~Praze, Fakulta informačních technologií [cit. 2018-03-12]},
+    urldate = {12.3.2018}
+  }
 
-@thesis{ cvut:thesis:mythesis,
-  author =      {Tomáš Šimáček},
-  title =       {Nástroj pro správu a monitorování systému souborů ZettaByte},
-}
+  @online{ virt3,
+    author =      {Jiří Kašpar and Pavel Tvrdík},
+    title =       {\textit{Techniky virtualizace III.} [online]},
+    url =         {https://edux.fit.cvut.cz/courses/MI-POA/_media/lectures/mi-poa10.pdf},
+    note =        {Praha, České vysoké učení technické v~Praze, Fakulta informačních technologií [cit. 2018-03-12]},
+    urldate =     {12.3.2018}
+  }
+
+  @online{ cvut:biadu:sysstart,
+    author =      {Zdeněk Muzikář and Jan Žďárek},
+    title =       {\textit{Start systému, proces init,  Solaris Service Management Facility} [online]},
+    url =         {https://edux.fit.cvut.cz/courses/BI-ADU/_media/lectures/07/biadu_p07_start.pdf},
+    note =        {Praha, České vysoké učení technické v~Praze, Fakulta informačních technologií [cit. 2018-03-23]},
+    urldate =     {23.3.2018}
+  }
+
+
+
+
 
 %%--------------------------------ORACLE DOCS------------------------------------------%%
 
@@ -49,12 +98,3 @@
 
 
 
-@Book{ vmm_book,
-  author =      {Remzi H. Arpaci-Dusseau and Andrea C. Arpaci-Dusseau},
-  title =       "{Operating Systems: Three Easy Pieces}",
-  publisher =   {Arpaci-Dusseau Books},
-  month =       "Květen",
-  year =        {2015},
-  edition =     {0.91},
-  url =         {http://www.ostep.org}
-}
