@@ -119,10 +119,10 @@ Než budeme pokračovat s klasifikací virtuálních strojů, představíme si a
   \end{itemize}
 
   Tyto tři rozhraní jasně definují rozmezí mezi HW a SW a určují architekturu počítačového systému. Uživatelské programy jsou zcela odkázány na funkcionalitu, která je jim poskytnuta kombinací těchto rozhraní.
-  
 
     \begin{figure}
-      \centering          
+      \centering
+      \includegraphics[scale=0.3]{assets/figures/ca.png}
       \caption[Architektura počítačového systému]{Architektura počítačového systému \cite{book:iee:vm_architecture}}
       \label{figure:computer_architecture}
     \end{figure}
@@ -150,28 +150,68 @@ Než budeme pokračovat s klasifikací virtuálních strojů, představíme si a
     což přináší výhody v přenositelnosti na systémy, které nabízejí stejné API .
 
 \section{Klasifikace virtuálních strojů}
-\label{subsection:clasification}
+\label{section:clasification}
 
 Abychom mohli rozlišit jednotlivé typy virtuálních strojů, musíme se podívat v jaké části počítačové architektury operují a tedy jakou vrstvu virtualizují. V části \ref{subsection:computer_architecture} jsme definovali
 tři dobře definované rozhraní počítačového systému a je logické, že virtualizační software bude virtualizovat nějakou z nich. Dle rozdělení v \cite{book:iee:vm_architecture} můžeme virtuální stroje obecně rozdělit na
-následující dva druhy v závislosti na tom, které rozhraní virtualizují.
+následující dva druhy v závislosti na tom, které rozhraní počítačové architektury virtualizují.
 
 \begin{itemize}
- \item Virtuální stroje v procesech
- \item Systémové virtuální stroje
+  \item \textit{Systémové virtuální stroje}
+  \item \textit{Virtuální stroje v procesech}
 \end{itemize}
 
+Jak může být z názvu patrné, \textit{systémové virtuální stroje} poskytují kompletní systémové prostředí, které podporuje operační systém a jeho aplikace. Operační systém využívá ke svému běhu ISA systému. Systémový virtuální
+stroj tedy musí poskytovat operačnímu systému stejné rozhraní jako OS očekává. Nabízí tak operačnímu systému přístup k HW prostředkům fyzického stroje, které mohou být virtualizovány. 
 
+Na druhou stranu procesy využívají ke svému běhu mimo uživatelské části ISA také ABI nebo v případě vyšších programovacích jazyků API. Virtuální stroje, které se specializují na virtualizaci těchto dvou systémových 
+rozhraní, budeme nazývat \textit{virtuální stroje v procesech}. Hlavním účelem tohoto typu virtuálního stroje je podpora jednoho procesu. Její činnost začíná v okamžiku vytvoření procesu a končí v okamžiku jeho ukončení.
 
-\begin{figure}
-  \centering          
-  \caption[Virtuální stroje v procesech (a) versus systémové virtuální stroje (b)]{Virtuální stroje v procesech (a) versus systémové virtuální stroje (b) \cite{book:iee:vm_architecture}}
-  \label{figure:computer_architecture}
-\end{figure}
+V následujících podkapitolách jsou popsané jednotlivé typy virtuálních strojů. Tato klasifikace byla převzata z \cite{book:iee:vm_architecture} a upravena podle požadavků práce.
+
+  \subsection*{Terminologie}
+  
+  Pro účely dalších částí diplomové práce si definujeme některé pojmy, které se v architektuře počítačového systému s virtuálním strojem vyskytují. 
+  
+  Po přidání virtualizačního SW mezi nějaké vrstvy počítačového systému nám vzniknou tři části. Tuto skutečnost popisuje obrázek \ref{figure:computer_architecture}, který zároveň ukazuje na jaké místo zaujímá virtualizační
+  software v případě systémových virtuální strojů (b) a virtuálních strojů v procesech (a).
+  
+  Softwarová vrstvy, které se v hierarchii počítačového systému nachází nad virtualizačním SW (je jim poskytováno rozhraní), se souhrnně nazývají \textit{guest}. V případě systémových virtuálních strojů se dá také 
+  mluvit o \textit{guest OS}, což je operační systém běžící ve virtuální prostředí.
+  
+  Na druhou stranu vrstvy poskytující rozhraní virtualizačnímu SW neboli se nacházejí níže v hierarchii, nazývame \textit{host}. 
+  
+  Poslední vrstva, která zbývá popsat je samotný virtualizační SW. V případě systémových virtuálních strojů se typicky nazývá virtualizační monitor neboli VMM. Pro virtualizační SW v druhém typu virtuálních strojů se
+  používá název \textit{runtime}. 
+  
+  Jak je naznačeno na obrázku \ref{figure:computer_architecture}, typ virtuálního stroje je jasně určen strukturou hosta a virtualizačního SW. Systémové virtuální stroje se tedy skládají z HW vrstvy a virtualizačního
+  monitoru. V případě virtuálních strojů v procesech se vrstva hosta skládá z HW a hostitelského operačního systému, ve kterém je spouštěn \textit{runtime}.
+
+  \begin{figure}
+    \centering
+    \includegraphics[scale=0.3]{assets/figures/procesvm_vs_sysvm.png}
+    \caption[Virtuální stroj v procesu versus systémové virtuální stroje ]{Virtuální stroje v procesech (a) versus systémové virtuální stroje (b) \cite{book:iee:vm_architecture}}
+    \label{figure:computer_architecture}
+  \end{figure}
   
   
   \subsection{Virtuální stroje v procesech}
+  \label{subsection:proces_vm}
+  
+  
+  
+    \subsubsection*{Operační systém}
+    \subsubsection*{Emulátory a překladače}
+    \subsubsection*{Virtuální stroje v HLL}
+    
   \subsection{Systémové virtuální stroje}
+  \label{subsection:system_vm}
+  
+  
+  
+    \subsubsection*{Virtuální počítače}
+    \subsubsection*{Virtualizace celého systému}
+    \subsubsection*{}
   
   
   \subsection{Definice pojmů}
