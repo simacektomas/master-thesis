@@ -238,11 +238,38 @@ V následujících podkapitolách jsou popsané jednotlivé typy virtuálních s
   \subsection{Systémové virtuální stroje}
   \label{subsection:system_vm}
   
-  
+  Druhým typem virtuálních strojů jsou tzv. \textit{systémové virtuální stroje}, které kompletně virtuálizují celou HW platformu. Virtualizační software je většinou umístěn hned na HW počítače a jeho hlavním úkolem je
+  virtualizovat ISA. Tímto způsobem \textit{systémové virtuální stroje} vytvářejí virtuální prostředí pro běh operačního systému a jeho aplikací a dokonce umožňují současný běh různých operačních systémů na jednom HW stroji.
   
     \subsubsection*{Virtuální počítače}
+    \label{subsubsection:virtual_computer}
+    
+    Nejznámějším a pravděpodobně nejpoužívanějším zástupcem z této kategorie virtuálních strojů jsou tzv. \textit{virtuální počítače}. Tento typ virtuálního stroje umožňuje současný běh více operačních systému na jednom
+    fyzickém počítači. Všechny operační systémy musí využívat instrukce stejné instrukční sady, kterou vykonává host. Jinými slovy tento typ virtuálního stroje žádným způsobem nepřekládá instrukce do jiné instrukční sady.
+    
+    Dle umístnění virtualizačního monitoru v architektuře počítače, můžeme rozdělit tento typ virtuálního stroje do dvou hlavních kategorií. 
+    
+    \begin{itemize}
+     \item Nativní VMM
+     \item Hosted VMM
+    \end{itemize}
+
+    Hlavní rozdíl mezi těmito dvěma typy spočívá v umístění virtualizačního monitoru v architektuře počítače. Zatímco \textit{nativní VMM} má přímou kontrolu nad HW počítače, \textit{hosted VMM} běží uvnitř operačního systému,
+    který spravuje HW prostředky. Oba tyto typy VMM jsou detailně popsány v kapitole \ref{section:vmm}.
+    
     \subsubsection*{Virtualizace celého systému}
-    \subsubsection*{}
+    \label{subsubsection:whole_system_virtualization}
+    
+    
+    
+    \subsubsection*{Hard partitioning}
+    \label{subsubsection:hard_partitioning}
+    
+    
+    
+    \subsubsection*{Soft partitioning}
+    \label{subsubsection:soft_partitioning}
+    
   
   
   \subsection{Definice pojmů}
