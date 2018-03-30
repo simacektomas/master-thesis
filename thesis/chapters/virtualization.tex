@@ -260,16 +260,22 @@ V následujících podkapitolách jsou popsané jednotlivé typy virtuálních s
     \subsubsection*{Virtualizace celého systému}
     \label{subsubsection:whole_system_virtualization}
     
+    V případě, kdy operační systém a jeho aplikace používají stejnou instrukční sadu jako nižší HW vrstvy, má virtuálizační monitor za úkol spravovat přístup k HW a sdílet ho mezi virtuální počítače. Pokud bychom chtěli
+    ve virtuální stroji spouštět operační systém používající odlišnou instrukční sadu, musíme zajistit emulaci prostředí. Jinými slovy VMM musí vytvořit virtuální prostředí pro konkrétní OS tak, aby si OS myslel, že běží
+    na odpovídající HW platformě. Tento typ virtuálního stroje nazýváme \textit{virtualizace celého systému} a jak je z názvu patrné, mimo instrukční sady můžou být virtualizovány i některá I/O zařízení.
     
+    Virtualizace celého systému se hojně využívá případech, kdy je nutné udržet v chodu systémy, který běží na speciálních HW platformách. V tomto případě se vytvoří emulace celého prostředí a systém se přesune do
+    takto vytvořeného prostředí. Systém i jeho aplikace nepoznají žádný rozdíl, jelikož je celé prostředí virtualizováno. Tento typ virtuálního stroje je v mnoha ohledech podobný virtuálnímu stroji popsanému v \ref{subsubsection:emulation}.
     
-    \subsubsection*{Hard partitioning}
-    \label{subsubsection:hard_partitioning}
+    \subsubsection*{Resource partitioning}
+    \label{subsubsection:partitioning}
     
+    Frekvence dnešních procesorů již není hlavním měřítkem výkonosti, jak tomu bylo kdysi. Moderní procesory škálují svůj výkon s počtem výpočetních jader a díky tomu můžeme nezávisle spouštět více výpočetních úloh.
+    Tyto jádra jsou propojeny sdílenou pamětí, která zajišťuje  komunikaci. Tohoto faktu využívá technika zvaná \textit{resource partitioning}, která 
     
+    \textit{Hard partitioning}
     
-    \subsubsection*{Soft partitioning}
-    \label{subsubsection:soft_partitioning}
-    
+    \textit{Soft partitioning}
   
   
   \subsection{Definice pojmů}
