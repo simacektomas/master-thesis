@@ -270,33 +270,18 @@ V následujících podkapitolách jsou popsané jednotlivé typy virtuálních s
     \subsubsection*{Resource partitioning}
     \label{subsubsection:partitioning}
     
-    Frekvence dnešních procesorů již není hlavním měřítkem výkonosti, jak tomu bylo kdysi. Moderní procesory škálují svůj výkon s počtem výpočetních jader a díky tomu můžeme nezávisle spouštět více výpočetních úloh.
-    Tyto jádra jsou propojeny sdílenou pamětí, která zajišťuje  komunikaci. Tohoto faktu využívá technika zvaná \textit{resource partitioning}, která 
+    Frekvence dnešních procesorů již není hlavním měřítkem jejich výkonosti, jak tomu kdysi bylo. Moderní procesory škálují svůj výkon s počtem výpočetních jader a díky tomu můžeme nezávisle spouštět více výpočetních úloh
+    najednou. Tyto jádra jsou propojeny sdílenou pamětí, která zajišťuje prostor pro ukládání dat a komunikaci. Tohoto faktu využívá technika zvaná \textit{resource partitioning}, která prostředky vícejádrového systému
+    spojuje do částí.
     
-    \textit{Hard partitioning}
+    \textit{Hard partitioning} je technika, kdy jsou fyzické prostředky počítače rozděleny do disjunktních částí. Každá tato část se chová jako nezávislý systém a většinou má vlastní CPU (jádro), paměť, I/O zařízení i
+    adaptér pro připojení k síti. Jednotlivé fyzické komponenty nebo jejich části jsou tedy přímo přiřazeny konkrétní části (partition) systému. V takto rozděleném systému pak můžeme současně provozovat několik instancí operačních systémů.
+    Tato technika zajišťuje velkou míru izolace pro běžící operační systémy, neboť každý OS má k dispozici vlastní disjunktní prostředí, ve kterém může operovat. Pokud nastane SW nebo HW chyby v jedné části (partition) systému, aplikace
+    a OS běžící v ostatních částech nejsou nijak omezeny.
     
-    \textit{Soft partitioning}
-  
-  
-  \subsection{Definice pojmů}
-  \label{definitions}
-
-  Pro potřeby popisu virtualizačních technik si definujeme základní pojmy a entity, které se ve virtuální infrastruktuře vyskytují.
-
-  \textit{Fyzické prostředky} počítače jsou dostupné prostředky a služby poskytované HW počítače. Tyto prostředky určují celkový výpočetní výkon daného stroje.
-
-  \textit{Virtualizační monitor}, \textit{Virtual Machine Monitor - VMM} nebo také \textit{Hypervisor} je softwarová vrstva, která virtualizuje HW prostředky fyzického počítače a přiděluje je
-  virtuálním strojům.
-
-  \textit{Virtuální prostředky} jsou virtuální reprezentace fyzických prostředků. Tyto prostředky využívají virtuální stroje skrze VMM. Často tyto prostředky reprezentují pouze nějakou část jejich
-  fyzických ekvivalentů. Například část adresního prostoru fyzické paměti nebo určité procento výpočetního času CPU.
-
-  \textit{Host} je HW a SW platforma, která poskytuje virtuálním strojům své fyzické prostředky. Softwarové vybavení hosta obsahuje virtualizační
-  monitor a v některých případech může obsahovat i operační systém hosta tzv. \textit{Host OS}
-
-  \textit{Virtuální stroj} nebo \textit{Virtual Machine - VM} je virtualizované prostředí vytvořené virtualizačním monitorem, ve kterém běží operační systém virtuálního počítače nazývaný \textit{Guest OS} společně
-  se svými aplikacemi.
-
+    Druhým přístupem k rozdělování zdrojů je technika zvaná \textit{logical partitioning}. V tomto případě fyzické prostředky nejsou exkluzivně přiděleny jednotlivým operačním systémům, ale dochází k jejich sdílení na
+    SW úrovni. Ke sdílení procesoru a jeho jader se například může používat časový multiplexu, který umožňuje střídání OS ve využívání procesoru. Tato technika umožňuje lepší využití fyzických prostředků než \textit{hard partitioning},
+    kde některé prostředky mohou kvůli malé zátěži zůstat nevyužity.          
 
 \section{Nasazení virtuální infrastruktury}
 \label{section:vm_deployment}
