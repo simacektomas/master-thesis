@@ -1,1 +1,90 @@
 % Detailed description of Solaris Zones configuration, installation, backup etc.
+V úvodu následující kapitoly jsou popsány základní principy a struktura virtualizační techniky Solaris Zones od
+firmy Oracle. Dále se tato kapitola zabývá popisem datových struktur, postupů a nástrojů, které slouží ke správě a manipulaci
+se zónami. Detailnější popis je věnován především administrátorským rutinám pro konfiguraci, instalaci a zálohování zón.
+
+
+\section{Virtualizační technika}
+Oracle Solaris Zones je virtualizační technika, která umožňuje běh více virtuálních strojů na jednom fyzickém stroji. Jak již
+bylo zmíněno v kapitole \ref{chapter:solaris}, tato technika je standardní součástí operačního systému Oracle Solaris od 
+verze systému Solaris 10. Aktuální verze je Solaris 11.3 a přináší novou funkcionalitu v podobě podpory starších verzí 
+operačního systému Solaris.
+
+Pokud bychom chtěli zařadit Solaris Zones do klasifikace virtuálních strojů popsané v kapitole \ref{section:clasification}, 
+pak bychom jí zařadili do sekce \textit{virtualizace na úrovni OS}. Jinak řečeno, tato technika rozděluje zdroje hostitelského
+operačního systému jako CPU, paměť nebo I/O zařízení mezi běžící virtuální stroje a zajišťuje izolaci na úrovni procesů,
+souborového systému a sítě. Zónu pak můžeme definovat jako virtuální kontejner běžící v hostitelském operačním systému, který
+využívá zdrojů hostitelského operačního systému a je izolovaný od ostatních zón.
+
+Standardně se po instalaci operačního systému Solaris nachází v systému jedna zóna. Je to vlastní instance operačního systému
+a nazývá se \textbf{globální} zóna. Jinými slovy, je to zóna, která běží přímo na hardwaru počítače nebo ve virtualizovaném
+prostředí. Tato zóna má dvě hlavní funkce. Za prvé tato zóna plní funkci hlavního operačního systému a přebírá kontrolu
+nad fyzickými prostředky po startu systému. Za druhé je hlavním centrálním prvkem pro administraci celého systému a ostatních
+zón. Globální zóna poskytuje globální pohled na celý systém a má přehled o všech systémových zdrojích a aktivitách ostatních
+zón. Její role v rámci Solaris Zones je zásadní a její chyba může zapříčinit pád ostatních zón. Z tohoto důvodu je doporučené
+používat globální zónu pouze pro účely administrace systému a managementu ostatních zón.
+
+Zóny, které jsou spouštěny v rámci globální zóny nazýváme \textbf{neglobální} zóny. Tyto zóny jsou navzájem izolované na
+několika úrovních. První úroveň izolace je izolace na úrovni sítě. Každá neglobální zóna může mít svůj vlastní logický síťový
+adaptér, který je vytvořený nad nějakým fyzickým síťovým rozhraním a je dostupný pouze pro konkrétní zónu. Z jiné neglobální
+zóny tento adaptér není přístupný. Takto vytvořený síťový adaptér může být spravován pouze z globální zóny a ze zóny, ke které
+byl přiřazen v průběhu jejího vytváření.
+
+Druhou úrovní izolace zón je souborový systém. Globální zóna spravuje svůj vlastní souborový systém ve kterém se nachází
+standardní adresářová struktura operačních systému typu UNIX. Můžeme v něm nalézt adresář \textit{/etc} sloužící pro globální
+systémovou konfiguraci, adresář \textit{/bin} obsahující uživatelsky spustitelné programy nebo například adresář \textit{/sbin},
+který uchovává programy spustitelné pod privilegovaným uživatelem. Každá neglobální zóna potřebuje pro svůj běh velmi podobné
+prostředí, a proto má svůj vlastní souborový systém, který se nachází někde v hierarchii souborového systému globální zóny.
+Podle typu zón popsaných v kapitole \ref{chapter:zones:types} může být tento souborový systém částečně sdílený se souborovým
+systémem globální zóny a nebo může obsahovat kompletně nezávislý obraz zóny. Při spouštění zóny pak dojde pomocí příkazu
+\verb|chroot(1)| k přepnutí kořenu souborového systému a zóna pracuje pouze se svojí částí souborového systému. V případě 
+sdílené části souborového systému jsou tyto části připojeny v režimu read-only \cite{virt1}. Tím je zajištěno, že souborové
+systémy jednotlivých zón jsou vzájemně izolované a nemohou se vzájemně ovlivnit. Správu těchto souborových systémů je opět
+možné provádět pouze z konkrétní zóny a nebo ze zóny globální.
+
+
+
+Druhou funkcí globální zóny je centrální administrace celého systému a ostatních zón. Zónám, které jsou spouštěny v rámci
+globální zóny se říká \textbf{neglobální} zóny a nemají žádný přístup do globální ani jiné neglobální zóny. Konfigurace, 
+instalace a další správa neglobálních zón jako přihlašování do konzole, se dá provádět pouze ze zóny globální. 
+
+ve kterém můžeme spouštět procesy izolovaně od ostatních virtuálních kontejnerů
+.
+
+Tento kontejner tedy stanovuje
+softwarové hranice a umožňuje procesům v něm spuštěných přímo komunikovat pouze s procesy ve stejném kontejneru (zóně). Pokud
+chce proces komunikovat s procesem z jiné zóny, musí k tomu využít počítačovou síť \cite{oracle:solaris:zones:introduction}.
+Z pohledu softwarového vývojáře i uživatele se tedy jedná o dva oddělené systémy, i když reálně běží na jednom fyzickém
+systému.
+
+
+
+
+
+
+
+Neglobální zóny se chovají jako nezávislé operační systémy a izolují procesy spuštěné v nich. Každá neglobální zóna má svůj
+vlastní souborový systém, který má svůj kořenový adresář umístěný v souborovém systému globální zóny. Díky úzké spolupráci 
+zón se souborovým systémem ZFS je správa těchto souborových systému jednoduchá a umožňuje využívat přednosti tohoto
+souborového systému i v rámci Solaris Zones.
+
+zóny mají svůj vlastní souborový systém, vlastní síťové rozhraní, vlastní plánovač procesů a vlastní softwarové
+balíčky. Všechny
+tyto zdroje si neglobální zóny samy spravují. Nicméně všechny tyto prostředky jsou vytvořeny v globální zóně a delegovány 
+jednotlivým neglobálním zónám.
+
+
+\subsection{Typy zón}
+\label{chapter:zones:types}
+
+
+
+\subsection{Virtuální síť}
+
+\section{Nástroje pro správu}
+
+\section{Konfigurace}
+
+\section{Instalace}
+
+\section{Zálohování}
