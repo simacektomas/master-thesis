@@ -42,37 +42,14 @@ sdílené části souborového systému jsou tyto části připojeny v režimu r
 systémy jednotlivých zón jsou vzájemně izolované a nemohou se vzájemně ovlivnit. Správu těchto souborových systémů je opět
 možné provádět pouze z konkrétní zóny a nebo ze zóny globální.
 
-
-
-Druhou funkcí globální zóny je centrální administrace celého systému a ostatních zón. Zónám, které jsou spouštěny v rámci
-globální zóny se říká \textbf{neglobální} zóny a nemají žádný přístup do globální ani jiné neglobální zóny. Konfigurace, 
-instalace a další správa neglobálních zón jako přihlašování do konzole, se dá provádět pouze ze zóny globální. 
-
-ve kterém můžeme spouštět procesy izolovaně od ostatních virtuálních kontejnerů
-.
-
-Tento kontejner tedy stanovuje
-softwarové hranice a umožňuje procesům v něm spuštěných přímo komunikovat pouze s procesy ve stejném kontejneru (zóně). Pokud
-chce proces komunikovat s procesem z jiné zóny, musí k tomu využít počítačovou síť \cite{oracle:solaris:zones:introduction}.
-Z pohledu softwarového vývojáře i uživatele se tedy jedná o dva oddělené systémy, i když reálně běží na jednom fyzickém
-systému.
-
-
-
-
-
-
-
-Neglobální zóny se chovají jako nezávislé operační systémy a izolují procesy spuštěné v nich. Každá neglobální zóna má svůj
-vlastní souborový systém, který má svůj kořenový adresář umístěný v souborovém systému globální zóny. Díky úzké spolupráci 
-zón se souborovým systémem ZFS je správa těchto souborových systému jednoduchá a umožňuje využívat přednosti tohoto
-souborového systému i v rámci Solaris Zones.
-
-zóny mají svůj vlastní souborový systém, vlastní síťové rozhraní, vlastní plánovač procesů a vlastní softwarové
-balíčky. Všechny
-tyto zdroje si neglobální zóny samy spravují. Nicméně všechny tyto prostředky jsou vytvořeny v globální zóně a delegovány 
-jednotlivým neglobálním zónám.
-
+Mimo izolace na úrovni sítě a souborového systému Solaris Zones implementuje ještě izolaci na úrovni procesů. Každá neglobální
+zóna má svůj plánovač a může spouštět svoje vlastní procesy. Procesy běžící v jedné neglobální zóně nejsou žádným způsobem 
+viditelné ani přímo ovlivnitelné z jiných neglobálních zón. Pokud chce proces z jedné zóny komunikovat s procesem z jiné zóny,
+nemůže k tomu využít mezi procesovou komunikaci, ale musí použít počítačové sítě. Naopak procesy, které běží v rámci jedné
+zóny spolu mohou komunikovat pomocí signálů, sdílené paměti a tak podobně. Všechny procesy běžící v systému mohou být
+spravovány z globální zóny. Globální zóna tedy nabízí globální přehled všech procesů, které jsou spuštěny ve všech běžících
+zónách v systému. Výstup příkazu \verb|ps(1)| v globální zóně zobrazí všechny procesy, zatímco v neglobální zóně budou zobrazeny
+pouze procesy příslušící dané zóně.
 
 \subsection{Typy zón}
 \label{chapter:zones:types}
