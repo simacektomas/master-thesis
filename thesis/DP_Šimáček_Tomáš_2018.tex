@@ -15,8 +15,8 @@
 % \usepackage{amssymb} %additional math symbols
 
 \usepackage{listings}
-\renewcommand{\lstlistingname}{Kód}% Listing -> Kód
-\renewcommand{\lstlistlistingname}{Seznam ukázek kódů}% List of Listings -> List of Algorithms
+\renewcommand*{\lstlistingname}{Kód}% Listing -> Kód
+\renewcommand*{\lstlistlistingname}{Seznam ukázek kódů}% List of Listings -> List of Algorithms
 
 \usepackage{tabularx}
 
@@ -69,25 +69,38 @@
 
 \chapter{Solaris Zones}
   \input{chapters/zones}
+  
+\chapter{Návrh aplikace}
+  \input{chapters/design}
+  
+\chapter{Implementace}
+  \input{chapters/implementation}
+  
+\chapter{Testování}
+  \input{chapters/testing}
 
 \begin{conclusion}
   \input{chapters/conclusion}
 \end{conclusion}
 
-\bibliographystyle{bibliography/csn690}
-\bibliography{bibliography/references}
+\bibliographystyle{csn690}
+\bibliography{references}
 
 \appendix
 
 \chapter{Seznam použitých zkratek}
 % \printglossaries
 \begin{description}
+        \item[BIOS] Basic Input Output System
         \item[DNS] Domain Name System
+        \item[EPT] Extended Page Tables
         \item[HW]  Hardware
         \item[ISA]  Instruction Set Architecture
 	\item[IT]  Information Technology
+	\item[NAT]  Network Address Transaltion
 	\item[OS]  Operating System
 	\item[PC]  Program Counter/Personal Computer
+	\item[RVI]  Rapid Virtualization Indexing
 	\item[SW]  Software
 	\item[SMF] Solaris Management Facility
 	\item[TLB] Translation Lookaside Buffer

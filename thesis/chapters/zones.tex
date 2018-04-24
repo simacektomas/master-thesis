@@ -262,6 +262,100 @@ zóny existují ještě další stavy, které zmíníme jenom v rychlosti, jelik
 samovysvětlující, a proto nemá smysl je podrobněji popisovat.
 \section{Konfigurace}
 \label{chapter:zones:configuration}
+Prvním krokem k vytvoření zóny je zaregistrování její konfigurace do systému Solaris Zones. K tomuto účelu se používá nástroj
+\verb|zonecfg(1)|, který umožňuje vytváře, měnit nebo mazat konfigurace jednotlivých neglobálních zón. Dle manuálových stránek 
+\cite{oracle:manpages:zonecfg} Tento nástroj umožňuje administrátorovi zadávat konfiguraci ve třech následujících režimech.
+\begin{itemize}
+ \item Interaktivně
+ \item Dávkově
+ \item Pomocí souboru s příkazy
+\end{itemize}
+První režim zadávání konfigurace vyžaduje aktivní účast uživatele a umožňuje interaktivně zadávat příkazy, které definují
+konfiguraci dané zón. Další dva režimy načítají příkazy k definici konfigurace z jiného zdroje než je interaktivní vstup uživatele.
+V případě dávkového režimu se jedná o vstup příkazů na příkazové řádce, kdy jsou příkazy zřetězeny za sebe a předány nástroji
+\verb|zonecfg(1)| jako parametr. V druhém případě jsou příkazy načteny ze souboru, kde je každý příkaz na samostatné řádce.
+
+Všechny režimy mají jednu věc společnou. Tím jsou příkazy, kterými předávají nástroji informace o definici konfigurace zóny.
+Nástroj tedy očekává přesně definovanou syntaxi příkazů, které umí zpracovávat. Konfigurace zóny se skládá z konfigurace 
+globálních atributů a prostředků. Prostředky mohou reprezentovat síťové rozhraní nebo jiný typ zařízení a mají svoje vlastní
+lokální atributy. Popis všech příkazů, které nástroj \verb|zonecfg(1)| umí zpracovávat je zbytečný, a proto si syntaxi
+ukážeme na následující výpisu \ref{code:zonecfg} konfiguračního souboru zóny.
+\begin{lstlisting}[caption={Ukázka konfigurace zóny}, float, label={code:zonecfg}]
+zadmin@shost:~$ cat /var/tmp/rzone-test_hu67.zonecfg
+create -b
+set brand=solaris
+set zonepath=/system/zones/rzone-test
+set autoboot=false
+set autoshutdown=shutdown
+set ip-type=exclusive
+add anet
+set linkname=net0
+set lower-link=auto
+set configure-allowed-address=true
+set link-protection=mac-nospoof
+set mac-address=auto
+end
+\end{lstlisting}
+V ukázce \ref{code:zonecfg} je patrné, že každá řádka začíná příkazem. Příkaz \verb|create| vytvoří v paměti reprezentaci
+konfigurace, která se po dokončení procesu konfigurace uloží do souboru. Následuje sekvence příkazů \verb|set|, které nastavují
+nějaké globální atributy zóny. Více o nich v následující podkapitole \ref{chapter:zones:configuration:global_attributes}. Dále
+můžeme v konfiguračním souboru vidět příkaz \verb|add|, který reprezentuje přidání prostředku zóně. V tomto případě se jedná
+o přidání síťového rozhraní s automatickou konfigurací. Základní typy jednotlivých prostředků popisuje podkapitola 
+\ref{chapter:zones:configuration:global_attributes}. Následuje opět sekvence příkazů \verb|set|, která se ale nyní váže
+k předchozímu příkazu \verb|add| a nastavuje tak lokální atributy daného síťového rozhraní. Celý konfigurační soubor je ukončený
+příkazem \verb|end|, který reprezentuje výstup z konfigurace prostředku.
+
+Nástroj \verb|zonecfg(1)| umožňuje dva módy editace konfigurace zóny. Prvním mód je editace konfigurace uložené v souborovém
+systému. Změna konfigurace v tomto módu, žádným způsobem neovlivní běžící zónu. Druhý způsobem je editace konfigurace v takzvaném
+živém módu, která umí ovlivňovat nastavení zóny ve stavu \textit{running}. V tomto případě je například možné dočasně přidat
+běžící zóně síťové rozhraní.
+\subsection{Globální atributy}
+\label{chapter:zones:configuration:global_attributes}
+Globální atributy popisují globální vlastnosti zóny jako celku. Neváží se tedy ke konkrétnímu prostředku ale k zóně jako takové.
+Podle manuálových stránek \cite{oracle:manpages:zonecfg} umožňuje příkaz \verb|zonecfg(1)| konfigurovat třináct globálních
+atributů zóny. V této kapitole nebudeme popisovat všechny, ale zaměříme se na nejdůležitější z nich. Důraz bude kladen především
+na atributy, které jsou nezbytné pro vytvoření zóny.
+\subsubsection{Jméno zóny}
+\label{chapter:zones:configuration:global_attributes:zonename}
+Jedním z hlavních atributů zóny je její jméno. Tento atribut je hlavním identifikátorem zóny v rámci systému a používá se
+pro její specifikaci v rámci nástrojů \verb|zonecfg(1)| a \verb|zoneadm(1)|. Nastavuje se pomocí vlastnosti \textit{zonename},
+nemá žádnou implicitní hodnotu a je povinným atributem pro vytvoření neglobální zóny.
+\subsubsection{Cesta k souborovému systému zóny}
+\label{chapter:zones:configuration:global_attributes:zonepath}
+Klíčovým atributem zóny je cesta k adresáři, kde je připojený kořenový souborový systém neglobální zóny. Tento adresář obsahuje
+všechny nezbytné softwarové balíčky pro běh zóny. V operačním systému Solaris 11 se pro kořenové souborové systémy zón používá
+souborový systém ZFS. Tato skutečnost umožňuje využívat pokročilé funkce ZFS jako například snapshot nebo klonování při správě
+a instalaci neglobálních zón. Tento atribut se nastavuje pomocí vlastnosti \textit{zonepath} a je povinným atributem pro 
+vytvoření zóny. V jeho definici je možné používat proměnou \textit{zonename} a jeho implicitní hodnota je nastavena na
+\verb|/system/zones/%{zonename}|.
+\subsubsection{Typ zóny}
+\label{chapter:zones:configuration:global_attributes:brand}
+Jak již bylo zmíněno v kapitole \ref{chapter:zones:types}, typ neglobální zóny určuje jak s ní bude globální zóna zacházet.
+Konfigurace typu zóny se provádí pomocí atributu \textit{brand}, který je povinným atributem pro vytvoření zóny. Může nabývat
+hodnot \textit{solaris}, \textit{solaris-kz} nebo \textit{solaris10} a jeho implicitní hodnota je \textit{solaris}.
+\subsubsection{Typ IP adresy}
+\label{chapter:zones:configuration:global_attributes:ip-type}
+Stejně jako předchozí atribut byl i atribut určující typ síťové adresy již zmíněn v kapitole \ref{chapter:zones:types}. V
+krátkosti pouze naznačíme, že tento atribut určuje jestli bude síťová adresa sdílená s adresou globální zóny či nikoli. Tento
+atribut se nastavuje pomocí atributu \textit{ip-type} a může mít hodnoty \textit{shared} a \textit{exclusive}, což je zároveň
+implicitní hodnota.
+\subsubsection{Automatické spouštění a vypínání}
+\label{chapter:zones:configuration:global_attributes:autoboot}
+Jako poslední zmíníme dva atributy, které souvisí se spouštěním a vypínáním neglobálních zón. Atribut \textit{autoboot} vyjadřuje
+jestli se má daná neglobální zóna spustit při startu zóny globální. Tento atribut může nabývat dvou hodnot. Jestliže chceme
+aby se zóna spustila při startu globální zóny, musíme nastavit hodnotu tohoto atributu na \textit{true}. V opačném případě
+nastavíme hodnotu \textit{false}, která je implicitní hodnotou tohoto atributu. O automatické spouštění neglobálních zón se
+stará systémová služba \verb|svc:/system/zones:default|, a proto je nutné, aby byla spuštěna \cite{oracle:manpages:zonecfg}.
+
+Druhým atributem je atribut \textit{autoshutdown}, který se uplatňuje při vypínání globální zóny a naznačuje co se má stát
+s danou neglobální zónou. Jeho hodnoty mohou být \textit{shutdown} pro korektní vypnutí zóny, \textit{halt} a nebo \textit{suspend}.
+Implicitně se při vypínání globální zóny používá korektní vypnutí neglobální zóny.
+\subsection{Prostředky}
+\label{chapter:zones:configuration:resources}
+\subsection{Vytvoření konfigurace}
+\subsection{Změna konfigurace}
+\subsection{Smazání konfigurace}
+
 \section{Instalace}
 \label{chapter:zones:instalation}
 \section{Zálohování}
