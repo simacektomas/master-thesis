@@ -168,9 +168,101 @@ přehled základních vlastností jednotlivých druhů zón.
 \end{table}
 \section{Administrace}
 \label{chapter:zones:administration}
+Globální zóna slouží hlavně pro účely správy hostitelského systému a všech neglobálních zón. Poskytuje nainstalovaným zónám
+prostředky pro jejich běh a spravuje informace o jejich stavu. Je to klíčové místo pro správu celého systému a správných chod
+neglobálních zón vyžaduje bezproblémový chod globální zóny. Administrátor takového systému by tento fakt vzít v úvahu a
+nepoužívat globální zónu jako zdroj pro spouštění uživatelských aplikací.
 
+Proces vytváření zón se skládá ze dvou částí. První částí je konfigurace neglobální zóny, kdy administrátor specifikuje jaké
+parametry má zóna mít a jaké prostředky bude moci využívat. Tento proces zavede zónu do databáze globální zóny a od této
+chvíle je registrovaná v systému. K tomuto účelu nabízí Solaris Zones nástroj \verb|zonecfg(1)|. Více o tomto nástroji a
+možnostech konfigurace zón je popsáno v kapitole \ref{chapter:zones:configuration}.
+
+Z předchozího procesu vznikne jakýsi recept na to, jak danou neglobální zónu vytvořit. Nyní je třeba vytvořit souborový systém
+zóny se všemi balíčky, které zóna bude potřebovat ke svému běhu. Této fázi se říká instalace zóny a v jejím průběhu se do
+kořenového souborového systému nahrávají určené balíčky a nastavuje se konfigurační profil zón. Pro tento účel slouží nástroj
+\verb|zoneadm(1)|. Výstupem tohoto procesu je nainstalovaná zóna připravená ke spuštění. Detailněji nástroj pro instalaci zón
+a proces instalace popisuje kapitola \ref{chapter:zones:instalation}.
+
+Čerstvě nainstalovaná zóna může být opět pomocí nástroje \verb|zoneadm(1)| spuštěna a následně se do ní může privilegovaný 
+uživatel přihlásit pomocí nástroje \verb|zlogin(1)|.
+\subsection{Administrátor}
+\label{chapter:zones:administration:administrator}
+Jelikož neglobálních zón může být v systému provozováno velké množství, může být pro administrátora globální zóny spravovat 
+celou globální zónu a přitom se starat o všechny neglobální zóny. Pro tento účel může být vytvořen uživatel, který se bude
+starat výhradně jenom o neglobální zóny. Tento uživatel bude mít práva na správu všech neglobálních zón.
+
+Pokud by i tak bylo neglobálních zón mnoho, je možné jednotlivým neglobálním zónám přiřadit vlastního administrátora. Ten
+se bude moc do zóny přihlásit pomocí příkazu \verb|zlogin(1)| a provádět údržbu a správu systému.
+\subsection{Stavový model zón}
+\label{chapter:zones:administration:states}
+V Solaris Zones má neglobální zóna definovaný stavový model. Jsou to stavy, ve kterých se zóna během jejího životního cyklu
+může nacházet. Zónu můžeme převést z jednoho stavu do druhého pouze nějakou kombinací nástrojů \verb|zonecfg(1)| a
+\verb|zoneadm(1)|. Podle specifikace \cite{oracle:solaris:zones:states} se neglobální zóna může nacházet v jednom z
+následujících sedmi stavů.
+\begin{itemize}
+ \item \textit{Configured}
+ \item \textit{Incomplete}
+ \item \textit{Unavailable}
+ \item \textit{Installed}
+ \item \textit{Ready}
+ \item \textit{Running}
+ \item \textit{Shutting down/Down}
+\end{itemize}
+V každém z těchto stavů může administrátor používat pouze nějakou podmnožinu příkazů, které zónu ovládají. Pro příklad
+můžeme uvést, že nelze zónu spustit pokud se nachází například ve stavu \textit{configured}. Pro spuštění se zóna musí nacházet
+ve stavu \textit{installed}. V následujících odstavcích je stručně shrnut význam jednotlivých stavů.
+\subsubsection{Configured}
+\label{chapter:zones:administration:states:configured}
+Stav \textit{configured} značí, že konfigurace zóny je hotová a uložená na perzistentním úložišti. V tuto chvíli se zónou
+ještě nebyl asociován žádný diskový obraz a tedy nemá připojený kořenový souborový systém. Tento stav je v pořadí první stav,
+ve kterém se zóna může od svého vzniku nacházet. Nachází se v něm buď bezprostředně po vytvoření konfigurace pomocí \verb|zonecfg(1)|
+nebo když je zóna odinstalována nebo odpojena.
+\subsubsection{Incomplete}
+\label{chapter:zones:administration:states:incomplete}
+Zóna se nachází ve stavu \textit{incomplete} během procesu instalace a odinstalace. Je to přechodný stav, ale v případě poškození
+nainstalované zóny může být v tomto stavu stále. V případě úspěchu procesu instalace pomocí nástroje \verb|zonecfg(1)| je 
+stav zóny změněn na stav \textit{installed}. Pokud uspěje proces odinstalování zóny pomocí stejného nástroje, je stav
+změněn na stav \textit{configured}.
+\subsubsection{Unavailable}
+\label{chapter:zones:administration:states:unavailable}
+Ve stavu \textit{unavailable} se zóna nachází v případě, kdy zóna byla v minulosti nainstalována, ale momentálně nemůže být
+spuštěna, přesunuta nebo její validace vrací chybu. Tento stav může mít několik příčin. Jednou z nich může být nedostupnost
+zdrojového souborového systému zóny. Souborový systém může být nedostupný chybou administrátora nebo například chybou diskového
+zařízení. Další příčinou může být nekompatibilita softwarového vybavení globální zóny a neglobální zóny. To se může stát například
+ve chvíli kdy migrujeme neglobální nativní zónu z jednoho systému na druhý a tyto dva systémy mají odlišnou verzi jádra.
+\subsubsection{Installed}
+\label{chapter:zones:administration:states:installed}
+Stav \textit{installed} signalizuje, že zóna s danou konfigurací je nainstalovaná ve svém kořenovém souborovém systému,
+ale nemá alokovanou žádnou virtuální platformu pro svůj běh. Jinými slovy ještě nemůže být přímo spuštěna. Zóna ve stavu
+\textit{installed} již může být zálohována nebo migrována mezi různými hosty. 
+\subsubsection{Ready}
+\label{chapter:zones:administration:states:ready}
+Zóna se nachází ve stavu \textit{ready}, právě když je pro ni alokována virtuální platforma pro její běh. To znamená, že jádro
+hostitelského operačního systému Solaris vytvořilo proces \verb|zsched|, vytvořilo virtuální síťové rozhraní a zpřístupnilo
+je neglobální zóně. Obecně jádro inicializovalo všechny prostředky specifikované v konfiguraci zóny a zpřístupnilo je dané
+neglobální zóně. V tomto stavu ještě nebyl spuštěn žádný uživatelský proces asociovaný s konkrétní zónou \cite{oracle:solaris:zones:states}.
+Tento stav je tranzitní a nastává v okamžiku kdy zahajujeme boot zóny pomocí příkazu \verb|zoneadm(1)|.
+\subsubsection{Running}
+\label{chapter:zones:administration:states:running}
+Ve stavu \textit{running} se zóna nachází když je spuštěn první uživatelský proces. Většinou se jedná o proces \verb|init(1)|,
+který inicializuje celou zónu a umožňuje spouštění procesů uvnitř dané neglobální zóny. Zóna ve stavu \textit{running} má tedy
+alokovanou virtuální platformu v jádru hostitelského operačního systému, inicializované všechny zařízení a spuštěné uživatelské
+procesy.
+\subsubsection{Shutting down/Down}
+\label{chapter:zones:administration:states:down}
+Posledním stavem respektive dvojicí stavů, ve kterých se může neglobální zóna nacházet jsou stavy \textit{shutting down} resp. 
+\textit{down}. Tyto stavy jsou tranzitní a nastávají ve chvíli, kdy daná zóna zastavuje svůj běh. V případě, kdy nelze zónu
+z nějakého důvodu zastavit, může daná zóna setrvat v některém z těchto dvou stavů \cite{oracle:solaris:zones:states}. 
+\subsubsection{Doplňkové stavy kernel zón}
+\label{chapter:zones:administration:states:kernel_zones}
+Výše zmíněné stavy jsou společné pro všechny typy zón. Nastávají tedy u nativních zón, kernel zón i branded zón. Pro kernel
+zóny existují ještě další stavy, které zmíníme jenom v rychlosti, jelikož nejsou tolik podstatné. Jedná se o stavy
+\textit{suspended}, \textit{debugging}, \textit{panicked}, \textit{migrating-out} a \textit{migrating-in}. Jména stavů jsou
+samovysvětlující, a proto nemá smysl je podrobněji popisovat.
 \section{Konfigurace}
-
+\label{chapter:zones:configuration}
 \section{Instalace}
-
+\label{chapter:zones:instalation}
 \section{Zálohování}
+\label{chapter:zones:backup}
