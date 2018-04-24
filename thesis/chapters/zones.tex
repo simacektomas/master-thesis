@@ -2,8 +2,6 @@
 V úvodu následující kapitoly jsou popsány základní principy a struktura virtualizační techniky Solaris Zones od
 firmy Oracle. Dále se tato kapitola zabývá popisem datových struktur, postupů a nástrojů, které slouží ke správě a manipulaci
 se zónami. Detailnější popis je věnován především administrátorským rutinám pro konfiguraci, instalaci a zálohování zón.
-
-
 \section{Virtualizační technika}
 Oracle Solaris Zones je virtualizační technika, která umožňuje běh více virtuálních strojů na jednom fyzickém stroji. Jak již
 bylo zmíněno v kapitole \ref{chapter:solaris}, tato technika je standardní součástí operačního systému Oracle Solaris od 
@@ -50,15 +48,126 @@ zóny spolu mohou komunikovat pomocí signálů, sdílené paměti a tak podobn�
 spravovány z globální zóny. Globální zóna tedy nabízí globální přehled všech procesů, které jsou spuštěny ve všech běžících
 zónách v systému. Výstup příkazu \verb|ps(1)| v globální zóně zobrazí všechny procesy, zatímco v neglobální zóně budou zobrazeny
 pouze procesy příslušící dané zóně.
-
 \subsection{Typy zón}
 \label{chapter:zones:types}
+Jak bylo zmíněno výše, virtualizační technika Solaris Zones umožňuje v rámci jedné globální zóny spouštět mnoho neglobálních
+zón. Každá neglobální zóna má vlastnost zvanou \textit{brand}, která určuje typ neglobální zóny. Tato vlastnost se specifikuje
+při konfiguraci zóny v globální zóny a dle přehledu \cite{oracle:solaris:zones:brands} může typ zóny mít následující hodnoty:
+
+\begin{itemize}
+ \item \textit{solaris}
+ \item \textit{solaris-kz}
+ \item \textit{solaris10}
+\end{itemize}
+
+\textit{Brand} neboli typ zóny určuje jakým způsobem se zóna bude po spuštění chovat. Implicitním typem zóny v Solaris Zones
+je \textit{solaris}, kterému se také jinak přezdívá nativní zóna nebo také tenká zóna. Dalším typem zóny je \textit{solaris-kz},
+kde zkratka za pomlčkou v názvu odpovídá slovnímu spojením kernel zone. Jak název napovídá, tato zóna má vlastní jádro
+operačního systému a někdy se jí také přezdívá plná nebo tlustá zóna. Posledním typem zón, kterou Solaris Zones umí vytvářet
+je \textit{solaris10}. Hlavním úkolem této zóny je zajišťovat zpětnou kompatibilitu s operačním systémem Solaris 10 a umožňuje
+uvnitř této zóny spouštět aplikace určené pro tento systém.
+
+V následujících podkapitolách jsou podrobněji popsány výše zmíněné typy zón.
+\subsubsection{Nativní zóna}
+\label{chapter:zones:native}
+Nativní neboli tenká zóna umožňuje administrátorovi vytvořit zónu, která má sdílené jádro operačního systému s globální zónou.
+Jinými slovy verze jádra operačního systému musí být stejná jako v globální zóně. Tento typ zóny je izolovaný pouze nad svým
+souborovým systémem a nemá standardně nemá k dispozici informace o žádném fyzickém zařízení systému. Souborové systémy ostatních
+zón jsou nedostupné a konkrétní neglobální zóna o nich nemá žádné informace. Z jejího pohledu existuje pouze její kořenový
+souborový systém. Jak již bylo popsáno výše, kořenový sytém nativní zóny může být sdílený se souborovým systémem globální
+zóny a sdílet tak základní systémové nástroje. Pokud chceme této zóně delegovat nějaký typ zařízení, musíme tak učinit při
+konfiguraci zóny v globální zóně. Tímto způsobem můžeme nativní zóně zpřístupnit souborové systémy, ZFS pool nebo
+ZFS dataset. Takto definované prostředky pak po instalaci zóny můžeme z této zóny využívat.
+
+Dále tento typ zóny má svoji vlastní databázi produktů, která obsahuje informace o všech nainstalovaných softwarových
+komponentech v konkrétní globální zóně. Opět platí, že konkrétní neglobální zóna vidí pouze své balíčky. Díky tomu je možné
+instalovat dodatečné softwarové balíčky do neglobálních zón, které nemusí být nainstalované v globální zóně
+\cite{oracle:solaris:zones:brands}. Některé softwarové balíčky jsou ale společné s globální zónou (kernel) a nelze tedy
+provádět kompletní aktualizaci bez zásahu do globální zóny. 
+
+Nativní zóna podporuje dva typy síťových rozhraní, které mohou být zóně při konfiguraci přiřazeny. Prvním typem je sdílená 
+adresa neboli \textit{shared-ip}. Tento typ síťového rozhraní sdílí ip adresu s nějakým fyzickým rozhraním globální zóny. 
+Pokud chce neglobální zóna komunikovat s okolím, bude v hlavičce paketu ip adresa globální zóny a při obdržení odpovědi
+globální zóna přesměruje paket na virtuální síťové rozhraní konkrétní globální zóny. Zde můžeme pozorovat podobnost s
+technikou NAT v sítích. Jako druhý typ rozhraní můžeme použít exkluzivní rozhraní nebo také \textit{exclusive-ip}, které
+nesdílí ip adresu s globální zónou, ale má svoji vlastní. V tomto případě veškerý síťový provoz generovaný touto zónou bude
+mít v hlavičce jinou ip adresu než zóna globální.
+
+Tento typ zóny nepodporuje vytváření další neglobálních zón. Jinými slovy se nativní neglobální zóna nemůže chovat jako
+globální zóna a vytvářet nové zóny uvnitř sebe. Stejně tak z nativní zóny nemůžeme vytvářet ani spravovat jiné neglobální zóny.
+
+Nativní zóna je implicitní typ zóny v Solaris Zones a pokud administrátor nespecifikuje jinak při vytváření zóny, bude nově
+vytvořená zóna právě typu \textit{solaris}. Tento typ zóny může být provozován na všech systémech, které podporují operační
+systém Oracle Solaris 11.3 \cite{oracle:solaris:zones:brands}.
+\subsubsection{Kernel zóna}
+\label{chapter:zones:kernel}
+Druhým typem zóny, který virtualizační technika Solaris Zones umožňuje vytvářet, je kernel zóna nebo také tlustá zóna. Tento
+typ zóny obsahuje vlastní jádro operačního systému a na rozdíl od nativní zóny ho nesdílí s globální zónou. Kernel zóna
+tedy může být provozována na jiné verzi jádra než globální zóna. V důsledku toho kernel zóna podporuje funkcionalitu,
+které nelze pomocí nativní zóny dosáhnout.
+
+Stejně jako v případě nativní zóny i kernel zóna obsahuje vlastní databázi instalovaných softwarových balíčků. Jelikož i 
+kernel zóna je neglobální, nelze z ní žádným způsobem vidět balíčky ostatních zón. Na rozdíl od nativní zóny administrátor
+může provádět aktualizaci všech balíčků, protože kernel zóna nesdílí nic s globální zónou. Žádné balíčky tedy nejsou závislé
+na balíčkách globální zóny.
+
+V případě síťových rozhraní kernel zóny podporují pouze rozhraní typu \textit{exclusive-ip} a neumožňuje sdílet síťovou adresu
+s globální zónou.
+
+Na rozdíl od nativní zóny se kernel zóny mohou chovat jako globální zóny uvnitř hostitelské globální zóny. Jinými slovy je
+možné uvnitř kernel zóny vytvářet další neglobální zóny a vytvářet tak hierarchickou strukturu virtuální strojů. Je na zvážení
+administrátora, jestli daný scénář vyžaduje tuto strukturu.
+\subsubsection*{Požadavky}
+Jelikož provoz kernel zóny se liší od provozu standardní nativní zóny, liší se i požadavky na hostitelský systéme. Požadavky
+se liší v závislosti na platformě. Pro jednoduchost si uvedeme pouze požadavky pro systémy s architekturou x86 a procesorem 
+intel. Podle specifikace \cite{oracle:solaris:zones:kernel_zones_requiremets} se na hostitelský systém kladou následující
+požadavky.
+
+\begin{itemize}
+ \item Procesor musí být typu Nehalem nebo novější
+ \item Virtualizace CPU (VT-x) 
+ \item Podpora virtualizace paměti (RVI, EPT)
+ \item Ochrana paměti
+\end{itemize}
+
+Výše zmíněné požadavky kladou nároky na HW vybavení hostitelského systému. Spolu s těmito požadavky musí být v globální zóně
+nainstalovaný balíček \textit{brand/brand-solaris-kz}, který umožňuje vytváření kernel zón. Administrátor může pomocí příkazu
+\verb|virtinfo(1)| zjistit, jaký typ virtualizace je v globální zóně podporován. Výpis programu na virtualizované platformě
+VMvare, kde jsou splněné výše zmíněné požadavky může vypadat následovně.
+
+\begin{verbatim}
+zadmin@shost:~$ virtinfo
+NAME            CLASS     
+vmware          current   
+non-global-zone supported
+kernel-zone     supported
+\end{verbatim}
 
 
+\subsubsection{Branded zóna}
+\label{chapter:zones:branded}
+Branded zóny byly vytvořeny pro zpětné zajištění kompatibility se staršími verzemi operačního sytému Solaris. Díky technologii
+\textit{BrandZ} \cite{oracle:solaris:zones:brands} umožňují spouštění aplikací určených pro operační systém Solaris 10 na 
+systému s OS Solaris 11. Aplikace mohou běžet v nezměněné formě v bezpečném prostředí, které je zajištěno neglobální zónou.
 
-\subsection{Virtuální síť}
+Z pohledu administrátora se tento typ zóny chová stejně jako nativní zóna a má stejné vlastnosti, které jsou popsané v
+podkapitole \ref{chapter:zones:native}.
+\subsubsection{Shrnutí}
+\label{chapter:zones:summary}
+Virtualizační technologie Solaris Zones umožňuje vytvářet neglobální zóny uvnitř primární globální zóny. Neglobální zóny
+poskytují izolované prostředí pro nezávislý a bezpečný běh aplikací. Zóny jsou izolovány na úrovni počítačové sítě,
+souborového systému a běžících procesů, čímž je zajištěno, že se vzájemně nemohou přímo ovlivňovat. Jediný způsob komunikace
+procesů z jiných zón je pomocí počítačové sítě. 
 
-\section{Nástroje pro správu}
+Neglobální zóna může být několika druhů, které poskytují různé vlastnosti. Tabulka \ref{table:zone_comparison} poskytuje stručný
+přehled základních vlastností jednotlivých druhů zón.
+\begin{table}
+  \centering  
+  \caption[Porovnání typů zón a jejich vlastností]{Porovnání typů zón a jejich vlastností}
+  \label{table:zone_comparison}
+\end{table}
+\section{Administrace}
+\label{chapter:zones:administration}
 
 \section{Konfigurace}
 
