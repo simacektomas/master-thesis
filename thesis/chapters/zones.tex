@@ -701,7 +701,7 @@ Příkaz \verb|boot| slouží pro start zón zatímco příkazy \verb|shutdown| 
 informace o těchto příkazech poskytují následující kapitoly.
 \subsection{Start zóny}
 \label{chapter:zones:management:start}
-Aby se mohla zóna dostat do stavu \textit{running}, je nutné aby pro ni byla v jádru globální zóny alokována virtuální platforma.
+Aby se mohla zóna dostat do stavu \textit{running}, je nutné, aby pro ni byla v jádru globální zóny alokována virtuální platforma.
 Jinými slovy musí existovat procesy \textit{zsched} a \textit{zoneadmd} asociované s konkrétní neglobální zónou. Tyto procesy
 se starají o plánování a spouštění procesů v dané zóně a o zpracovávání kontrolních příkazů. Virtuální platforma je pro zónu
 alokována právě tehdy kdy se nachází ve stavu \textit{ready}. Do tohoto stavu může administrátor zónu dostat pomocí příkazu 
@@ -731,8 +731,64 @@ způsob ovládání musí být uživatel administrátorem globální zóny nebo 
 administrátor.
 
 Druhý způsob se dá použít pouze v případě, že daná zóna má nakonfigurované síťové rozhraní a umožňuje se uživatelům přihlašovat
-pomocí nástroje \verb|ssh(1)|
-\section{Zálohování}
+pomocí nástroje \verb|ssh(1)|.
+\section{Zálohování a obnova}
 \label{chapter:zones:backup}
+Při provozu každého počítačového systému je důležité provádět jeho zálohu pro případ nečekaného selhání. Jinak tomu není ani
+v případě Solaris Zones. Proces vytváření neglobální zóny zahrnoval vytvoření konfigurace a následnou instalaci softwarových
+balíků do zdrojového souborového systému zóny, a proto tyto dvě věci je nutné zálohovat. Některé typy zálohy umí vytvářet kompaktní
+archiv, který obsahuje jak konfiguraci tak i obraz souborového systému zdrojové zóny. V ostatní případech je nutné udržovat
+konfiguraci a obraz disku odděleně nebo v archivu typu \textit{zip} nebo \textit{tar}. 
+\subsection{Záloha a obnova pomocí ZFS}
+\label{chapter:zones:backup:zfs}
+Prvním typ zálohovací procedury Solaris Zones využívá archiv, který produkuje souborový systém ZFS. Tento typ zálohy lze použít
+jen v případě, že se souborový systém zálohované zóny nachází v ZFS svazku. V novějších verzích operačního systému Solaris je 
+přítomnost souborového systému ZFS standard, ale ve starší verzích tomu tak být nemusí.
+
+Vstupem tohoto typu zálohy je neglobální zóna, která je nakonfigurovaná, nainstalovaná a nachází se ve stavu \textit{installed}.
+Prvním krokem je vytvoření snapshotu zdrojového souborového systému zálohované zóny pomocí příkazu \verb|zfs snapshot|. Snapshot
+je read-only souborový systém, který je kopií zdrojového souborového systému. Rozdíl oproti úplné kopii je v tom, že se data 
+kopírují až v okamžiku, kdy se změní vzor (zdrojový souborový systém). Výhodou této techniky je, že z počátku nezabírá téměř žádné místo a
+vytvoření snapshotu je téměř okamžité. Dalším krokem je konstrukce ZFS archivu z vytvořeného snapshotu. K tomuto účelu se využívá příkaz 
+\verb|zfs send|, který na standardní výstup produkuje datový proud reprezentující daný souborový systém. Úkolem administrátora je
+přesměrovat tento datový proud do archivu, který bude sloužit jako záloha. Pro zmenšení velikosti archivu je možné použit kompresi 
+typu \textit{bzip} nebo \textit{gzip}. Výstupem zálohy je tedy archiv souborového systému ZFS. Konfiguraci zóny musí administrátor 
+zálohovat zvlášť nebo zabalit pomocí nástroje \verb|zip| nebo \verb|tar| do archivu společně se zálohou.
+
+Obnova zóny z tohoto typu archivu spočívá v obnovení konfigurace zóny z archivu  a následné spuštění příkazu \verb|zoneadm attach|,
+který zařídí připojení souborového systému ZFS na správné místo v globální zóně.
+
+Výhodou tohoto typu zálohy je její relativně rychlé vytvoření a možnost jí vykonávat paralelně pro více zón najednou. Další výhodou
+může být přesměrování výstupu příkazu \verb|zfs send| do nástroje \verb|ssh(1)| a rovnou přijímat archiv na vzdáleném serveru.
+\subsection{Záloha a obnova pomocí UAR}
+\label{chapter:zones:backup:uar}
+Unified archive neboli UAR \cite{oracle:solaris:zones:uar} je nativní nástroj pro archivování diskových obrazů pro operační systém
+Solaris. Umožňuje archivaci více systému do jednoho unifikovaného archivu. Součástí tohoto archivu může být i záloha neglobálních
+zón. Záloha se provádí pomocí nástroje \verb|archiveadm(1)| a její vytvoření je velice jednoduché. Administrátor na příkazové
+řádce specifikuje jaké zóny chce archivovat a program spustí. Výstupem je archiv s příponou \textit{uar}, který slouží jako záloha
+specifikovaných zóna.
+
+Obnova ze zálohy pomocí UAR je stejně jednoduchá jako její vytvoření. Jelikož archiv obsahuje jak diskový obraz tak i konfiguraci
+zóny je možné vše provést pomocí dvou příkazů. Nejprve obnovíme konfiguraci zóny přímo z archivu pomocí nástroje \verb|zonecfg(1)|
+a následovně spustíme příkaz \verb|zoneadm install|, kde jako parametr specifikujeme cestu k archivu.
+
+Výhodou zálohy pomocí UAR je její jednoduchost. Celý proces je otázkou několika málo příkazů. Nevýhodou naopak je, že uživatel
+potřebuje speciální práva na práci s nástrojem \verb|archiveadm(1)|. Další nevýhodou je fakt, že se nedá vytvářet více archivů
+najednou ale musíme archivovat více zón do jednoho archivu.
 \section{Migrace}
 \label{chapter:zones:migration}
+V rámci infrastruktury, která poskytuje výpočetní zdroje virtuálním strojům, může občas dojít k odstávkám některých serverů.
+Tento případ vyžaduje migraci všech virtuálních strojů na jiné servery, aby nedošlo k přerušení provozu služeb běžících ve 
+virtuálních počítačích. Více serverů využívající virtualizační techniky Solaris Zones mohou být případem takové infrastruktury
+a i Solaris Zones poskytují několik technik pro migraci neglobálních zón.
+
+Migrace v kontextu Solaris Zones je přesun neglobální zón z jedné globální zón do globální zóny na vzdáleném počítači. Jak je
+zmíněno v manuálových stránkách \cite{oracle:manpages:zoneadm} a administrátorské příručce \cite{oracle:solaris:zones:migration}
+hlavním nástrojem pro migraci zón je nástroj \verb|zoneadm| a jeho příkazy \verb|attach| a \verb|detach|. Obecně migrace
+probíhá tak, že se nejdříve odpojí diskový obraz dané zóny pomocí příkazu \verb|detach|. Tento krok převede danou zónu
+do stavu \textit{configured}, ale její souborový systém zůstane na původním místě. Poté se souborový systém přenese přímo pomocí
+\verb|zfs send| nebo pomocí archivu na vzdálený počítač. V tomto kroku se využívá technik popsaných v kapitolách 
+\ref{chapter:zones:backup:zfs} a \ref{chapter:zones:backup:uar} s tím rozdílem, že se vytvořený archiv přesune na vzdálený
+počítač. Před finálním připojením obrazu disku je třeba ještě nakonfigurovat zónu na cílovém stroji. Konečně spuštěním
+příkazu \verb|attach| s odpovídajícím parametrem se začne připojovat diskový obraz ke konfiguraci zóny. Výsledkem je  přenesení
+neglobální zóny z jednoho počítačového systému na druhý.
