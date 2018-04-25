@@ -481,10 +481,81 @@ set auths=login,manage
 end
 \end{lstlisting}
 \subsection{Vytvoření konfigurace}
-\subsection{Změna konfigurace}
-\subsection{Smazání konfigurace}
+\label{chapter:zones:configuration:creating}
+První krok v procesu vytváření neglobální zóny je vytvoření její konfigurace. Konfigurace zóny se vytváří pomocí nástroje 
+\verb|zonecfg(1)| a jeho příkazu \verb|create|. Tento příkaz vytvoří datovou reprezentaci konfigurace v paměti počítače a
+po dokončení konfigurace jí uloží do souboru ve formátu XML v systémovém adresáři \verb|/etc/zones|. Teoreticky jediné co
+administrátor potřebuje k vytvoření standardní zóny je její jméno. K vytvoření konfigurace může administrátor použít
+následující způsoby.
+\begin{itemize}
+ \item Přímá konfigurace
+ \item Konfigurace ze šablony
+ \item Konfigurace z archivu
+\end{itemize}
+Přímá konfigurace již byla popsána v kapitole \ref{chapter:zones:configuration} a využívá přímé zadávání příkazů, které obsahují
+definici atributů a zdrojů zóny. Tento proces může probíhat buď interaktivně postupným zadáváním příkazů nebo dávkově na
+příkazové řádce.
 
+Druhým způsobem je použití takzvané šablony. Šablona není nic jiného než konfigurace zóny, která je již zaregistrovaná v 
+systému. Pokud tedy administrátor již vytvořil předem nějaké neglobální zóny a chce jejich konfiguraci znovu využít, stačí
+specifikovat jejich jméno jako argument příkazu \verb|create|. Tím vznikne úplně nová konfigurace zóny, která má ale stejné
+atributy jako zóna zdrojová. Standardní instalace operačního systému Solaris již obsahuje standardní šablony pro rychlou tvorbu
+neglobálních zón. Tyto šablony se nachází společně s konfiguracemi ostatní zón v adresáři \verb|/etc/zones|. Zvídavý uživatel
+může zjistit, že adresář obsahuje například šablony \textit{SYSdefault.xml}, \textit{SYSsolaris10.xml} nebo
+\textit{SYSsolaris-kz.xml}, které odpovídají jednotlivým typů neglobálních zón. V ukázce kódu \ref{code:zonecfg:create:template}
+je viditelné rychlé vytvoření konfigurace zóny se jménem \textit{z1}, které využívá systémovou šablonu \textit{SYSdefault}.
+\begin{lstlisting}[caption={Vytvorení zóny ze systémové šablony}, label={code:zonecfg:create:template}]
+zadmin@shost:~$ zonecfg -z z1 create -t SYSdefault
+zadmin@shost:~$ zonecfg -z z1 export
+create -b
+set brand=solaris
+set zonepath=/system/zones/%{zonename}
+set autoboot=false
+set autoshutdown=shutdown
+set ip-type=exclusive
+add anet
+set linkname=net0
+set lower-link=auto
+set configure-allowed-address=true
+set link-protection=mac-nospoof
+set mac-address=auto
+end
+\end{lstlisting}
+Z ukázky je patrné, že šablona \textit{SYSdefault} nastavuje základní atributy zón s použitím implicitních hodnot a přidává
+jedeno síťové rozhraní pro připojení k síti.
+
+Poslední možností pro vytvoření konfigurace zóny je využití archivu. Archiv musí být typu \textit{Unified archive}, což je
+výstup systémového nástroje pro zálohování a archivaci zón nebo celých systémů. Více o tomto archivu je popsáno v kapitole
+\ref{chapter:zones:backup}, která se zabývá zálohováním. Druhou možností archivu je složka se kořenovým souborovým systémem
+zóny, která byla odpojena pomocí příkazu \verb|zoneadm detach|. V tomto případě je konfigurace odpojované zóny nahrána do 
+kořenového adresáře a nástroj \verb|zonecfg(1)| si jí převezme.
+\subsection{Změna konfigurace}
+\label{chapter:zones:configuration:editing}
+Dalším administrátorským úkonem ve správě Solaris Zones může být změna existující konfigurace zóny. Administrátor může editovat
+konfiguraci zóny jak ve stavech \textit{configured} a \textit{configured} tak i ve stavu \textit{running}. Pokud zóna není spuštěná
+administrátor může editovat pouze konfiguraci, která je uložená v adresáři \verb|/etc/zones|. V případě, že konfigurovaná zóna běží
+může si administrátor vybrat jestli změny chce propagovat do uložené konfigurace nebo do živé konfigurace běžící zóny. 
+Změny, které jsou provedeny pouze v živé konfiguraci zóny, jsou po vypnutí dané zóny ztraceny. Při opětovném startu si zóna
+totiž načte konfiguraci z příslušného souboru.
+
+Editace globálních atributů zóny probíhá stejným způsobem jako při jejich vytváření. Pomocí příkazu \verb|set| nástroje
+\verb|zonecfg(1)| administrátor pouze přepíše danou hodnotu atributu. Pokud chce uživatel měnit lokální atributy nějakého zdroje,
+například síťového rozhraní, musí použít příkaz \verb|set| pro jeho výběr jak je naznačeno v \ref{oracle:solaris:zones:modify}
+Dále už může postupovat stejným způsobem jako při nastavování globálních parametrů.
+
+Při ukončování editace konfigurace zóny je nutné použít příkaz \verb|commit|, který dané změny propaguje do perzistentního 
+úložiště nebo do živé konfigurace zóny.
+\subsection{Smazání konfigurace}
+\label{chapter:zones:configuration:deleting}
+Posledním typem operace, která se dá s konfigurací zóny provádět, je mazání. K tomuto účelu slouží příkaz \verb|delete| nástroje
+\verb|zonecfg(1)|. Tato akce nemůže být vrácena, a proto by si administrátor měl tento úkon řádně promyslet. Po provedení
+příkazu je konfigurace odstraněna jak z paměti počítače tak ze souborového systému. Tento příkaz neodstraní zdrojový souborový
+systém zóny.
 \section{Instalace}
 \label{chapter:zones:instalation}
+\section{Správa}
+\label{chapter:zones:instalation}
 \section{Zálohování}
+\label{chapter:zones:backup}
+\section{Migrace}
 \label{chapter:zones:backup}
