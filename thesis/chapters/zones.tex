@@ -540,7 +540,7 @@ totiž načte konfiguraci z příslušného souboru.
 
 Editace globálních atributů zóny probíhá stejným způsobem jako při jejich vytváření. Pomocí příkazu \verb|set| nástroje
 \verb|zonecfg(1)| administrátor pouze přepíše danou hodnotu atributu. Pokud chce uživatel měnit lokální atributy nějakého zdroje,
-například síťového rozhraní, musí použít příkaz \verb|set| pro jeho výběr jak je naznačeno v \ref{oracle:solaris:zones:modify}
+například síťového rozhraní, musí použít příkaz \verb|set| pro jeho výběr jak je naznačeno v \cite{oracle:solaris:zones:modify}
 Dále už může postupovat stejným způsobem jako při nastavování globálních parametrů.
 
 Při ukončování editace konfigurace zóny je nutné použít příkaz \verb|commit|, který dané změny propaguje do perzistentního 
@@ -553,6 +553,124 @@ příkazu je konfigurace odstraněna jak z paměti počítače tak ze souborové
 systém zóny.
 \section{Instalace}
 \label{chapter:zones:instalation}
+Dalším krokem na cestě za funkční neglobální zónou je proces její instalace. Tento proces vyžaduje, aby daná zóna měla v
+systému vytvořenou konfiguraci. Účelem procesu instalace je vytvoření kořenového souborového systému zóny, který obsahuje
+softwarové balíky nezbytné pro její správný chod.
+
+Instalace zóny se provádí pomocí nástroje \verb|zoneadm(1)|, který umožňuje několik poskytuje administrátorovi několik způsobů
+pro vytvoření kořenového souborového systému zóny. Dle specifikace \cite{oracle:solaris:zones:installation} a manuálových stránek
+\cite{oracle:manpages:zoneadm} jsou podporovány následující typy instalace.
+\begin{itemize}
+ \item Instalace z repozitáře
+ \item Instalace pomocí archivu
+ \item Klonování zóny
+\end{itemize}
+Výše zmíněné typy instalace se liší hlavně ve způsobu získávání a vytváření zdrojové souborového systému zón. Kritériem pro
+výběr může být například doba trvání instalace, protože mezi jednotlivými typy můžeme pozorovat zásadní rozdíl. Administrátor
+musí při výběru druhu instalace brát v úvahu dostupné prostředky systému a časový interval trvání instalace. Druhy instalace
+budou popsány z pohledu nativní neglobální zóny a rozdíly v instalaci pro kernel zóny budou upřesněny. 
+\subsection{Instalace z repozitáře}
+\label{chapter:zones:instalation:repozitory}
+Prvním typem instalace neglobální zóny je instalace z repozitáře. Repozitář je databáze softwarových balíčků, které jsou pro 
+operační systém Solaris poskytovány. Standardní poskytovatel této databáze je společnost Oracle, která hlavní databázi balíčku
+poskytuje jako webovou službu dostupnou z \textit{pkg.oracle.com/solaris/release}. Nastavení této služby v systému se provádí
+pomocí nástroje \verb|pkg(1)|, který slouží jako správce softwarových balíků v operačním systému Solaris 11.
+
+Instalace touto metodou se provádí pomocí příkazu \verb|install| nástroje \verb|zoneadm(1)|. Jediný povinný argument je jméno
+zóny, pro kterou chce administrátor nainstalovat systém. Tato zóna musí nacházet ve stavu \textit{configured}. Po puštění 
+příkazu začne instalátor stahovat potřebné balíčky z repozitáře a instalovat je do kořenového souborového systému zóny. V případě
+nativní zóny se implicitně instaluje softwarový balík \textit{pkg:/group/system/solaris-small-server}, je virtuální
+a obsahuje pouze závislosti. Z jeho názvu je patrné, že balíky budou umožňovat provozovat zónu jako malý server. Jelikož nativní
+zóna sdílí jádro operačního systému s globální zónou, balíček s jádrem se do nativní zóny neinstaluje. V případě kernel zóny
+zde nastává rozdíl a balíček s jádrem se nainstaluje. Podle článku \cite{oracle:solaris:zones:kernel_version} je možné tímto
+typem instalace nainstalovat pouze stejnou verzi jádra jako používá globální zóna.
+
+Administrátor může předat příkazu \verb|install| další dva volitelné parametry. Prvním z nich je tzv. \textit{manifest}, který
+předává instalátoru informace o tom, jaké softwarové balíčky má nainstalovat do kořenového souborového systému. Podrobněji 
+je manifest popsán v kapitole \ref{chapter:zones:instalation:repozitory:manifest}. Druhý parametr odpovídá cestě k tzv. 
+systémovému profilu, který specifikuje systémové nastavení. Tento parametr je společný pro všechny typy instalace a je podrobněji
+popsán v kapitole \ref{chapter:zones:instalation:profile}.
+
+Po úspěšném dokončení instalace jsou všechny softwarové balíčky definované v manifestu nainstalované a připravené k použití.
+Čerstvě nainstalovaná zóna se nachází ve stavu \textit{installed} a čeká na první spuštění. Tento typ instalace trvá nejdelší
+dobu. Je to zapříčiněno tím, že se všechny balíčky musí stáhnou pomocí počítačové sítě.
+\subsubsection{Manifest}
+\label{chapter:zones:instalation:repozitory:manifest}
+Manifest je soubor obsahující definici všech softwarových balíčků, které má instalátor nainstalovat do souborového systému zóny.
+Tento soubor je ve formátu XML a je povinnou součástí instalace. V minulé kapitole je řečeno, že tento parametr je volitelný.
+V případě, kdy uživatel nespecifikuje cestu k souboru explicitně, je použit předdefinovaný soubor. Podle specifikace
+\cite{oracle:solaris:zones:manifest} se soubor nachází v adresáři \textit{/usr/share/auto\_install/manifest} a jmenuje
+se \textit{zone\_default.xml}. Právě v tomto souboru je definované, že standardní výbavou každé zóny je softwarový balík 
+\textit{pkg:/group/system/solaris-small-server}.
+
+Administrátor má tedy možnost si vytvořit vlastní XML soubory s definicemi softwarových balíčků. Tyto soubory pak může používat
+při instalaci nových zón. V ukázce kódu \ref{code:manifest} je naznačeno, jak by mohl takový uživatelský manifest vypadat.
+Pro přehlednost je zobrazena pouze část s definicí balíků a zbytek XML dokumentu je vynechán.
+\begin{lstlisting}[language={XML}, caption={Ukázkový manifest}, label={code:manifest}]
+<software_data action="install">    
+    <name>pkg:/group/system/solaris-small-server</name>
+    <name>pkg:/developer/versioning/mercurial</name>
+    <name>pkg:/developer/versioning/git</name>    
+</software_data>
+\end{lstlisting}
+\subsection{Instalace z archivu}
+\label{chapter:zones:instalation:archive}
+Pokud nechceme instalovat zónu přímo z repozitáře můžeme využít možnosti instalace z archivu. Archiv je soubor, který obsahuje
+zdrojový souborový systém zóny neboli diskový obraz. V tomto případě se nemusí balíčky stahovat přes počítačovou síť z repozitáře,
+ale jsou zkopírovány ze zdrojového archivu. V předchozím případě instalátor zajistí, že se z repozitáře stáhnou správné verze
+balíčků a administrátor se o to nemusel starat. V tomto případě může nastat problém s nekompatibilitou balíčků neglobální a 
+globální zóny. Pokud se jedná o nativní zónu pak musí souhlasit verze jádra instalované zóny s verzí jádra globální zóny. 
+Administrátor může instalátoru nastavit, aby při instalaci provedl potřebnou aktualizaci všech balíčků. Tento krok lze provést
+jenom v případě, že verze hosta je vyšší než verze neglobální zóny. V opačném případě se nepodaří zónu z archivu nainstalovat.
+
+Instalace z archivu se provádí opět pomocí příkazu \verb|install| nástroje \verb|zoneadm(1)|, kde administrátor specifikuje
+cestu k danému archivu. Jelikož archiv již obsahuje nainstalované softwarové balíky, není možné použít manifest pro další specifikaci.
+Stejně jako při minulém typu instalace je možné použít systémový profil pro konfiguraci nainstalované zóny. Instalace z 
+archivu je rychlejší než instalace z repozitáře, ale nekompatibilita globální zóny a archivu může vyústit v neúspěch.
+\subsection{Klonování}
+\label{chapter:zones:instalation:cloning}
+Posledním podporovaným druhem instalace je klonování zóny. Vstupem klonování je již existující nakonfigurovaná a nainstalovaná
+zóna. Tento proces instalace využívá pokročilé techniky souborového systému ZFS, který umožňuje vytváření klonů z existujících
+souborových systémů. Klon je read-write kopie zdrojového souborového systému. Ve skutečnosti se nevytváří úplná kopie
+souborového systému, ale data se kopírují až v okamžiku kdy se klon změní. Jak říká specifikace \cite{oracle:solaris:zones:clonning},
+vytvoření klonu trvá zlomek času klasické instalace. 
+
+Klonování zón se spouští pomocí příkazu \verb|clone| nástroje \verb|zoneadm(1)|, který bere zdrojovou zónu jako parametr. Pro efektivní
+využívání tohoto typu instalace je třeba dodrže následující požadavek. Aby bylo opravdu použito funkce klonování souborového systému
+ZFS musí se zdrojová i cílová zóna nacházet ve stejném ZFS poolu. V opačném případě je zdrojový souborový systém opravu zkopírovaná a
+není využito této techniky. Dále si administrátor musí dát pozor při konfigurování cílové zóny a musí změnit atributy, které
+nemohou zůstat stejné. Především se jedná o atribut \textit{zonepath}, který musí být unikátní.
+
+Obrovskou výhodou tohoto typu vytváření zón je rychlost instalace a celková úspora diskového místa systému. Navíc podle specifikace
+\cite{oracle:solaris:zones:clonning} se všechny aktualizace balíčků, které jsou provedeny ve zdrojové zóně automaticky objeví i ve
+všech klonech.
+\subsection{Systémový profil}
+\label{chapter:zones:instalation:profile}
+Všechny výše zmíněné typy instalace umožňují specifikovat systémový profil, který slouží pro konfiguraci systému. Profil je soubor
+ve formátu XML (podobně jako manifest), který podle specifikace \cite{oracle:solaris:zones:profile} umožňuje konfigurovat
+kteroukoli systémovou službu v rámci SMF. Tento soubor se tedy skládá z popisů konfigurace jednotlivých systémových služeb
+operačního systému Solaris. Prostřednictvím profilu se například specifikuje počáteční heslo uživatele root, konfigurace 
+síťových rozhraní nebo časová zóna systému. Příklad konfigurace uživatele root je naznačen v ukázce kódu \ref{code:profile}.
+Pro přehlednost jsou vynechány ostatní nepodstatné části souboru.
+\begin{lstlisting}[language={XML}, caption={Konfigurace uživatele root}, label={code:profile}]
+<service name="system/config-user" version="1" type="service">
+    <instance name="default" enabled="true">
+      <property_group type="application" name="root_account">
+        <propval type="astring" name="type" value="%{type}"/>
+        <propval type="astring" name="login" value="root"/>
+        <propval type="astring" name="password" value="%{password}"/>
+        <propval name="expire" value="%{expire}"/>
+      </property_group>>
+    </instance>
+</service>
+\end{lstlisting}
+V ukázce je vidět, že konfigurace uživatele root umožňuje specifikovat jeho počáteční heslo, platnost hesla a typ uživatele.
+
+Konfigurace samostatných služeb je možné vygenerovat pomocí nástroje \verb|sysconfig(1)|, který slouží pro konfiguraci systému.
+Jak je zmíněno v manuálových stránkách \cite{oracle:manpages:sysconfig}, pomocí parametru \textit{grouping} lze stanovit typ
+služby, pro kterou chcete vygenerovat systémový profil. Pokud administrátor při instalaci zóny neuvede soubor se systémovým
+profilem, je po prvním startu zóny spuštěn právě nástroj \verb|sysconfig(1)|. Tento nástroj pak interaktivně nastaví konfiguraci
+požadovaných služeb.
 \section{Správa}
 \label{chapter:zones:instalation}
 \section{Zálohování}
