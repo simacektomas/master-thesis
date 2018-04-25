@@ -654,14 +654,14 @@ síťových rozhraní nebo časová zóna systému. Příklad konfigurace uživa
 Pro přehlednost jsou vynechány ostatní nepodstatné části souboru.
 \begin{lstlisting}[language={XML}, caption={Konfigurace uživatele root}, label={code:profile}]
 <service name="system/config-user" version="1" type="service">
-    <instance name="default" enabled="true">
-      <property_group type="application" name="root_account">
-        <propval type="astring" name="type" value="%{type}"/>
-        <propval type="astring" name="login" value="root"/>
-        <propval type="astring" name="password" value="%{password}"/>
-        <propval name="expire" value="%{expire}"/>
-      </property_group>>
-    </instance>
+  <instance name="default" enabled="true">
+    <property_group type="application" name="root_account">
+      <propval type="astring" name="type" value="%{type}"/>
+      <propval type="astring" name="login" value="root"/>
+      <propval type="astring" name="password" value="%{password}"/>
+      <propval name="expire" value="%{expire}"/>
+    </property_group>>
+  </instance>
 </service>
 \end{lstlisting}
 V ukázce je vidět, že konfigurace uživatele root umožňuje specifikovat jeho počáteční heslo, platnost hesla a typ uživatele.
@@ -672,8 +672,67 @@ služby, pro kterou chcete vygenerovat systémový profil. Pokud administrátor 
 profilem, je po prvním startu zóny spuštěn právě nástroj \verb|sysconfig(1)|. Tento nástroj pak interaktivně nastaví konfiguraci
 požadovaných služeb.
 \section{Správa}
-\label{chapter:zones:instalation}
+\label{chapter:zones:management}
+Po procesu instalace se zóna nachází ve stavu \textit{installed} a je možné ji spravovat. S neglobálními zónami jde provádět
+několik základních typů operací, které můžou měnit jejich stav. K účelu správy zón se používá opět nástroj \verb|zoneadm(1)|
+a jeho příkazy. Podle manuálových stránek \cite{oracle:manpages:zoneadm} může administrátor pro základní správu neglobálních
+zón používat následující příkazy.
+\begin{itemize}
+ \item \verb|list|
+ \item \verb|ready|
+ \item \verb|boot|
+ \item \verb|shutdown|
+ \item \verb|halt|
+\end{itemize}
+První příkaz v pořadí umožňuje administrátorovi získat přehled o zónách přítomných v lokálním systému a jejich stavech. Jedná
+se o zcela zásadní příkaz, jelikož zobrazuje jména zón, které slouží jako identifikátor. V každém dalším příkazu je nutné 
+specifikovat jméno zóny, na které chceme danou operaci provést. V ukázce kódu \ref{code:list} je předveden výpis příkazu
+\verb|list|. Pro úsporu místa byl z výpisu vynechán atribut \textit{zonepath}
+\begin{lstlisting}[language=bash, caption={Výpis příkazu zoneadm list}, label={code:list}]
+zadmin@shost:~$ zoneadm list -vic
+  ID NAME             STATUS      BRAND      IP    
+   0 global           running     solaris    shared
+   1 zweb1b-clone     running     solaris    excl     
+   - zweb1b           installed   solaris    excl  
+   - z1               configured  solaris    excl  
+\end{lstlisting}
+
+Příkaz \verb|boot| slouží pro start zón zatímco příkazy \verb|shutdown| a \verb|halt| slouží k jejímu zastavení. Podrobnější
+informace o těchto příkazech poskytují následující kapitoly.
+\subsection{Start zóny}
+\label{chapter:zones:management:start}
+Aby se mohla zóna dostat do stavu \textit{running}, je nutné aby pro ni byla v jádru globální zóny alokována virtuální platforma.
+Jinými slovy musí existovat procesy \textit{zsched} a \textit{zoneadmd} asociované s konkrétní neglobální zónou. Tyto procesy
+se starají o plánování a spouštění procesů v dané zóně a o zpracovávání kontrolních příkazů. Virtuální platforma je pro zónu
+alokována právě tehdy kdy se nachází ve stavu \textit{ready}. Do tohoto stavu může administrátor zónu dostat pomocí příkazu 
+\verb|ready|, který zařídí vytvoření příslušný procesů, ale ještě nespustí proces \textit{init}.
+
+Zóna ve stavu \textit{ready} je připravená pro spuštění a pomocí příkazu \verb|boot| je možné zahájit její start. Se spuštěním
+procesu \textit{init} a po proběhnutí startu systému je možné se přihlásit ke konzoly. Pokud se zóna před spuštěním příkazu
+\verb|boot| nenacházela ve stavu \textit{ready}, je automaticky spuštěn stejnojmenný příkaz v rámci příkazu \verb|boot|.
+
+Podle manuálových stránek \cite{oracle:manpages:zoneadm} má příkaz \verb|boot| několik volitelných parametrů, které slouží
+pro ovlivnění startu systému. Jednou z možností je například zapnout mód pro vypisování detailních informací o startu systému
+(verbose).
+\subsection{Zastavení zóny}
+\label{chapter:zones:management:stop}
+Pro vypnutí zóny poskytuje nástroj \verb|zoneadm(1)| hned dva příkazy. Pro standardní zastavení systému slouží příkaz \verb|shutdown|,
+který je podle manuálových stránek \cite{oracle:manpages:zoneadm} ekvivalentem volání příkazu \verb|/usr/sbin/init 0| v dané zóně.
+Tento příkaz počká až se validně ukončí všechny služby systému. Pomocí dalšího přepínače je možné specifikovat, že chceme aby
+se zóna vzápětí opět nastartovala.
+
+Pokud volání příkazu \verb|shutdown| trvá moc dlouho nebo chceme zónu rychle zastavit, můžeme použít příkaz \verb|halt|. Tento
+příkaz násilně ukončí všechny procesy zóny a přepne zónu do stavu \textit{installed}.
+\subsection{Konzole}
+\label{chapter:zones:management:console}
+Přímé ovládání zóny je možné provádět dvěma způsoby. Pokud je uživatel privilegovaný k použití příkazu \verb|zlogin|, může ho
+použít pro připojení ke konzoly dané neglobální zóny. Pomocí této konzole pak může standardně ovládat běžící systém. Pro tento
+způsob ovládání musí být uživatel administrátorem globální zóny nebo musí být specifikovaný v konfiguraci dané zóny jako její
+administrátor.
+
+Druhý způsob se dá použít pouze v případě, že daná zóna má nakonfigurované síťové rozhraní a umožňuje se uživatelům přihlašovat
+pomocí nástroje \verb|ssh(1)|
 \section{Zálohování}
 \label{chapter:zones:backup}
 \section{Migrace}
-\label{chapter:zones:backup}
+\label{chapter:zones:migration}
