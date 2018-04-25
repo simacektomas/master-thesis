@@ -299,7 +299,7 @@ end
 V ukázce \ref{code:zonecfg} je patrné, že každá řádka začíná příkazem. Příkaz \verb|create| vytvoří v paměti reprezentaci
 konfigurace, která se po dokončení procesu konfigurace uloží do souboru. Následuje sekvence příkazů \verb|set|, které nastavují
 nějaké globální atributy zóny. Více o nich v následující podkapitole \ref{chapter:zones:configuration:global_attributes}. Dále
-můžeme v konfiguračním souboru vidět příkaz \verb|add|, který reprezentuje přidání prostředku zóně. V tomto případě se jedná
+můžeme v konfiguračním souboru vidět příkaz \verb|add|, který reprezentuje přidání zdroje k zóně. V tomto případě se jedná
 o přidání síťového rozhraní s automatickou konfigurací. Základní typy jednotlivých prostředků popisuje podkapitola 
 \ref{chapter:zones:configuration:global_attributes}. Následuje opět sekvence příkazů \verb|set|, která se ale nyní váže
 k předchozímu příkazu \verb|add| a nastavuje tak lokální atributy daného síťového rozhraní. Celý konfigurační soubor je ukončený
@@ -350,8 +350,136 @@ stará systémová služba \verb|svc:/system/zones:default|, a proto je nutné, 
 Druhým atributem je atribut \textit{autoshutdown}, který se uplatňuje při vypínání globální zóny a naznačuje co se má stát
 s danou neglobální zónou. Jeho hodnoty mohou být \textit{shutdown} pro korektní vypnutí zóny, \textit{halt} a nebo \textit{suspend}.
 Implicitně se při vypínání globální zóny používá korektní vypnutí neglobální zóny.
-\subsection{Prostředky}
+\subsection{Zdroje}
 \label{chapter:zones:configuration:resources}
+Mimo generických atributů umožňuje nástroj \verb|zonecfg(1)| přidávat do konfigurace zóny takzvané zdroje. Zdroj je objekt
+nějakého typu, který má svoje lokální atributy a do konfigurace zóny se přidává pomocí příkazu \verb|add|. Zdroj reprezentuje
+většinou nějaké zařízení, souborový systém, prostředky pro přidělování zdrojů zónám nebo například specifikuje uživatele,
+který může zónu administrovat. Některé zdroje mohou být do konfigurace zóny přidány vícekrát. V takovém případě jim \verb|zonecfg(1)|
+automaticky přidělí číselný identifikátor, který daný zdroj jednoznačně určuje. Podle manuálových stránek \cite{oracle:manpages:zonecfg}
+umožňuje konfigurace zón přidávat až jednadvacet různých typů zdrojů. Stejně jako v případě globálních atributu si zde
+popíšeme jenom zdroje, které jsou nejdůležitější pro správný běh neglobální zóny.
+\subsubsection{Zařízení}
+\label{chapter:zones:configuration:resources:device}
+Prvním typem zdroje, který může být delegován neglobální zóně, je obecné zařízení. Takovým zařízením může být například disk
+nebo disková partition. V případě operačního systému se jedná o takzvané \textit{slice}, které jsou alternativou k diskovým 
+partition. 
+
+Použití tohoto zdroje se liší v závislosti na typu neglobální zóny, ke které ho chceme přiřadit. V případě nativní zóny má tento
+zdroj následující  atributy.
+\begin{itemize}
+ \item \textit{match}
+ \item \textit{allow-partition}
+ \item \textit{allow-raw-io}
+\end{itemize}
+Atribut \textit{match} odpovídá jménu zařízení, které chceme delegovat zóně. Hodnotou může být absolutní cesta k zařízení nebo
+regulární výraz, který může specifikovat více zařízení najednou. Druhý atribut \textit{allow-partition} určuje, jestli zóna 
+bude moci používat nástroj \verb|format(1)|, který umožňuje rozdělování disku na jednotlivé partition. Přímý přístup na disk může
+být povolen pomocí atributu \textit{allow-raw-io}.
+
+V případě kernel zóny je podle manuálových stránek \cite{oracle:manpages:solaris-kz} povinné přidat alespoň jedno diskové zařízení,
+které bude sloužit jako hlavní disk. Implicitně je pro kernel zónu vytvořen souborový systém ZFS, který je vyexportovaný jako
+zařízení. Toto zařízení se přidá v průběhu konfigurace a nastaví se mu atribut \textit{bootpri} na hodnotu 0 (primární disk).
+Část konfigurace specifikující úložné zařízení kernel zóny je naznačena v kódu \ref{code:zonecfg:device}
+\begin{lstlisting}[caption={Konfigurace zařízení kernel zóny}, float, label={code:zonecfg:device}]
+add device
+set storage=/dev/zvol/dsk/rpool/VARSHARE/zones/z1/disk
+set bootpri=0
+set id=0
+end
+\end{lstlisting}
+Podle doporučení v \cite{oracle:manpages:zonecfg} může být nebezpečné delegovat zónám obecné zařízení a povolit na ně přímý
+přístup. Tento krok může vést k nestabilitě a ohrožení globální zóny, jelikož uživatelské procesy neglobálních zón mohou
+přímo ovlivňovat delegovaná zařízení.
+\subsubsection{Síťové rozhraní}
+\label{chapter:zones:configuration:resources:network}
+Jelikož spolu neglobální zóny nemohou komunikovat jinak než pomocí počítačové sítě, nástroj \verb|zonecfg(1)| umožňuje delegovat
+neglobálním zónám následující dva typy sítových rozhraní. 
+\begin{itemize}
+ \item Fyzické síťové rozhraní - \textit{net}
+ \item Automatické síťové rozhraní - \textit{anet}
+\end{itemize}
+Fyzické síťové rozhraní neboli zdroj \textit{net} umožňuje delegovat do neglobální zóny existující fyzické síťové rozhraní
+z globální zóny. Tento typ zdroje má několik lokálních atributů, které definují jeho zdroj a chování. Hlavním atributem je
+\textit{physical}, který reprezentuje jméno fyzického rozhraní v globální zóně. Jedno fyzické rozhraní nemůže být sdíleno
+napříč více neglobálními zónami. Pomocí další atributů je možné specifikovat například ip adresy, které se mohou k danému 
+rozhraní připojovat, gateway nebo ip adresu rozhraní. 
+
+Automatické síťové rozhraní neboli \textit{anet} je druhým síťového zdroje, který může být neglobální zóně přiřazen. Rozdíl
+oproti předchozímu typu je v tom, že tento typ rozhraní nemusí v globální síti existovat a je vytvořeno jako virtuální síťové
+rozhraní. Jelikož je toto zařízení virtuální, umožňuje administrátorovi nastavovat mnohem větší škálu atributů. Těchto
+atributů je podle manuálových stránek \cite{oracle:manpages:zonecfg} opravdu velké množství a opět si popíšeme jenom některé
+z nich. Nejdůležitějšími atributy jsou \textit{linkname} a \textit{lower-link}. Atribut \textit{linkname} určuje jméno
+síťového rozhraní tak, jak se bude jevit v neglobální zóně. Pomocí tohoto jména je možné toto rozhraní konfigurovat.
+Atribut \textit{lower-link} je v podstatě jméno fyzického nebo virtuálního síťového rozhraní v globální zóně. Jinými slovy
+přes toto zařízení bude proudit provoz generovaný vytvořeným síťovým rozhraním. Další atributy již nebudeme podrobně zmiňovat.
+Ostatní parametry slouží například k nastavování MAC adresy, ochrany linkové vrstvy, VLAN a mnohého dalšího. V ukázce 
+\ref{code:zonecfg:anet} je naznačeno jak by mohla vypadat konfigurace automatického síťového rozhraní pomocí nástroje 
+\verb|zonecfg(1)|.
+\begin{lstlisting}[caption={Konfigurace síťového rozhraní}, float, label={code:zonecfg:anet}]
+add anet
+set lower-link=auto
+set configure-allowed-address=true
+set link-protection=mac-nospoof
+set mac-address=auto
+end
+\end{lstlisting}
+\subsubsection{Řízení zdrojů}
+\label{chapter:zones:configuration:resources:resource_control}
+Jak již bylo zmíněno výše, neglobální zóny využívají fyzických prostředků hostitelského systému (globální zóny). Aby bylo
+možné zajistit kontrolu na přidělováním prostředků jednotlivým neglobálním zónám, umožňuje konfigurace specifikovat některé
+omezení na využívání zdrojů. Tyto omezení se do konfigurace přidávají jako kterékoli jiné zdroje. Podle manuálových stránek
+\cite{oracle:manpages:zonecfg} existují následující typy zdrojů, které umožňují řízení přidělování fyzických zdrojů.
+\begin{itemize}
+ \item Exkluzivní CPU - \textit{dedicated-cpu}
+ \item Omezení CPU - \textit{capped-cpu}
+ \item Omezení paměti - \textit{capped-memory}
+\end{itemize}
+První ze zdrojů s názvem \textit{dedicated-cpu} slouží pro alokování určitého počtu procesorů a procesorových jader exkluzivně
+pro použití danou neglobální zónou. V systému dojde k vytvoření množiny procesorů, která v době běhu dané neglobální zóny
+může být využívána pouze danou neglobální zónou. Dokonce ani globální zóna nemůže tyto procesory a jádra využívat. Tento typ
+zdroje umožňuje specifikovat výpočetní zdroje s různou granularitou. Administrátor může zóně přiřadit prostředky na úrovni 
+procesorových jader, procesorů nebo dokonce celých soketů s několika procesory.
+
+Zdroj \textit{capped-cpu} reprezentuje množství procesorového času, které může být danou zónou využíváno. Tento zdroj má pouze
+jeden numerický atribut, kterým je desetinné číslo určující možné procentuální využití jednoho procesoru. Hodnotou 1 se tedy
+myslí, že daná zóna může využít 100\% procesorového času.
+
+Posledním zdrojem, který si zmíníme v rámci řízení zdrojů zón je \textit{capped-memory}. Tento zdroj se podobá \textit{capped-cpu}
+ale řídí využití paměti. Tento zdroj má tři atributy \textit{physical}, \textit{swap} a \textit{locked}, které se týkají určitého
+druhu paměti. Atribut \textit{physical} souvisí s hlavní operační pamětí počítače a umožňuje administrátorovi specifikovat,
+kolik hlavní paměti může daná zóna využít. Ostatní atributy mají stejný význam, ale týkají se jiné části paměti. Všechny 
+atributy je možné specifikovat v jednotkách kilobyte (K), megabyte (M), gigabyte (G) nebo terabyte (T).
+\subsubsection{ZFS Dataset}
+\label{chapter:zones:configuration:resources:dataset}
+Standardně mají neglobální zóny ponětí pouze o svém kořenovém souborovém systému a nevidí žádný jiný. Pokud chce zóna využívat
+nějaké další úložiště, musíme jí delegovat buď celý disk nebo můžeme použít zdroj \textit{dataset}. Tento zdroj reprezentuje
+existující souborový systém ZFS v globální zóně, který je delegován do neglobální zóny jako virtuální ZFS pool. Tento zdroj
+má dva atributy specifikující jméno souborového systému v globální zóně a alias pod kterým bude vytvořen virtuální ZFS pool
+v neglobální zóně.
+\subsubsection{Administrátor zóny}
+\label{chapter:zones:configuration:resources:admin}
+Jak již bylo zmíněno v kapitole \ref{chapter:zones:administration:administrator}, administrátor globální zóny může delegovat 
+administraci neglobální zóny na jiného uživatele. K tomuto účelu se požívá zdroj \textit{admin}, který reprezentuje administrátora
+dané neglobální zóny. Tomuto administrátorovi lze přiřadit různé privilegia, které mu umožňují nějakým způsobem spravovat zónu.
+Podle manuálových stránek \cite{oracle:manpages:zonecfg} jsou možná privilegia následující.
+\begin{itemize}
+ \item \textit{login}
+ \item \textit{manage}
+ \item \textit{copyfrom}
+ \item \textit{config}
+ \item \textit{liveconfig}
+\end{itemize}
+Názvy jednotlivých privilegií odpovídají akcím, které může daný uživatel se zónou provádět. Za zmínění snad stojí jenom 
+privilegium \textit{copyfrom}, které umožňuje administrátorovi vytvářet nové zóny jako klony dané neglobální zóny. V kódu
+\ref{code:zonecfg:admin} je ukázána konfigurace která umožňuje uživateli \textit{zadmin} přihlašování a základní správu dané
+zóny.
+\begin{lstlisting}[caption={Delegace administrace jinému uživateli}, float, label={code:zonecfg:admin}]
+add admin
+set user=zadmin
+set auths=login,manage
+end
+\end{lstlisting}
 \subsection{Vytvoření konfigurace}
 \subsection{Změna konfigurace}
 \subsection{Smazání konfigurace}
