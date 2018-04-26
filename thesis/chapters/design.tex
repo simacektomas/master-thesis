@@ -1,0 +1,67 @@
+\label{chapter:design}
+Následující kapitola popisuje návrh aplikace pro podporu automatické správy virtualizačního kontejneru Solaris Zones na
+platformě Solaris. Zaměřuje se především na popis funkcionality a požadavků, které aplikace musí splňovat. V závěrečné části
+kapitoly jsou rozebrána bezpečnost a požadavky na uživatele, který aplikaci bude moci využívat.
+\section{Požadavky na aplikaci}
+\label{chapter:design:demands}
+Hlavním cílem této práce je vytvořit aplikaci, která bude administrátorovi operačního systému Solaris ulehčovat správu
+většího množství neglobálních zón. Na základě účelu aplikace je nutné vytvořit požadavky, které bude muset výsledná implementace
+aplikace splňovat. Pokud vytvořená aplikace splní stanovené požadavky, bude moci být cíl práce označen za splněný.
+
+Jak bylo zmíněno v kapitole \label{chapter:zones}, virtualizační technika Solaris Zones je exkluzivním produktem pro operační
+systém Solaris. Tomuto faktu musí být přizpůsoben výběr technologií, které budou použity při implementaci výsledné aplikace.
+Operační systém Solaris není standardní platformou, i když je v dnešní době podporován na platformě \textit{x86}. Hlavní důraz
+musí být kladen na kompatibilitu programovacího jazyka a jeho knihoven s operačním systémem Solaris. Z výše zmíněných důvodů
+je možné vyvodit první požadavek na administrační nástroj, který je podpora na operačním systému \textbf{Solaris}.
+
+Účelem nástroje má být podpora automatické správy neglobálních zón. Pod pojmem správa je myšlena podpora základních administračních
+postupů a technik, které jsou z velké části popsány v kapitole \label{chapter:zones}. Mezi tyto postupy patří především 
+vytváření neglobálních zón, ale také podpora jejich správy, zálohování nebo migrace. Automatickou správou se myslí hlavně
+automatizace procesů vytváření zóny, zálohy nebo migrace, které se skládají z několika kroků. Aplikace by tedy měla administrátorovi
+poskytovat funkce, které umožní provedení výše zmíněných procesů pomocí jednoho příkazu. Požadavky na aplikaci vyplývající
+z účelu nástroje je možné pojmenovat jako \textbf{podpora správy} Solaris Zones a \textbf{automatizace procesů} administrace.
+
+Virtualizační technika Solaris Zones poskytuje administrátorovi skrze příkazy \verb|zonecfg(1)| a \verb|zoneadm(1)| způsob,
+jak spravovat lokální neglobální zóny. Zcela zde ale chybí podpora pro správu zón na vzdálených serverech. V dnešních infrastrukturách
+počítačových systémů využívající virtualizaci serverů se nachází mnoho serverů, které poskytují své výpočetní prostředky
+virtuálním strojů. Z tohoto pohledu je tedy žádoucí, aby implementovaná aplikace umožňovala správu neglobálních zón, které
+se nacházejí na \textbf{vzdálených} serverech.
+
+Následující požadavek se vztahuje k požadavku na automatizaci administračních procesů. Jelikož definice zóny se skládá z její
+konfigurace, softwarového vybavení a systémového nastavení, aplikace by měla umožňovat specifikaci této definice nějakým 
+jednotným způsobem. Jinými slovy aplikace musí poskytovat administrátorovi systém pro vytváření definic zón, které bude možné
+používat pro jejich vytváření. Tento požadavek lze pojmenovat jako podpora vytváření \textbf{šablon}.
+
+Uživatel musí mít možnost jak ovládat nástroj pro podporu automatické správy neglobálních zón. To znamená, že aplikace bude
+poskytovat uživateli své funkce pomocí \textbf{uživatelského rozhraní}. Toto uživatelské rozhraní musí být přehledné a poskytovat
+uživateli všechny informace potřebné pro využívání jeho funkcí. Pomocí toho rozhraní bude uživatel zadávat příkazy, které
+aplikace bude vykonávat. Rozhraní by mělo nabízet izolovaný pohled pro každého uživatele, který bude aplikaci využívat.
+
+Posledním požadavkem, který musí aplikace splňovat, je \textbf{bezpečnost}. Na bezpečnost používání aplikace se musí dbát především
+proto, že nesprávným a neopatrným používáním virtualizační techniky Solaris Zones může dojít k nestabilitě celého systému.
+K takovým případům dochází především ve chvílích, kdy neglobální zóny vyčerpají všechny fyzické prostředky systému a tím
+znemožní správný běh globální zóny.
+
+Kompletní požadavky na aplikaci pro podporu automatické správy Solaris Zones můžeme shrnout do následujících bodů.
+\begin{itemize}
+ \item \textbf{Operační systém Solaris}
+ \item \textbf{Lokální a vzdálená správa}
+ \item \textbf{Automatizace administračních procesů}
+ \item \textbf{Šablony}
+ \item \textbf{Uživatelské rozhraní}
+ \item \textbf{Bezpečnost}
+\end{itemize}
+Splněním těchto požadavků by mělo vést k značnému zjednodušení správy virtualizačního kontejneru Solaris Zones. Dále by výsledná
+aplikace měla zajistit přehled o neglobálních zónách, které se nacházejí na vzdálených serverech a také umožňovat jejich správu. 
+\section{Automatizace}
+\label{chapter:design:automation}
+\section{Šablony}
+\label{chapter:design:templates}
+\section{Vzdálený správa}
+\label{chapter:design:remote}
+\section{Architektura aplikace}
+\label{chapter:design:architecture}
+\section{Uživatelské rozhraní}
+\label{chapter:design:ui}
+\section{Bezpečnost}
+\label{chapter:design:security}
