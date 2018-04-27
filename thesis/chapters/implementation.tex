@@ -358,6 +358,7 @@ takovým parametrem je \textit{force}. Tento parametr nabírá na váze v příp
 chce rutina vytvořit. V případě, že je tento parametr zapnutý, rutina danou existující zóny smaže a na místo ní nainstaluje
 zónu novou. V opačném případě skončí rutina s chybou, že se nepodařilo zónu nainstalovat. Druhým parametrem rutin je \textit{boot}.
 Tento parametr určuje jestli se vytvořená zóna má rovnou spustit. Implicitní hodnota obou parametrů je nastavená na \textit{false}.
+Všechny rutiny pro vytváření neglobálních zón jsou implementované v rámci třídy \verb|DeploymentRoutines|.
 \subsubsection{Záloha a obnova zón}
 \label{chapter:implementation:szones:routines:backup}
 Záloha zón může podle kapitoly \ref{chapter:zones:backup} probíhat dvojím způsobem. Tyto dva způsoby se liší především v technologii,
@@ -373,7 +374,8 @@ V obou případech zálohovacích rutin je možné použít volitelný parametr 
 se má záloha zkopírovat. Implicitně se záloha vytváří na serveru, kde se daná zóna nachází.
 
 Obnova zóny předpokládá existenci její zálohy. Jelikož se v podstatě jedná o vytvoření zóny z archivu, je tento proces stejný s
-procesem vytváření zón z archivu popsaným v předchozí kapitole.
+procesem vytváření zón z archivu popsaným v předchozí kapitole. Všechny zálohovací rutiny jsou v modulu implementované ve třídě
+\verb|MigrationRoutines|.
 \subsubsection{Migrace zón}
 \label{chapter:implementation:szones:routines:migration}
 Migrace v rámci Solaris Zones je přesun neglobální zóny z jednoho virtualizačního serveru na druhý. Jedná se jak o přesun
@@ -399,11 +401,25 @@ protože nemusí souborový systém extrahovat z archivu.
 
 Všechny výše zmíněné funkce budou umožňovat migraci mezi všemi hosty dané infrastruktury. Jinými slovy bude umožněno migrovat 
 lokální zónu na vzdálený server a naopak a také migrace zóny mezi dvěma vzdálenými hosty. V rámci migračních rutin je možné specifikovat,
-že zóna na cílovém serveru se může jmenovat jinak než na zdrojovém.
+že zóna na cílovém serveru se může jmenovat jinak než na zdrojovém. Migrační rutiny jsou v implementovaném modulu zahrnuty
+ve třídě s názvem \verb|MigrationRoutines|
 \subsubsection{Rutiny pro správu zón}
 \label{chapter:implementation:szones:routines:management}
-
+Modul Solaris Zones bude mimo výše zmíněných pokročilejších rutin poskytovat i základní rutiny pro manipulaci a správu 
+neglobálních zón. V těchto rutinách bude zahrnuto spouštění, násilné i nenásilné vypnutí, restart nebo úplné odstranění zóny
+ze systému. Všechny tyto akce bude možné provádět jak na lokálním tak i na vzdáleném serveru. Třída poskytující tyto
+rutiny v rámci implementovaného modulu se nazývá \verb|BasicRoutines|.
 \subsection{Funkční rozhraní modulu}
 \label{chapter:implementation:szones:api}
+Poslední částí modulu pro správu virtualizačního kontejneru Solaris Zones bude rozhraní, které bude nabízet klientským aplikacím
+prostřednictvím knihovny. Pro tyto účely bude vytvořena speciální třída, která bude zprostředkovávat administrátorské rutiny popsané 
+v minulé kapitole. Princip rozhraní bude fungovat stejně jako v případě knihovny. Toto rozhraní bude mít zaregistrované všechny 
+třídy jejichž metody chce veřejně poskytovat knihovně a klientským aplikacím. Pokud knihovna obdrží požadavek na volání nějaké
+rutiny, přesměruje tento požadavek právě na toto rozhraní. Rozhraní vyhledá v rámci zaregistrovaných tříd zadali umí obsloužit
+konkrétní požadavek. Pokud nějaká z tříd modulu umí danou rutinu provést rozhraní vrátí její návratovou hodnotu. V opačném případě
+je vyvolána výjimka, kterou knihovna odchytí a případně bude vyhledávat v ostatních implementovaných modulech.
+
+Ve výsledné implementaci je toto rozhraní reprezentováno třídou \verb|SZONESAPI|, která má zaregistrované třídy modulu korespondující
+s rutinami popsanými v kapitole \ref{chapter:implementation:szones:routines}.
 \section{Klientská aplikace}
 \section{Editor}
