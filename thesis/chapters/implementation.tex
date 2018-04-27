@@ -98,7 +98,7 @@ jak knihovna využívá rozhraní modulu a jakým způsobem je modul poskytován
     \label{module:interface}
 \end{figure}
 \subsection{Přesměrování požadavků}
-\label{chapter:implementation:library:interface}
+\label{chapter:implementation:library:routing}
 Mimo inicializace modulů je hlavní funkcí knihovny přesměrovávat požadavky klientských aplikací na funkční rozhraní 
 implementovaných modulů. K tomuto účelu obsahuje knihovna hlavní třídu, která virtuálně reprezentuje rozhraní všech modulů
 knihovny. Tato třída se nazývá hlavní rozhraní. Jak již bylo zmíněno v kapitole \ref{chapter:implementation:library:interface},
@@ -186,7 +186,224 @@ funkce validace dokumentů typu JSON pomocí schémat.
 \end{lstlisting}
 \section{Modul Solaris Zones}
 \label{chapter:implementation:szones}
+Modul Solaris Zones bude hlavním stavebním kamenem celé implementace výsledného nástroje. Tento modul bude zařazen do knihovny
+popsané v kapitole \ref{chapter:implementation:library} a mimo jiné bude poskytovat základní rutiny pro správu virtualizačního
+kontejneru Solaris Zones. Aby mohl být tento modul využíván knihovnou, musí implementovat rozhraní definované v kapitole \ref{chapter:implementation:library:interface}.
+Takto podmínka zahrnuje především implementaci tříd pro zpracovávání šablon virtuálních strojů. V rámci tohoto modulu se bude
+jednat o šablony neglobálních zón. 
 
+Pro jednoduchou orientaci a nezávislost bude modul rozdělen do následujících vrstev, které budou poskytovat různou funkcionalitu
+a budou se vzájemně využívat. 
+\begin{itemize}
+ \item Management šablon
+ \item Nástroje pro správu Solaris Zones
+ \item Administrátorské rutiny
+ \item Funkční rozhraní modulu
+\end{itemize}
+Architekturu vrstev modulu je také možné pozorovat na obrázku \ref{image:implemetation:szones}. V následujících kapitolách
+bude podrobně popsána funkce jednotlivých vrstev a jejich interakce.
+\begin{figure}
+    \centering    
+    \caption{Modul Solaris Zones}
+    \label{image:implemetation:szones}
+\end{figure}
+\subsection{Šablona Solaris Zones}
+\label{chapter:implementation:szones:template}
+Nástroje pro správu Solaris Zones neposkytují možnost vytvářet zóny pomocí jednoho předpisu. Jak bylo popsáno v kapitole
+\ref{chapter:zones}, k úspěšnému vytvoření neglobální zóny se využívají tři soubory. Prvním a povinným parametrem instalace zóny
+je její konfigurace. Není podmínkou aby konfigurace zóny byla v podobě souboru, ale pro automatizaci tohoto procesu je to výhodné.
+Dále je nutné instalátoru předat definici softwarových balíků, které má nainstalovat. Posledním nepovinným parametrem instalace
+je konfigurace systémových služeb. Aby bylo možné nainstalovat zónu pomocí jednoho souboru, musí tato šablona šablona kombinovat
+vlastnosti výše zmíněných souborů. 
 
+Kostra šablony pro neglobální zónu je naznačena v ukázce kódu \ref{code:szones_template}. Z ukázky je patrné, že šablona obsahuje
+tři sekce, které korespondují s jednotlivými soubory vyžadovanými při instalaci. Pro úsporu místa jsou z ukázky vynechány konkrétní
+atributy zón, které jsou nahrazeny třemi symboly tečky. Modul tedy musí implementovat JSON schéma, které bude využívat pro
+validaci šablony a mechanizmy pro její zpracování. Jinými slovy modul musí být ze šablony schopný reprodukovat soubor s 
+konfigurací, manifestem a systémovým profilem. Tyto soubory pak nástroj bude využívat pro instalaci neglobální zóny s parametry,
+které jsou určené v dané šabloně.
+\begin{lstlisting}[language=json, caption={Kostra šablony neglobální zóny}, float,label={code:szones_template}]  
+{  
+  "name": "template_webserver",
+  "type": "szones",
+  "configuration": {...},
+  "manifest": {
+    "packages": [...]
+   },
+   "profile": {...} 
+}
+\end{lstlisting}
+Pokud bude modul zpracovávat rutinu využívající šablonu, v prvním kroku dojde k rozdělení šablony do třech zmíněných částí.
+V následujícím kroku budou tyto části převedeny do vnitřní reprezentace a následně zpracovány.
+\subsubsection{Zpracování konfigurace}
+\label{chapter:implementation:szones:template:configuration}
+Konfigurační sekce šablony se bude skládat z definice globálních atributů zóny popsaných v kapitole \ref{chapter:zones:configuration:global_attributes}
+a z definice zdrojů zóny, které jsou popsané v kapitole \ref{chapter:zones:configuration:resources}. Jednoduché globální atributy
+budou v šabloně specifikovány přímo pomocí jejich jména a hodnoty. Pro globální atribut typu zóny by mohla definice vypadat 
+takto následovně \lstinline[language=json]{"brand" : "solaris"}.
+
+Dále bude tato sekce šablony obsahovat definici zdrojů zóny, které mají složitější strukturu a obsahují několik atributů. Z tohoto
+důvodu bude šablona obsahovat speciální atribut \lstinline[language=json]{resources}, který bude typu pole a bude obsahovat definici
+všech zdrojů zóny. V rámci jednotlivého zdroje bude použita stejná technika definice atributu jako ve výše zmíněném případě.
+
+Cílem zpracování této části šablony je vygenerovat soubor s konfigurací, který má přesně definovanou syntaxi. Pomocí načtené
+šablony uchované v asociativním poli jsou globální atributy přetransformované do podoby, kterou vyžaduje nástroj \verb|zonecfg(1)|.
+V případě zdrojů je proveden stejný postup s tím rozdílem, že se před každý zdroj přidá příkaz \verb|add| a jeho definice
+se ukončí příkazem \verb|end|. Takto přetransformovaná konfigurace je připravena k použití v nástroji \verb|zonecfg(1)|.
+\subsubsection{Zpracování manifestu}
+\label{chapter:implementation:szones:template:manifest}
+V rámci sekce  \lstinline[language=json]{manifest} šablony může uživatel specifikovat softwarové balíky, které má zóna obsahovat.
+Pro tento účel obsahuje tato část šablony atribut \lstinline[language=json]{packages}, který je typu pole. Hodnotou každého
+prvku pole je obyčejný textový řetězec, který obsahuje jméno balíčku. V tomto atributu může uživatel specifikovat libovolné
+množství balíčků. 
+
+Cílem zpracování této sekce šablony je vytvořit manifest popsaný v kapitole \ref{chapter:zones:instalation:repozitory:manifest}.
+K tomuto účelu si modul drží kopii tohoto souboru, která nese název \textit{manifest\_template.xml} a nachází se v kořenovém 
+adresáři aplikace ve složce \textit{szones/manifest}. Při zpracovávání manifestu jsou tedy jednotlivé balíčky načteny ze šablony
+a ve správném formátu vloženy do kopie tohoto souboru.
+\subsubsection{Zpracování systémového profilu}
+\label{chapter:implementation:szones:template:profile}
+Poslední částí zpracovávání šablony je transformace systémového profilu. Tato sekce slouží k nastavení systémových služeb
+neglobální zóny a bude mít stejnou strukturu jako sekce s konfigurací zóny. Na rozdíl od způsobu zpracování konfigurace je
+však v tomto případě vyžadován jiný výstup. Cílem této transformace má být soubor v XML formátu popsaný v kapitole \ref{chapter:zones:instalation:profile}.
+
+Pro každou službu bude existovat korespondující soubor obsahující potřebnou část výsledného XML souboru. Tyto soubory budou
+uloženy v kořenovém adresáři aplikace ve složce \textit{szones/profile}. V průběhu zpracování šablony pak budou jednotlivé soubory
+načítány a vyplňovány hodnotami ze šablony. Tímto způsobem se zkonstruuje celý soubor, který může být předán instalátoru.
+\subsection{Nástroje}
+\label{chapter:implementation:szones:commands}
+Základní základním stavebním kamenem modulu bude vrstva, která bude zajišťovat vykonávání potřebných příkazů na příkazové řádce.
+Tato vrstva bude poskytovat vyšším vrstvám modulu možnost vykonávání základní administračních příkazů pro správu Solaris Zones
+a souborového systému ZFS. Konkrétní příkazy jsou vyjmenovány v kapitole \ref{chapter:design:architecture:szones}.
+
+Pro účel vykonávání příkazů bude tato vrstva implementovat třídu, která bude umožňovat provádění příkazů jak na lokálním tak i
+na vzdáleném serveru. Tato třída nebude vykonávat příkaz okamžitě, ale umožní vyšším vrstvám aplikace vykonání mohly odložit.
+Tento požadavek je na třídu kladen zejména z důvodu efektivity využívání vytvořených SSH spojení. Dále bude třída umožňovat
+definovat automatické chování v případě chyby prováděného příkazu. Pro každý nástroj využívaný aplikací bude definována sada
+pravidel, které budou reagovat na chybové výstupy nástrojů a vyvolávat příslušné výjimky. Vyšší vrstvy aplikace musí tyto výjimky
+odchytávat a adekvátně na ně reagovat.
+
+Pomocí výše zmíněné třídy bude tato vrstva modulu umožňovat volání jednotlivých nástrojů s požadovanými parametry a argumenty.
+Například bude umožňovat spouštět nástroj \verb|zonecfg(1)| se jménem konfigurované zóny a cestou k souboru s konfigurací. Vyšším
+vrstvám pak bude poskytnutý standardní výstup a standardní chybový výstup daného nástroje.
+\subsection{Administrátorské rutiny}
+\label{chapter:implementation:szones:routines}
+Hlavní částí modulu bude vrstva tříd, které budou implementovat požadované rutiny pro správu Solaris Zones. Rutiny budou využívat
+nástrojů implementovaných v nižší vrstvě a budou pomocí nich vytvářet sekvence příkazů nutné k vykonání požadované činnosti.
+Tato vrstva bude poskytovat pokročilejší rutiny pro vytváření neglobálních zón, zálohu, obnovu a migraci. Mimo jiné bude také
+poskytovat základní funkce pro správu zón. 
+\subsubsection{Transakce}
+\label{chapter:implementation:szones:routines:transaction}
+Jednotlivé rutiny budou implementované jako transakce. Transakce se bude skládat z jednotlivých příkazů, které budou tvořit
+celek. V případě úspěchu všech příkazů v transakci bude celá transakce označena za úspěšnou. Jestliže jakýkoliv příkaz v průběhu
+transakce selže, selže i celá transakce.
+
+V průběhu některých rutin dochází k vytváření dočasných souborů. Tyto soubory souží například pro přenos konfigurace zóny
+na vzdálený server nebo pro dočasné uložení diskového obrazu zóny. Soubory, které jsou dočasně vytvořené v průběhu transakce jsou
+zaznamenávány a na konci transakce dojde k jejich smazaní. Status transakce nemám na vykonání tohoto procesu vliv. V případě
+Dále některé transakce vytvářejí nové konfigurace zón, snapshoty konkrétních souborových systémů nebo celé diskové obrazy zón. 
+Některé z těchto entit mají být například výsledkem transakce. Příkladem může být rutina pro vytváření zóny. V tomto případě 
+má být konfigurace zóny a její diskový obraz výsledkem transakce. Tento případ je nutné rozlišit a tyto entity smazat pouze 
+v případě neúspěchu transakce. Tuto funkcionalitu v rámci modulu zajišťuje třída \verb|Cleanuper|.
+
+Během zálohovacích a migračních rutin je třeba provádět akce, které nějakým způsobem ovlivní existující zóny. Tyto akce se opět
+zaznamenávají a v případě neúspěchu transakce se ovlivněné zóny vrátí do původního stavu. Příkladem může být zastavení běžící
+zóny z důvodu její zálohy nebo migrace. Tuto funkcionalitu bude v rámci knihovního modulu zajišťovat třída \verb|Rollbacker|.
+
+Rutiny modulu tedy budou zachovávat stav existujících zón v případě neúspěchu transakce a zajišťovat tak konzistentní stav. Stejně
+tak budou zajišťovat, že všechny dočasně vytvořené entity budou po ukončení transakce smazány.
+\subsubsection{Vytváření zón}
+\label{chapter:implementation:szones:routines:creation}
+Hlavní součástí administrátorských rutin budou funkce pro vytváření zón. Tyto rutiny budou umožňovat vytváření vzdálených i
+lokálních neglobálních zón z následujících zdrojů.
+\begin{itemize}
+ \item Ze standardní souborů (konfigurace, manifest, profil)
+ \item Ze šablon virtuálních strojů
+ \item Z jiné existující zóny (vzdálené i lokální)
+ \item Z archivu zóny
+\end{itemize}
+
+Prvním způsobem vytvoření zóny je pomocí standardních tří souborů obsahující konfiguraci zóny, manifest a nastavení systémových
+služeb. V případě vytváření zóny na vzdáleném serveru dojde v první řadě ke zkopírování zdrojových souborů na cílový server.
+Dále se vytvoří konfigurace zóny pomocí nástroje \verb|zonecfg(1)| ze zdrojového konfiguračního souboru. Následuje spuštění
+instalace zóny z repozitáře popsané v kapitole \ref{chapter:zones:instalation:repozitory}, kde se jako parametry předají
+cesty k souborům s manifestem a systémovým profilem. Tato sekvence příkazů se vykoná lokálně nebo v rámci jednoho SSH spojení
+s cílovým serverem.
+
+Dále poskytnuta podpora pro vytváření zón specifikovaných v šablonách popsaných v kapitole \ref{chapter:implementation:szones:template}. 
+V průběhu této rutiny nejprve dojde k transformaci šablony, popsané ve stejné kapitole, na standardní soubory. Tato transformace proběhne na 
+vždy na lokálním serveru. Dále rutina pokračuje stejně jako v případě instalace ze standardních souborů popsané výše.
+
+Výše zmíněné rutiny pro vytváření zóny neměli k dispozici diskový obraz zón a instalace zóny musela vždy probíhat z repozitáře.
+Následující dva způsoby tvorby neglobálních zóny využívají jako zdroj již existující diskový obraz. První z těchto dvou postupů
+využívá diskový obraz již existující zóny. Kroky této rutiny můžeme rozdělit na části získání diskového obrazu a samotné instalace
+zóny. Obě tyto části mohou být prováděny buď na lokální serveru nebo na vzdáleném. Sever odkud je zóna získávána se označuje
+jako \textbf{zdrojový} a server kde je vytvářená nová zóna se nazývá \textbf{cílový}. Před získáváním diskového obrazu se 
+nástroj nejprve musí ujistit jestli je zóna v konzistentním stavu a tedy jestli není spuštěná. Pokud je, nástroj ji dočasně zastaví.
+Následuje vytvoření archivu zdrojové zóny pomocí techniky ZFS popsané v kapitole \ref{chapter:zones:backup:zfs}. Vytvořený archiv je
+následně společně s konfigurací zdrojové zóny přesunut na cílový server a následuje druhá část instalace zóny. Tato část probíhá na
+cílovém serveru a zde se nejprve nakonfiguruje cílová zóna s pomocí konfigurace zóny zdrojové. Následuje samotná část připojení
+diskového obrazu z poskytnutého archivu. Po tomto procesu je cílová zóna nainstalována na cílový server. Technika klonování
+popsaná v kapitole \ref{chapter:zones:instalation:cloning} se použije pouze v případě, že zdrojový a cílový server jsou 
+identické stroje.
+
+Poslední podporovanou rutinou pro instalaci neglobálních zón je vytváření z archivu. Tato rutina předpokládá existenci archivu,
+který může být typu ZFS nebo UAR. Tvorba obou těchto archivů je popsána v kapitole \ref{chapter:zones:backup}. V případě tvorby
+zóny na vzdáleném serveru se nejprve zkopíruje archiv do dočasného adresáře na cílovém serveru. Na cílovém serveru se z archivu
+extrahuje konfigurační soubor a pomocí něj se zóna nakonfiguruje. Následuje proces vytvoření kořenového souborového systému cílové
+zóny z archivu. Po dokončení tohoto procesu je cílová zóna úspěšně nainstalována na cílovém serveru.
+
+Všechny výše zmíněné typy rutin mají několik společných parametrů, které specifikují chování v krajních situacích. Prvním
+takovým parametrem je \textit{force}. Tento parametr nabírá na váze v případě, kdy již existuje zóna se jménem zóny, kterou
+chce rutina vytvořit. V případě, že je tento parametr zapnutý, rutina danou existující zóny smaže a na místo ní nainstaluje
+zónu novou. V opačném případě skončí rutina s chybou, že se nepodařilo zónu nainstalovat. Druhým parametrem rutin je \textit{boot}.
+Tento parametr určuje jestli se vytvořená zóna má rovnou spustit. Implicitní hodnota obou parametrů je nastavená na \textit{false}.
+\subsubsection{Záloha a obnova zón}
+\label{chapter:implementation:szones:routines:backup}
+Záloha zón může podle kapitoly \ref{chapter:zones:backup} probíhat dvojím způsobem. Tyto dva způsoby se liší především v technologii,
+která vytváří danou zálohu. V obou případech se jedná o vytvoření archivu kořenového souborového systému neglobální zóny. Jeden
+způsob používá standardní techniku systémové archivace pomocí UAR archivu a druhý způsob používá přímo nástroje souborového
+systému ZFS. Rutiny pro zálohu budou podporovat oba tyto způsoby a budou se lišit pouze v technice vytvoření daného archivu.
+
+Oba typy zálohovacích rutin bude možné provádět na lokálních i vzdálených serverech. V prvním kroku je nutné uvést danou neglobální
+zónu do konzistentního stavu a v případně ji zastavit. Následuje proces vytváření archivu, který se liší v závislosti na
+použité technice. Po dokončení archivace je záloha hotová. 
+
+V obou případech zálohovacích rutin je možné použít volitelný parametr \textit{archive\_destination} určující, na který server 
+se má záloha zkopírovat. Implicitně se záloha vytváří na serveru, kde se daná zóna nachází.
+
+Obnova zóny předpokládá existenci její zálohy. Jelikož se v podstatě jedná o vytvoření zóny z archivu, je tento proces stejný s
+procesem vytváření zón z archivu popsaným v předchozí kapitole.
+\subsubsection{Migrace zón}
+\label{chapter:implementation:szones:routines:migration}
+Migrace v rámci Solaris Zones je přesun neglobální zóny z jednoho virtualizačního serveru na druhý. Jedná se jak o přesun
+konfigurace zóny tak i o přesun diskového obrazu. Tato administrační rutina se v mnoha ohledech podobá rutině pro vytvoření
+neglobální zóny z jiné již existující zóny. Podstatou je vytvoření archivu zóny na zdrojovém serveru a přesun tohoto archivu
+na server cílový. Jak již bylo popsané v následující kapitole, vytvoření archivu je možné provést dvojím způsobem. Migrační rutiny
+implementovaného nástroje budou umožňovat migraci zón jak s použitím archivu ZFS tak i s použitím archivu UAR.
+
+Hlavním rozdílem migrace oproti vytváření zóny z již existující zóny je v tom, že původní zóna se v případě úspěchu transakce smaže.
+Zóna na zdrojovém server se musí opravdu smazat až v případě, kdy je zóna kompletně nakonfigurována a zdárně nainstalována na
+cílovém serveru. Dřívější smazání zdrojové zóny by mohlo vést ke ztrátě dat.
+
+Další rozdíl je v typu používaných příkazů. Před procesem vytváření archivu jakéhokoli typu dojde na zdrojovém serveru k 
+použití nástroje \verb|zoneadm(1)| a jeho příkazu \verb|detach|, který bezpečně odpojí diskový obraz zóny od její konfigurace.
+Po tomto kroku následuje vytvoření archivu a jeho přesun na cílový server. Jakmile se dokončí přenos archivu je zóna na cílovém
+server nakonfigurována a následně je její obraz připojen pomocí příkazu \verb|attach|, který má jako argument vytvořený archiv.
+V případě úspěchu může být konfigurace zóny i jejího obrazu smazána ze zdrojového serveru.
+
+Migrační rutiny budou poskytovat ještě jeden typ přenosu diskového obrazu zóny a to přímo pomocí příkazu \verb|zfs send|
+a \verb|zfs recv|. Spuštění prvního příkazu na zdrojovém server a druhého příkazu na druhém serveru v rámci SSH spojení
+zajistí přenos zdrojového souborového systému z jednoho serveru na druhý. Příkaz \verb|attach| poté již nemá skoro žádnou práci
+protože nemusí souborový systém extrahovat z archivu.
+
+Všechny výše zmíněné funkce budou umožňovat migraci mezi všemi hosty dané infrastruktury. Jinými slovy bude umožněno migrovat 
+lokální zónu na vzdálený server a naopak a také migrace zóny mezi dvěma vzdálenými hosty. V rámci migračních rutin je možné specifikovat,
+že zóna na cílovém serveru se může jmenovat jinak než na zdrojovém.
+\subsubsection{Rutiny pro správu zón}
+\label{chapter:implementation:szones:routines:management}
+
+\subsection{Funkční rozhraní modulu}
+\label{chapter:implementation:szones:api}
 \section{Klientská aplikace}
 \section{Editor}
