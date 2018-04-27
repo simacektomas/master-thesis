@@ -1,0 +1,192 @@
+\label{chapter:implementation}
+V následující kapitole je představena implementace nástroje pro automatickou správu Solaris Zones. Hlavní částí
+je popis knihovny, modulu Solaris Zones a klientské aplikace. Důraz je kladen na popis funkcí jednotlivých funkčních
+bloků aplikace a jejich vzájemné komunikace.
+\section{Programovací jazyk}
+\label{chapter:implementation:language}
+Prvním krokem  při implementaci bylo zvolení vhodného programovacího jazyka. Požadavky stanovené v kapitole 
+\ref{chapter:design:demands} vyžadují od zvoleného programovacího jazyka následující dvě podmínky.
+\begin{itemize}
+ \item Operační systém Solaris
+ \item Možnost tvorby grafického rozhraní
+\end{itemize}
+Nástroj pro automatickou správu virtualizačního kontejneru Solaris Zones bude stavět hlavně nad využíváním
+nástrojů na příkazové řádce a zpracovávání jejich výstupu. Pro tento účel bude vhodné zvolit interpretovaný
+programovací jazyk, který umožní jednoduše nástroje spustit a následně snadno zpracovat jejich výstup. Na základě
+výstupu se pak nástroj rozhodne o dalším průběhu zpracování uživatelského příkazu. První podmínka není ve volbě
+tolik omezující. Pro operační systém Solaris totiž existuje implementace standardního kompilátoru \verb|gcc(1)|
+pro jazyk C a stejně tak i implementace virtuálního stroje JVM pro jazyk Java. Většina interpretovaných jazyků
+staví svůj překladač právě nad jedním z těchto základních programovacích jazyků.
+
+Z výše uvedených důvodů je nutné při volbě jazyka dbát hlavně na dostupnost grafických knihoven pro operační systém
+Solaris. Standardním skriptovacím jazykem pro většinu operačních systému typu UNIX je \verb|shell|. Tento program
+interpretuje uživatelské příkazy na příkazové řádce a následně je provádí. Tato volba by splňovala podmínku platformy,
+ale těžko by se s pomocí tohoto jazyka vytvářelo grafické uživatelské rozhraní. Z tohoto důvodu zvolíme programovací
+jazyk Ruby \cite{ruby}, který umožní splnit obě dvě stanovené podmínky.
+\subsection{Ruby}
+\label{chapter:implementation:language:ruby}
+Ruby je objektově orientovaný programovací jazyk, který má mnoho možností pro využití. Jedním z využití může být
+právě spouštění příkazů na příkazové řádce a tvorba uživatelského rozhraní. Objektová povaha tohoto jazyka umožňuje
+programátorovi využívat všech výhod objektově orientovaného programování. Podle dokumentu \cite{ruby:implementation}
+existuje několik implementací interpretu jazyka Ruby, z nichž nejpoužívanější jsou YARV \cite{ruby:implementation:yarv} 
+a JRuby \cite{ruby:implementation:jruby}. Obě tyto implementace jsou dostupné i pro operační systém Solaris.
+
+Pokud chce programátor využívat grafické rozhraní pomocí programovacího jazyka Ruby, je nutné aby byly v systému
+nainstalované potřebné grafické knihovny. Standardní knihovny pro programovací jazyk Ruby ale nejsou na na operačním
+systému Solaris podporované. Z toho důvodu bude nutné využít grafické rozhraní, které nabízí implementace JRuby.
+Tato implementace je postavená nad virtuálním strojem JVM a může využívat grafické knihovny v něm implementované.
+Navrhovaný nástroj pro automatickou správu virtualizačního kontejneru Solaris Zones bude tedy využívat programovacího
+jazyka Ruby. Pokud bude chtít uživatel nástroje využívat grafického rozhraní bude muset nástroj spouštět pomocí
+interpretu JRuby. Zbytek nástroje bude nezávislý na použitém interpretu programovacího jazyka Ruby.
+\section{Knihovna}
+\label{chapter:implementation:library}
+Hlavním centrálním prvkem implementace bude knihovna, která bude zprostředkovávat komunikaci mezi implementovanými moduly
+a klientskými aplikacemi. Knihovna je navržená tak, aby se v budoucnosti dala lehce rozšířit o další moduly, které budou
+poskytovat funkce pro správu jiných virtualizačních technologií. Jedním z takových rozšíření by mohl být například modul
+pro podporu virtualizační technologie Virtualbox. Výsledná implementace bude obsahovat pouze modul pro podporu automatické
+správy virtualizačního kontejneru Solaris Zones, který bude dále podrobně popsán v kapitole \ref{chapter:implementation:szones}.
+
+Knihovna bude poskytovat hlavní rozhraní, pomocí kterého bude moci klient využívat funkcí jednotlivých modulů. Jednotlivé
+moduly tedy budou sloužit jako hlavní zdroj funkcionality pro knihovnu.
+
+Mimo zprostředkovávání komunikace mezi moduly a klientem bude knihovna sloužit k validaci šablon, které mají specifikovat
+konkrétní virtuální stroj. V případě šablon bude knihovna sloužit jako vstupní bod, který umí šablonu načíst a provést
+prvotní validaci. Spouštění těchto operací a jejich výsledky bude knihovna zprostředkovávat klientovi.
+
+Jelikož moduly budou implementovat různé typy operací pomocí různých technologií, je nutné ponechat vývojářům velkou volnost
+v možnostech jejich implementace. Pro účel zajištění jednotné komunikace s moduly je nutné, aby každý implementovaný modul
+splňoval určité rozhraní. Toto rozhraní zajistí, aby všechny moduly mohli jednotně komunikovat s knihovnou a také aby knihovna
+mohla zprostředkovávat jejich funkce klientovi. Definice rozhraní modulu je podrobně popsána v kapitole 
+\ref{chapter:implementation:library:interface}.
+
+Poslední funkcí knihovny bude udržování hlavní konfigurace. V této konfiguraci bude například uchováván seznam implementovaných
+modulů, kořenový adresář knihovny nebo například jméno knihovny. Klientská aplikace pak bude mít možnost tuto konfiguraci
+změnit a docílit jiného chování knihovny.
+\subsection{Rozhraní modulu}
+\label{chapter:implementation:library:interface}
+Povinné rozhraní modulu bude sloužit především ke komunikaci mezi knihovnou a samotným modulem. Funkcionalitu, kterou modul
+musí poskytovat můžeme shrnout do následujících tří bodů.
+\begin{itemize}
+ \item Inicializační rutina
+ \item Rozhraní poskytované klientům
+ \item Funkce pro validaci šablon
+\end{itemize}
+
+Prvním požadavkem na rozhraní modulu je existence inicializační rutiny. Pomocí této rutiny je do modulu předána hlavní
+konfigurace knihovny, která umožňuje modulu zjistit kořenový adresář aplikace a další volitelné parametry. Hlavním smyslem
+této rutiny je inicializace daného modulu. Hlavní knihovna v rámci inicializační smyčky spustí tuto rutinu pro každý
+registrovaný modul. V rámci této rutiny modul může provádět inicializaci vlastních datových struktur nebo vytvoření potřebné
+adresářové struktury. Dále může modul využít hlavní konfiguraci knihovny k doplnění vlastní lokální konfigurace. Tímto způsobem
+je zajištěno, že všechny registrované moduly knihovny obdrží globální konfiguraci a dojde k jejich inicializaci.
+
+Dalším nutnou částí rozhraní modulu jsou funkce, které mají být poskytovány klientovi. K tomuto účelu musí modul poskytovat
+třídu, která bude tyto funkce implementovat nebo je bude pouze zprostředkovávat pomocí jiných tříd modulu. Tato třída je tedy
+hlavním funkčním rozhraním modulu, které klientské aplikace mohou využívat. V rámci inicializace celé knihovny dojde nejprve
+k inicializaci jednotlivých modulů. Po této akci knihovna provede registraci těchto tříd a v udržuje si jejich seznam.
+
+Posledním požadavkem na rozhraní modulu je existence funkcí pro validaci šablon. Tyto funkce musí umožňovat validovat šablony,
+které se týkají konkrétního modulu knihovny. Jinými slovy modul, který podporuje správu virtualizačního kontejneru, musí poskytovat
+funkce pro validaci šablon specifikující neglobální zóny.
+
+Vlastní implementace modulu není nijak jinak omezena. Jediným logickým omezením je fakt, že tento modul musí být napsaný
+v programovacím jazyku Ruby. Pokud modul splní výše zmíněné požadavky, může být jednoduše registrován do knihovny a klientské
+aplikace ho můžou bezprostředně po inicializaci knihovny využívat. Na obrázku \ref{module:interface} je názorně zobrazeno 
+jak knihovna využívá rozhraní modulu a jakým způsobem je modul poskytován klientské aplikaci.
+\begin{figure}
+    \centering    
+    \caption{Rozhraní modulu}
+    \label{module:interface}
+\end{figure}
+\subsection{Přesměrování požadavků}
+\label{chapter:implementation:library:interface}
+Mimo inicializace modulů je hlavní funkcí knihovny přesměrovávat požadavky klientských aplikací na funkční rozhraní 
+implementovaných modulů. K tomuto účelu obsahuje knihovna hlavní třídu, která virtuálně reprezentuje rozhraní všech modulů
+knihovny. Tato třída se nazývá hlavní rozhraní. Jak již bylo zmíněno v kapitole \ref{chapter:implementation:library:interface},
+knihovna si udržuje odkazy na hlavní třídy modulů, které reprezentují jejich funkční rozhraní.
+
+V okamžiku, kdy klientská aplikace vznese požadavek na zavolání nějaké funkce, knihovna v době běhu zjistí jakému modulu daná
+funkce přísluší a vyvolá ji. Pokud neexistuje žádný modul, který umí danou funkci provést, dojde k vyvolání výjimky a aplikace
+se ukončí. Díky tomuto chování může dojít ke kolizi jmen funkcí. V takovém případě by knihovna vyvolala takovou funkci, kterou
+by našla jako první v pořadí. Z tohoto důvodu je nutné se vyvarovat opakování jmen funkcí a nejlépe používat pro funkce určitého
+modulu prefix, který daný modul jasně identifikuje. Například jeho jméno.
+
+Toto směrování za běhu aplikace je umožněno díky programovacímu jazyku Ruby a jeho možnosti dynamického volání funkcí za běhu
+programu. Směrování požadavků ke konkrétním modulům knihovny je názorně ukázáno na obrázku \ref{module:interface}.
+\subsection{Generická šablona}
+\label{chapter:implementation:library:generic}
+Poslední funkcionalitou knihovny je definice generické šablony, která má za úkol specifikovat virtuální stroj. Hlavním úkolem
+generické šablony bude specifikace typu virtuálního stroje. Tento atribut bude určovat, který modul knihovny je zodpovědný
+za zpracování a validaci. Generická šablona by dále měla obsahovat jméno, které bude nějakým způsobem vystihovat a popisovat
+specifikovaný virtuální stroj. Knihovna bude tedy zajišťovat validaci těchto dvou atributů a v případě úspěchu předá
+šablonu zodpovědnému modulu.
+
+Knihovna tedy bude klientským aplikacím poskytovat funkce pro načítání a validaci šablon. V případě úspěšného načtení šablony
+bude knihovna vracet objekt, který bude moci být použit v rámci konkrétního modulu. Validace šablony bude provedena ve dvou
+krocích. Knihovna nejprve zjistí jestli daná šablona obsahuje atribut jména a typu. Podle typu šablony se knihovna rozhodne
+jakému modulu ji předá na druhý krok validace. Způsob validace je popsaný v kapitole \ref{chapter:implementation:library:generic:validation}.
+\subsubsection{Struktura šablony}
+\label{chapter:implementation:library:generic:structure}
+Aby mohla být šablona opakovaně používána pro tvorbu virtuálních strojů, musí být perzistentně uložena v souborovém systému.
+Pro tento účel bude použit datový formát JSON \cite{json}, který bude sloužit jako reprezentace šablony. Hlavním důvodem využití tohoto
+formátu je relativně dobrá uživatelská čitelnost a především snadné zpracování pomocí programovacího jazyka Ruby. Uživatel
+může pro konstrukci šablony použít jednoduchý textový editor nebo grafický editor, který bude součástí uživatelského rozhraní
+klientské aplikace. 
+
+Struktura šablony se bude skládat ze dvou částí. První částí bude název a definice typu šablony. Tato hlavička bude určovat
+způsob zacházení s danou šablonou. V ukázce kódu \ref{code:generic_template} je naznačeno, jak by mohla taková šablona vypadat.
+Atribut \textit{type} určuje o jaký typ virtuálního stroje se jedná a k jakému modulu knihovny přísluší. Druhou povinnou položkou
+v šabloně je atribut \textit{name}, který má za úkol popsat funkcionalitu virtuálního stroje. Tečky v ukázce
+\ref{code:generic_template} reprezentují atributy specifické pro konkrétní typ šablony. Z důvodu úspory místa byly tyto atributy
+v ukázce vynechány.
+\begin{lstlisting}[language=json, caption={Generická šablona}, float,label={code:generic_template}]  
+{
+  "name": "template_webserver",
+  "type": "szones",
+  ...
+}
+\end{lstlisting}
+\subsubsection{Validace šablony}
+\label{chapter:implementation:library:generic:validation}
+Šablona musí poskytovat validní definici virtuálního stroje, aby z ní bylo možné konkrétní virtuální stroj zkonstruovat.
+Pro tento účel je nutné zavést validaci šablon a jejich atributů. Jelikož je pro ukládání šablon použitý datový formát JSON,
+může být pro validaci šablony použité tvz. JSON schéma definované v \cite{json:schema}. Tento dokument je opět ve formátu
+JSON, ale neslouží pro ukládání dat. Jeho funkcí je definovat formát jiného dokumentu JSON. Jinými slovy pomocí tohoto schématu
+je možné specifikovat atributy a typy jejich hodnot, které má konkrétní typ dokumentu obsahovat.
+
+Pomocí tohoto nástroje je tedy možné definovat, jaké atributy může konkrétní typ virtuálního stroje mít. Pokud uživatel sestrojí
+nevalidní šablonu virtuálního stroje, knihovna skrze validaci JSON dokumentu pozná, že se jedná o neplatnou konfiguraci. Knihovna
+bude implementovat základní schéma, které bude sloužit pro základní validaci šablon. Jak je vidět v ukázce \ref{code:generic_tmplate:validation},
+toto schéma vyžaduje, aby v dokumentu byly přítomné atributy \textit{name} a \textit{type}. Podle atributu \textit{type} je 
+rozhodnuto, kterému modulu bude konkrétní šablona předána. Moduly aplikace musí implementovat podrobnější schéma, které bude
+definovat konkrétní typ virtuálního stroje.
+
+Aby bylo možné v programovacím jazyku Ruby validovat JSON dokumenty, je nutné použít použít knihovnu, která bude implementovat
+JSON schéma. Pro tento účel bude aplikace využívat volně dostupné řešení json-schema \cite{json:schema:ruby}, které implementuje
+funkce validace dokumentů typu JSON pomocí schémat.
+\begin{lstlisting}[language=json, caption={Schéma generické šablony}, float, label={code:generic_tmplate:validation}]  
+{
+  {
+  "title": "general-vm-template",
+  "description": "Used for general template distinction",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the vm template"
+    },
+    "type": {
+      "enum": [ "szones", "vbox" ],
+      "description": "Type of the vm template"
+    }
+
+  },
+  "required": [ "name", "type" ],
+  "additionalProperties": true
+}
+\end{lstlisting}
+\section{Modul Solaris Zones}
+\label{chapter:implementation:szones}
+
+
+\section{Klientská aplikace}
+\section{Editor}
