@@ -422,4 +422,213 @@ je vyvolána výjimka, kterou knihovna odchytí a případně bude vyhledávat v
 Ve výsledné implementaci je toto rozhraní reprezentováno třídou \verb|SZONESAPI|, která má zaregistrované třídy modulu korespondující
 s rutinami popsanými v kapitole \ref{chapter:implementation:szones:routines}.
 \section{Klientská aplikace}
-\section{Editor}
+\label{chapter:implementation:client}
+Další významnou částí implementovaného nástroje je klientská aplikace. Hlavním úkolem tohoto funkčního bloku nástroje je 
+skrývat implementační detaily knihovny a jejích modulů. Funkcionalitu knihovny bude tato klientská aplikace zprostředkovávat
+uživateli pomocí následujících komponent.
+\begin{itemize}
+ \item Uživatelské rozhraní (CLI)
+ \item Správa vzdálených hostů
+ \item Uživatelský žurnál
+\end{itemize}
+Klientská aplikace bude poskytovat rutiny pro správu Solaris Zones popsané v kapitole \ref{chapter:implementation:szones}
+Tyto rutiny bude moci uživatel využívat pomocí uživatelského rozhraní aplikace. Hlavním cílem tohoto
+rozhraní je přehlednost a možnost vykonávat rutiny pro velké množství neglobálních zón. Uživatel bude tedy moci jednoduše
+specifikovat konkrétní zóny v uživatelském rozhraní a klientská aplikace se postará o vykonání daného příkazu pro všechny
+specifikované neglobální zóny.
+
+Jak bylo zmíněno v požadavcích \ref{chapter:design:demands}, nástroj musí umožňovat správu vzdálených zón. Tato funkcionalita
+je již implementována v modulu Solaris Zones. Klientská aplikace musí implementovat pouze způsob, jak jednoznačně identifikovat
+neglobální zónu v rámci infrastruktury. Dále bude klientská aplikace spravovat databázi virtualizačních hostů. Pomocí této databáze
+bude možné vykonávat některé rutiny hromadně, napříč všemi registrovanými hosty.
+
+Poslední funkcionalitou klientské aplikace udržování tzv. uživatelského žurnálu. Tento žurnál bude sloužit uživateli pro uchovávání
+stavů jednotlivých neglobálních zón. V případě změny stavu registrované zóny jiným uživatelem, bude aplikace schopna dohledat,
+že došlo  ke změně.
+\subsection{Rozhraní na příkazové řádce}
+\label{chapter:implementation:client:cli}
+Hlavní ovládací prvek klientské aplikace, ale i celého nástroje, je rozhraní na příkazové řádce. Důvody pro výběr tohoto rozhraní
+byly popsány v kapitole \ref{chapter:design:ui:cli}. Uživatel může toto rozhraní ovládat pomocí příkazů, které určují typ 
+prováděné operace. Příkazy můžeme rozdělit do dvou skupin. První skupina příkazů mění vnitřní stav klientské aplikace a budou
+popsány v kapitolách \ref{chapter:implementation:client:hosts} a \ref{chapter:implementation:client:journal}.
+
+Druhá skupina příkazů slouží k správě a manipulaci s neglobálními zónami. Téměř všechny tyto příkazy vyžadují jako argument jednu
+nebo více neglobálních zón, nad kterými se má provést požadovaná akce. Pro tento účel je nutné zavést unikátní identifikátor,
+který bude přesně specifikovat neglobální zónu v rámci několika hostů. Jelikož doménové jméno stroje musí být v rámci sítě
+unikátní, bude v identifikátoru figurovat. Druhou částí identifikátoru bude jméno neglobální zóny v rámci jednoho hosta.
+Toto jméno je v prostředí jedné globální zóny taky unikátní. Kombinací těchto dvou identifikátorů je možné sestrojit název
+pro neglobální zónu, který bude unikátní v rámci celé infrastruktury. Pro identifikaci zóny na příkazové řádce bude uživatel
+používat název zóny a doménové jméno hosta spojené dvojtečkou. Globální identifikátor pak může vypadat následovně \textit{z1:host1}.
+
+V následujících kapitolách bude popsána funkcionalita a parametry jednotlivých příkazů uživatelského rozhraní, které slouží
+pro správu virtualizačního kontejneru Solaris Zones.
+\subsubsection{Deploy}
+\label{chapter:implementation:client:cli:deploy}
+Prvním zástupcem příkazů pro práci s neglobálními zónami je \verb|deploy|. Úkolem tohoto příkazu je tvorba zón ze zadaných parametrů.
+Jako zdroj pro vytvoření zóny umí tento příkaz využívat všechny způsoby, které poskytuje implementovaný modul Solaris Zones.
+Konkrétně se jedná o vytvoření pomocí souborů, šablony nebo existující zóny v rámci infrastruktury. Mimo tyto způsoby poskytuje
+příkaz \verb|deploy| interaktivní instalaci, která využívá grafického rozhraní. Tento způsob je podrobněji popsán v kapitole
+\ref{chapter:implementation:gui:interactive}. Implicitní způsob vytvoření zóny je právě pomocí interaktivní instalace.
+
+Jako argumenty uživatel musí specifikovat minimálně jednu neglobální zónu pomocí výše zmíněného identifikátoru. Jméno zóny 
+se použije pro vytvoření a doménové jméno se použije pro připojení ke vzdálenému hostu. Pro všechny takto specifikované zóny
+bude použit stejný zdroj a příkaz bude vykonán paralelně pro každou z nich.
+
+Volitelnými parametry jsou \textit{boot} a \textit{force}, jejichž funkčnost byla popsána v kapitole \ref{chapter:implementation:szones:routines:creation}.
+\subsubsection{Backup}
+\label{chapter:implementation:client:cli:backup}
+V pořadí druhý příkaz \verb|backup| slouží pro zálohování zón. Tento příkaz umožňuje zálohovat zóny dvěma způsoby, které již
+byly popsány v kapitole \ref{chapter:implementation:szones:routines:backup}. Jmenovitě se jedná o archivaci pomocí ZFS nebo UAR.
+Struktura tohoto příkazu je velmi podobná předchozímu. Uživatel nejprve musí definovat seznam zón pomocí globálních
+identifikátorů. Aplikace se následně paralelně připojí ke každému specifikovanému hostu a začne vytvářet zálohy konkrétních zón. 
+V případě zálohy pomocí ZFS se záloha všech zón na tomto serveru provádí paralelně. V druhém případě tomu tak není, jelikož 
+archivace pomocí UAR neumožňuje paralelní tvorbu archivů na jednom serveru.
+
+Implicitně se záloha vytváří na serveru korespondujícím se zálohovanou zónou. Pomocí volitelných parametrů \textit{destination}
+a \textit{path} se toto chování dá změnit a zkopírovat zálohu na vzdálený server.
+\subsubsection{Migrate}
+\label{chapter:implementation:client:cli:migrate}
+Příkaz \verb|migrate| zajišťuje přesun neglobálních zón mezi dvěma servery. Tento příkaz umožňuje přenášet větší množství zón
+libovolně rozložených v infrastruktuře na jeden konkrétní server. Cílový server může být buď lokální nebo vzdálený. Migrace
+je implementována v několika způsobech, které jsou popsány v kapitole \ref{chapter:implementation:szones:routines:migration}.
+Jedná se o migraci přímé metody nebo pomocí archivu ZFS a UAR.
+
+Argumenty tohoto příkazu jsou identifikátory neglobálních zón, které chce uživatel přesunout. Pomocí parametru \textit{destination}
+je možné určit na jaký server mají být specifikované zóny přesunuty. Pokud uživatel nespecifikuje jinak jsou zóny migrovány
+na lokální server. Typ migrace se určuje parametrem \textit{type}. Pokud není využíván způsob migrace pomocí UAR, jsou všechny
+migrace prováděny paralelně.
+\subsubsection{Template}
+\label{chapter:implementation:client:cli:template}
+Speciálním příkazem v rámci uživatelského rozhraní je \verb|template|. Tento příkaz umožňuje vytvářet v infrastruktuře instance
+šablon neglobálních zón. V kombinaci s příkazem \verb|deploy| a jeho parametrem \textit{template} je možné vytvářet zóny
+dané konfigurace opravdu rychle.
+
+Příkaz \verb|template| obsahuje dva podpříkazy. Prvním z nich je \verb|create|, který umožňuje vytvořit instanci šablony na 
+jakýkoli vzdáleny server. Implicitní chování tohoto příkazu vytvoří instanci specifikované šablony na každém serveru, který
+je v aplikaci registrovaný. Funkcionalita registrace serverů bude teprve vysvětlena v kapitole \ref{chapter:implementation:client:host}.
+Chování tohoto příkazu je tedy podobné jako vytváření zóny ze šablony. Následně může uživatel použít příkaz \verb|deploy|
+s parametrem \textit{template} a vytvořit specifikované zóny pomocí funkce klonování. Tento způsob vytváření zóny je výrazně
+rychlejší než všechny ostatní a navíc šetří místo na disku.
+
+Druhým podpříkazem je \verb|destroy|, který implementuje opačnou funkcionalitu k příkazu \verb|create|. Tento příkaz tedy 
+smaže specifikovanou instanci šablony ze specifikovaných serverů. Implicitně je šablona smazána ze všech registrovaných serverů.
+
+Pomocí parametrů \textit{hosts} je možné specifikovat, na kterých serverech se má šablona vytvořit nebo smazat. Parametr
+\textit{force} potom slouží k přepsání existujících instancí šablon se stejným jménem.
+\subsubsection{Manage}
+\label{chapter:implementation:client:cli:manage}
+Poslední příkaz související se správou neglobálních zón je \verb|manage|. Tento příkaz obsahuje několik podpříkazů, které
+jako argumenty vyžadují globální identifikátory zón. Názvy jednotlivých podpříkazů korespondují s akcí, která se má na specifikovaných
+zónách provést. Jedná se o příkazy spuštění, nenásilného vypnutí, zastavení, restartu a kompletní odinstalace zóny ze systému.
+Tyto podpříkazy nemají žádné parametry a pro každou specifikovanou zónu se provádí paralelně.
+\subsection{Správa vzdálených hostů}
+\label{chapter:implementation:client:hosts}
+Další komponentou klientské aplikace je správa vzdálených hostů. Tato komponenta umožňuje uživateli registrovat vzdálené 
+hosty do vnitřního stavu aplikace. Hromadné akce nabízené uživatelským rozhraním jsou pak vykonávány právě pomocí této databáze
+hostů. Dalším důvodem proč je nutné uchovávat hosty v aplikaci je specifikace připojení. Jelikož se aplikace připojuje ke
+vzdáleným hostům pomocí SSH, je nutné specifikovat uživatelské údaje. Pro tyto účely je vytvořena databáze hostů uložená
+v domovském adresáři uživatele ve složce \textit{\textasciitilde/.szmgmt/hosts/}.
+
+Tato komponenta se ovládá pomocí uživatelského rozhraní a konkrétně pomocí příkazu \verb|host|. Tento příkaz má následující
+tři podpříkazy.
+\begin{itemize}
+ \item \verb|add|
+ \item \verb|delete|
+ \item \verb|list|
+\end{itemize}
+První příkaz v pořadí \verb|add| slouží pro registrování hostů do aplikace. Jako argument požaduje doménové jméno vzdáleného
+serveru, které je následně uloženo do databáze. Volitelné parametry tohoto příkazu umožňují specifikovat uživatele a jeho
+privátní klíče, které mají být použity pro připojování k tomuto serveru. Implicitní hodnoty těchto parametrů je možné vidět
+v ukázce kódu \ref{code:host_spec}.
+
+Příkaz \verb|delete| slouží k odstranění daného hosta z databáze aplikace. Při této akci dojde i k smazání specifikace projení
+SSH k tomuto hostu. Poslední příkaz \verb|list| vypíše na standardní výstup seznam všech registrovaných hostů.
+
+Funkcionalita této komponenty značně souvisí se všemi příkazy uživatelského rozhraní, které se připojují ke vzdáleným hostům.
+Uživatel specifikuje neglobální zóny pomocí globální identifikátoru, který obsahuje doménové jméno. V okamžiku připojování
+ke konkrétnímu vzdálenému server je použito právě nastavení uložené v databázi. Pokud pro daného hosta neexistuje záznam
+v databázi, jsou použiti implicitní hodnoty.
+
+Pro každého uživatele takto komponenta udržuje jeho vlastní databázi v jeho domovském adresáři. Hlavním důvodem pro toto umístění
+je izolace pohledů jednotlivých uživatelů aplikace.
+\subsubsection{Struktura databáze}
+\label{chapter:implementation:client:hosts:database}
+Databáze hostů je uložena v několika souborech, které se nacházejí v adresáři \textit{\textasciitilde/.szmgmt/hosts} konkrétního uživatele.
+Hlavním soubor databáze se nazývá \textit{hosts.json} a obsahuje seznam doménových jmen jednotlivých hostů. Pro každý záznam 
+v tomto souboru je vytvořen další souboru, který obsahuje specifikaci SSH připojení. Název tohoto souboru odpovídá doménovému
+jménu konkrétního serveru. Všechny soubory databáze jsou uloženy v datovém formátu JSON. V ukázce kódu \ref{code:host_spec}
+je zobrazeno implicitní nastavení pro uživatele \textit{zadmin} a server s doménovým jménem \textit{shost1}.
+\begin{lstlisting}[language=json, caption={Implicitní nastavení parametrů SSH připojení}, float,label={code:host_spec}]  
+{
+  "host_name": "shost1",
+  "user": "zadmin",
+  "keys": ["~/.ssh/id_rsa"],
+  "timeout": 1
+}
+\end{lstlisting}
+\subsection{Uživatelský žurnál}
+\label{chapter:implementation:client:journal}
+Poslední komponentou klientské aplikace je uživatelský žurnál. Solaris Zones neposkytují žádný nástroj pro přidělování zón 
+jednotlivým uživatelům. Každý privilegovaný uživatel má možnost jakýmkoli způsobem ovlivnit kteroukoliv zónu v rámci dané globální
+zóny. Z tohoto důvodu se může stát, že neglobální zóna vytvořená jedním uživatelem bude smazána nebo změněna druhým uživatelem.
+Standardně Solaris Zones na tuto skutečnost uživatele nijak neupozorní. 
+
+Uživatelský žurnál slouží pro sledování stavů jednotlivých neglobálních zón, se kterými uživatel nějakým způsobem manipuloval.
+Tyto stavy budou sloužit k informování uživatele o tom, jestli se daná zóna od předchozí manipulace nějakým způsobem změnila.
+Konkrétně jestli se změnil její stav nebo diskový obraz. Mimo jiné žurnál umožňuje detekci nových zón, které se v infrastruktuře
+od posledního spuštění aplikace objevily.
+
+Práce této komponenty je z větší části automatická, ale je umožněno její přímé ovládání pomocí uživatelského rozhraní. Automatická
+práce žurnálu spočívá v aktualizování stavů jednotlivých zón vždy, když uživatel vyvolá nějakou administrátorskou rutinu. Při vytvoření
+zóny dojde k přidání konkrétního stavu do uživatelského žurnálu. V případě odstranění zóny je odstraněn i stav z databáze. Pro 
+manuální správu žurnálu poskytuje uživatelské rozhraní příkaz \verb|journal|, který má následující podpříkazy.
+\begin{itemize}
+ \item \verb|track|
+ \item \verb|detrack|
+ \item \verb|update|
+ \item \verb|clear|
+ \item \verb|status|
+ \item \verb|list|
+\end{itemize}
+Příkaz \verb|track| slouží pro zaregistrování dané zóny. Díky tomuto příkazu není nutné, aby uživatel s danou zónou manipuloval.
+Pokud uživatel spustí tento příkaz a předá mu jako argument globální identifikátor zóny, dojde k získání aktuálního stavu zóny
+a zaregistrování do žurnálu. Od této chvíle se konkrétní zóna zařadila do seznamu sledovaných. Opačnou akci provádí příkaz
+\verb|detrack|, který ze žurnálu odstraní záznam o dané zóně. Jinými slovy odstraní zónu ze seznamu sledovaných.
+
+Pokud chce uživatel znát stavy všech zón v rámci registrovaných hostů, může použít příkaz \verb|update|. Tento příkaz se pomocí
+SSH přihlásí na všechny registrované hosty a stáhne informace o všech neglobálních zónách.  Tyto informace jsou následně uloženy
+do žurnálu a všechny zóny se stávají sledovanými. Pro opačnou funkcionalitu slouží příkaz \verb|clear|, který kompletně vymaže
+databázi sledovaných zón.
+
+Poslední dvojicí podporovaných příkazů jsou \verb|status| a \verb|clear|. Oba tyto příkazy mají za úkol informovat uživatele
+o stavech sledovaných zón. Příkaz \verb|list| jednoduše vypíše všechny zaregistrované zóny a jejich stavy. Tento příkaz se nikam
+nepřipojuje a vypisuje informace přímo ze žurnálu. Příkaz \verb|status| slouží pro porovnání stavů uložených v žurnálu s 
+aktuálním stavem všech zón v rámci registrovaných hostů. Pokud se některý uložený stav neshoduje se stavem aktuálním, je 
+o tom uživatel prostřednictvím standardního výstupu informován. Program také označí zóny, které se nově objevily v infrastruktuře. 
+Stejně jako v případě správy vzdálených hostů, je žurnál udržován pro každého uživatele zvlášť. 
+\subsubsection{Struktura databáze}
+\label{chapter:implementation:client:journal:database}
+Uživatelský žurnál je uložený v souboru \textit{\textasciitilde/.szmgmt/journal/tracked\_zones.json} v domovském adresáři
+konkrétního uživatele. V tomto souboru jsou uložené atributy sledovaných zón, které slouží pro definici konkrétního stavu zóny.
+Kombinace hodnot těchto atributů by měla zajistit detekci změn, které nemusí být na první pohled patrné. Příkladem takové změny
+může být například přeinstalování zóny a navození stejného stavu. Při této akci zůstane jméno, konfigurace a stav zóny stejné,
+ale změní se diskový obraz. Pro tento účel udržuje žurnál u každé sledované zóny atribut \textit{UUID}, který jednoznačně
+definuje diskový obraz zóny. Porovnáním uložených atributů s aktuálním stavem zóny je možné zjistit, jestli bylo se zónou 
+nějakým způsobem manipulováno. Ukládané atributy zóny a struktura záznamu je patrná z ukázky kódu \ref{code:journal}. V 
+uživatelském žurnálu je takovýto záznam pro každou sledovanou zónu.
+\begin{lstlisting}[language=json, caption={Záznam stavu zóny v žurnálu}, float,label={code:journal}]  
+"zweb1b-clone:localhost": {
+  "zone_name": "zweb1b-clone:localhost",
+  "zone_state": "running",
+  "zone_path": "/system/zones/zweb1b-clone",
+  "zone_uuid": "a000b847-7854-4939-8ac1-8ae5d9013072",
+  "zone_brand": "solaris",
+  "zone_ip": "excl"
+}
+\end{lstlisting}
+\section{Grafické rozhraní}
+\label{chapter:implementation:gui}
+\subsection{Editor šablon}
+\label{chapter:implementation:gui:editor}
+\subsection{Interaktivní instalace}
+\label{chapter:implementation:gui:interactive}
