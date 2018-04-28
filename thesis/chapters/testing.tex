@@ -1,0 +1,43 @@
+\label{chapter:testing}
+Poslední kapitola této diplomové práce popisuje testování funkcionality nástroje pro podporu automatické správy virtualizačního
+kontejneru Solaris Zones, jehož implementace je popsána v kapitole \ref{chapter:implementation}. Zaměřuje se především testování
+jednotlivých scénářů použití nástroje a zkoumá jeho chování. Na začátku této kapitoly je definováno prostředí, ve kterém byly
+testy prováděny. Následuje série testů, které zkoumají funkčnost nástroje v konkrétních případech použití. Kapitola je zakončena
+měřením, které zkoumá dobu trvání některých funkcí nástroje.
+\section{Definice testovacího prostředí}
+\label{chapter:testing}
+Pro účely testování výše zmíněného nástroje bylo nutné vytvořit prostředí odpovídající jeho cílové platformě. Toto prostředí
+obsahuje několik virtualizačních serverů s operačním systémem Solaris, který bude poskytovat své prostředky neglobálním zónám.
+Tyto servery jsou propojeny počítačovou sítí, pomocí které je lze ovládat. Tato infrastruktura virtualizovaně vytvořena na 
+fyzickém systému s následujícími parametry.
+\begin{itemize}
+ \item Procesor Intel(R) Xeon(R) CPU E3-1230 v3 (3.30Ghz)
+ \item RAM 16GB
+ \item Operační systém Windows 10 (64-bit)
+\end{itemize}
+Virtualizace architektury byla docílena pomocí virtualizační technologie Virtualbox, která umožňuje spouštění virtuálních 
+počítačů v rámci jiného operačního systému. Pomocí této technologie byly vytvořeny tři virtuální stroje s operačním systémem
+Solaris ve verzi 11.3. Tyto stroje byly propojeny pomocí virtuální počítačové sítě a nakonfigurovány tak, aby se na ně dalo 
+připojovat pomocí SSH. Dále byly jednotlivým strojů přiřazeny doménové jména \textit{shost}, \textit{shost1} a \textit{shost2},
+a přidány korespondující řádky do souboru \textit{/etc/hosts}. Toto nastavení umožňuje používat specifikované doménové jména
+místo IP adres a zjednoduší tak identifikaci strojů v testovacích ukázkách. 
+
+Jelikož provozování virtualizační technologie Solaris Zones vyžaduje nemalé množství výpočetní prostředků, bylo nutné
+dostupné prostředky fyzického systému rozdělit mezi virtuální stroje. Z tohoto důvodu byly každému virtuálnímu počítači
+přiřazeny následující výpočetní prostředky.
+\begin{itemize}
+ \item Jedno jádro fyzického procesoru
+ \item RAM 3 GB 
+ \item Virtuální disk 50 GB (HDD)
+\end{itemize}
+
+Na virtuální počítač s doménovým jménem \textit{shost} byl nainstalován interpret programovacího jazyka Ruby ve verzi 2.4.2.
+Dále byla na stejný počítač nainstalována Java ve verzi 1.8.0\_60 a následně druhý interpret programovacího jazyka Ruby
+tentokrát ve verzi 2.3.3 a implementaci JRuby. Pokud nebude uvedeno jinak, testovaný nástroj bude vždy spouštěn z virtuálního
+počítače s doménovým jménem \textit{shost}.
+
+Posledním učiněným krokem byla konfigurace uživatele \textit{zadmin}, který má práva na vykonávání příkazů nutných k správnému
+chodu implementovaného nástroje. Tyto nástroje byly vyjmenovány v kapitole \ref{chapter:design:architecture:szones}. Uživatel 
+byl pomocí nástroje RBAC vytvořen a nakonfigurován na všech vytvořených virtuálních počítačích.
+\section{Testování scénářů použití}
+\section{Měření}
