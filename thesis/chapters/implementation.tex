@@ -628,7 +628,57 @@ uživatelském žurnálu je takovýto záznam pro každou sledovanou zónu.
 \end{lstlisting}
 \section{Grafické rozhraní}
 \label{chapter:implementation:gui}
+Poslední součástí nástroje pro podporu automatické správy vritualizačního kontejneru Solaris Zones bude grafické uživatelské 
+rozhraní. Jeho hlavní účel je zvyšování uživatelského komfortu a odstínění uživatele  od implementačních detailů. 
+Implementované grafické rozhraní slouží jako nadstavba nad tvorbou šablon specifikovaných v kapitole \ref{chapter:implementation:szones:template}
+a umožňuje uživateli jejich tvorbu a editaci. Pro tyto účely byl vytvořen graficky orientovaný editor, které pomocí grafických
+elementů umožňuje vyplňování příslušných atributů neglobálních zón. Stejný princip je využitý i pro interaktivní instalaci 
+zón.
+
+Implementované grafické rozhraní využívá grafické knihovny Swing, která je podporována pouze na platformě JVM. Z důvodů uvedených
+v kapitole \ref{chapter:implementation:language:ruby} je použití grafického rozhraní podmíněno využitím interpretu JRuby jako
+platformu pro programovací jazyk Ruby. V případě, že uživatel spustí grafické rozhraní na jiné platformě, aplikace se ukončí
+a grafické rozhraní nezobrazí. Ostatní funkce nástroje nejsou závislé na použitém interpretu.
 \subsection{Editor šablon}
 \label{chapter:implementation:gui:editor}
+První využití grafického rozhraní je editor pro manipulaci se šablonami zón. Tento editor se spouští pomocí příkazu \verb|editor|,
+který je součástí uživatelského rozhraní klientské aplikace. Po spuštění tohoto příkazu je uživateli zobrazeno grafické okno,
+které slouží pro editaci šablon.
+
+Horní část editoru obsahuje ovládací panel, který umožňuje uživateli načítat šablony nebo vytvářet nové. Součástí tohoto panelu
+je také tlačítko pro ukončení editoru. Pokud uživatel zvolí možnost načtení šablony, je pomocí několika dialogových oken dotázán
+na cestu k dané šabloně. Po úspěšném zadání cesty se uživateli v prostřední části editoru zobrazí formulář vyplněný pomocí
+dat z načtené šablony. Pokud uživatel vybere druhou možnost a to vytvoření šablony, je v prostřední části editoru zobrazen 
+ten samý formulář, ale vyplněný implicitními hodnotami. Ovládací menu společně s úvodní obrazovkou editoru je zobrazeno na 
+obrázku \ref{image:implemetation:gui:menu}.
+\begin{figure}
+    \centering    
+    \caption{Ovládací menu editoru šablon}
+    \label{image:implemetation:gui:menu}
+\end{figure}
+Formulář pro vyplňování atributu šablony je umístěn ve středu editoru a tvoří jeho nejpodstatnější část. Jelikož má struktura 
+šablony neglobální zóny tři části, skládá se i hlavní okno editoru ze tří oddělených částí. Tyto části přímo odpovídají jednotlivým
+sekcím šablony a nazývají se konfigurace, manifest a nastavení. Jak je vidět na obrázku \ref{image:implemetation:gui:form}, každá
+sekce editoru má ve spodní částí ovládací prvky. Tyto prvky slouží k přidávání a odebírání prvků ze šablony. Část s konfigurací
+umožňuje vybírat z několika různých typů zdrojů, které lze v editoru použít. V druhé části editoru lze přidávat a odebírat
+softwarové balíčky, které mají být v instancí dané šablony nainstalované. Poslední část umožňuje přidávat a odebírat nastavení
+pro definované síťové adaptéry.
+
+Poslední částí editoru je hlavní spodní ovládací panel, který obsahuje dvě funkční tlačítka. V případě použití první tlačítka
+pro validaci se pomocí knihovny vyvolá příslušná funkce a šablona se ověří. Uživatel je o výsledku informován pomocí dialogového
+okna. Druhé tlačítko slouží k uložení šablony do souboru a uživatel je vyzván k zadání jména šablony a adresáře kam se má uložit.
+V obou případech dojde k rekonstrukci datového formátu JSON popsaného v kapitole \ref{chapter:implementation:szones:template},
+který je vyplněn pomocí hodnot specifikovaných uživatelem v editoru. Tato konstrukce šablon je pro uživatele jednodušší, protože
+vždy vygeneruje validní šablonu. V případě manuální tvorby musí uživatel zajistit její validitu.
+\begin{figure}
+    \centering    
+    \caption{Formulář editoru šablon}
+    \label{image:implemetation:gui:form}
+\end{figure}
 \subsection{Interaktivní instalace}
 \label{chapter:implementation:gui:interactive}
+Grafické rozhraní je v nástroji využito ještě v případě, že uživatel spustí příkaz \verb|deploy| s parametrem \textit{interactive}.
+V tomto případě je spuštěna interaktivní instalace a uživateli je opět zobrazeno grafické okno. Toto okno je stejného charakteru
+jako výše popsaný editor a slouží k specifikaci vytvářených zón. Uživatel nyní nebude mít na výběr z načtení šablon, bude muset
+hodnoty zadat ručně. Některé atributy jsou vyplněny implicitními hodnotami a uživatel musí zadat minimálně počáteční heslo 
+uživatele \textit{root} a počátečního systémového uživatele.
