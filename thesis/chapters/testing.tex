@@ -205,17 +205,85 @@ V případě tohoto scénáře se jednalo o zálohy typu UAR, které byly vytvo�
 \section{Měření}
 \label{chapter:measurement}
 V rámci testování nástroje pro podporu automatické správy virtualizačního kontejneru Solaris Zones bylo provedeno měření doby
-běhu některých funkčních prvků. Konkrétně se jednalo o měření doby běhu vytváření a migrace neglobálních zón v rámci popsané
-infrastruktury. V obou případech se přihlíželo k jiným parametrům měření, které jsou detailněji popsány v následujících dvou
-kapitolách. K měření bylo opět použito prostředí definované v kapitole \ref{chapter:testing:environment}.
-\subsection{Vytváření zón}
-\label{chapter:measurement:}
-Prvním objektem měření bylo sledování doby běhu nástroje při vytváření zón v závislosti na počtu vytvářených zón.
+běhu některých funkčních prvků. Konkrétně se jednalo o měření doby běhu vytváření pomocí klonování a migrace neglobálních zón
+v rámci popsané infrastruktury. V obou případech se přihlíželo k jiným parametrům měření, které jsou detailněji popsány v 
+následujících dvou kapitolách. K měření bylo opět použito prostředí definované v kapitole \ref{chapter:testing:environment}.
+\subsection{Výkonnost klonování zón}
+\label{chapter:measurement:creation}
+Prvním objektem měření bylo sledování doby běhu nástroje při vytváření zón v závislosti na počtu vytvářených zón. Zóny byly
+vytvářeny z již existující zóny, která byla umístěna na vzdáleném serveru \textit{shost}. Cílovým serverem byl stejný virtuální počítač
+Technika tvoření zón pomocí klonování byla zvolena z důvodu, aby měření nebylo ovlivněno proměnlivou povahou internetového připojení
+a jinými omezeními fyzického systému. Tyto omezení by se mohli projevit v případě, kdy by zóny byly instalovány z oficiálního repozitáře.
 
-\subsection{}
-\label{chapter:measurement:}
+V případě tohoto měření byla nejprve vytvořena na cílovém serveru zdrojová neglobální zóna, která sloužila jako předloha.
+Měření bylo prováděno pro různé hodnoty parametru počtu zón, jak je naznačeno v tabulce \ref{table:measuremet:creation}. Větší
+hodnoty parametru nebyly testovány kvůli omezení testovacího prostředí. Pro každou hodnotu parametru bylo měření několikrát
+opakováno a výsledek zprůměrován. Přesné hodnoty naměřených časů je možné vidět v tabulce \ref{table:measuremet:creation}. Graficky
+znázorněné jsou na grafu \ref{graph:measuremet:creation}. Červená křivka v tomto grafu znázorňuje sériové vytváření zón pomocí klonování.
 
-\subsection{Závěr testování}
+% 1 19.477s 20.466s 19.916s 19.940s
+% 2 24.800s 24.694s 23.912s 22.833s
+% 4 41.175s 42.044s 40.600s 43.137s
+% 8 43.608s 45.175s 41.897 44.597s
+% 16 73.143s  65.351s 73.945s 72.473s
+% 20 95.522s 175.068s 40.600s 43.137s
+\begin{table}
+  \centering
+  \label{table:measuremet:creation}
+  \caption{Doba běhu vytváření zón v závislosti na počtu vytvářených zón}
+  \begin{tabular}{ r | c c c c c c}
+   Počet zón & 1 & 2 & 4 & 8 & 16 & 20  \\ \hline
+   Doba běhu [s] & 19.94 & 24.05 & 41.73 & 77.72 & 128.95 & \\
+  \end{tabular}
+\end{table}
+
+\begin{figure}
+  \centering
+  \label{graph:measuremet:creation}
+  \caption{Doba běhu vytváření zón v závislosti na počtu vytvářených zón}
+\end{figure}
+
+Z měření je možné vypozorovat TODO.
+\subsection{Různé techniky migrace zón}
+\label{chapter:measurement:migration}
+Druhé měření se zabývá různými technikami způsobu migrace zón a měří dobu jejich trvání. Implementovaný nástroj umožňuje přenášet zóny mezi
+servery pomocí následujících tří technik.
+\begin{itemize}
+ \item Přímá migrace
+ \item Migrace pomocí ZFS archivu
+ \item MIgrace pomocí UAR archivu
+\end{itemize}
+První technika využívá k migraci přímo příkazy souborového systému ZFS a umožňuje přenášet souborový systém bez nutnosti jeho dočasného
+uložení. Migrace pomocí ZFS archivu je podobná přímé technice, ale v průběhu migrace uloží zdrojový souborový systém do archivu,
+který je následně přenesen na cílový stroj. V případě poslední techniky je použit archiv typu UAR, který je standardním zálohovacím
+nástrojem v operačním systému Solaris. I tato technika vyžaduje dočasné uložení vytvořeného archivu. Provedené měření se zaměřilo
+na porovnání doby trvání migrace pomocí jednotlivých technik.
+
+Pro účel tohoto měření byly na lokálním serveru \textit{shost} neglobální zóny, které byly vždy přesouvány na vzdálený
+server \textit{shost1}. Migrace byla několikrát opakována pro každou zmíněnou techniku a počet migrovaných zón. Výsledná
+doba běhu byla v rámci opakování se stejnými hodnotami parametrů zprůměrována. Naměřené hodnoty doby běhu pro různé počty
+migrovaných zón a různé techniky migrace je možné vidět v tabulce \ref{table:measuremet:migration}. Graficky jsou tyto
+hodnoty vyneseny v grafu \ref{graph:measuremet:migration}.
+\begin{table}
+  \centering
+  \label{table:measuremet:migration}
+  \caption{Doba běhu migrace zón v závislosti na použité metodě}
+  \begin{tabular}{ r | c c c c c c}
+   Počet zón & 1 & 2 & 4 & 8 & 16 & 20  \\ \hline
+   Doba běhu (Přímá) [s] & 19.94 & 24.05 & 41.73 & 77.72 & 128.95 & \\
+   Doba běhu (ZFS) [s] & 19.94 & 24.05 & 41.73 & 77.72 & 128.95 & \\
+   Doba běhu (UAR) [s] & 19.94 & 24.05 & 41.73 & 77.72 & 128.95 & \\
+  \end{tabular}
+\end{table}
+
+\begin{figure}
+  \centering
+  \label{graph:measuremet:migration}
+  \caption{Doba běhu migrace zón v závislosti na použité metodě}
+\end{figure}
+
+Z měření je možné vypozorovat TODO.
+\section{Závěr testování}
 \label{chapter:testing:scenario:conclusion}
 Všechny testované scénáře byly prováděny v rámci prostředí definovaném v kapitole \ref{chapter:testing:environment}. Vybrané 
 scénáře použití by měly pokrývat hlavní funkcionalitu nástroje a jejich splnění by mělo vypovídat funkčnosti celého nástroje.
