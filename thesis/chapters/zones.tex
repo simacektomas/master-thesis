@@ -1,17 +1,19 @@
 % Detailed description of Solaris Zones configuration, installation, backup etc.
+\label{chapter:zones}
 V úvodu následující kapitoly jsou popsány základní principy a struktura virtualizační techniky Solaris Zones od
 firmy Oracle. Dále se tato kapitola zabývá popisem datových struktur, postupů a nástrojů, které slouží ke správě a manipulaci
 se zónami. Detailnější popis je věnován především administrátorským rutinám pro konfiguraci, instalaci a zálohování zón.
 \section{Virtualizační technika}
-Oracle Solaris Zones je virtualizační technika, která umožňuje běh více virtuálních strojů na jednom fyzickém stroji. Jak již
+\label{chapter:zones:technique}
+Oracle Solaris Zones je virtualizační technika, která umožňuje běh více virtuálních počítačů na jednom fyzickém stroji. Jak
 bylo zmíněno v kapitole \ref{chapter:solaris}, tato technika je standardní součástí operačního systému Oracle Solaris od 
-verze systému Solaris 10. Aktuální verze je Solaris 11.3 a přináší novou funkcionalitu v podobě podpory starších verzí 
+verze systému Solaris 10. Aktuální verze je Solaris 11.3, která přináší novou funkcionalitu v podobě podpory starších verzí 
 operačního systému Solaris.
 
-Pokud bychom chtěli zařadit Solaris Zones do klasifikace virtuálních strojů popsané v kapitole \ref{section:clasification}, 
-pak bychom jí zařadili do sekce \textit{virtualizace na úrovni OS}. Jinak řečeno, tato technika rozděluje zdroje hostitelského
+Virtualizační techniku Solaris Zones je možné zařadit v klasifikaci virtuálních strojů popsané v kapitole \ref{section:clasification}
+do sekce \textit{virtualizace na úrovni OS}. Jinak řečeno, tato technika rozděluje zdroje hostitelského
 operačního systému jako CPU, paměť nebo I/O zařízení mezi běžící virtuální stroje a zajišťuje izolaci na úrovni procesů,
-souborového systému a sítě. Zónu pak můžeme definovat jako virtuální kontejner běžící v hostitelském operačním systému, který
+souborového systému a sítě. Zónu je možné definovat jako virtuální kontejner běžící v hostitelském operačním systému, který
 využívá zdrojů hostitelského operačního systému a je izolovaný od ostatních zón.
 
 Standardně se po instalaci operačního systému Solaris nachází v systému jedna zóna. Je to vlastní instance operačního systému
@@ -22,23 +24,24 @@ zón. Globální zóna poskytuje globální pohled na celý systém a má přehl
 zón. Její role v rámci Solaris Zones je zásadní a její chyba může zapříčinit pád ostatních zón. Z tohoto důvodu je doporučené
 používat globální zónu pouze pro účely administrace systému a managementu ostatních zón.
 
-Zóny, které jsou spouštěny v rámci globální zóny nazýváme \textbf{neglobální} zóny. Tyto zóny jsou navzájem izolované na
+Zóny, které jsou spouštěny v rámci globální zóny se nazývají \textbf{neglobální} zóny. Tyto zóny jsou navzájem izolované na
 několika úrovních. První úroveň izolace je izolace na úrovni sítě. Každá neglobální zóna může mít svůj vlastní logický síťový
-adaptér, který je vytvořený nad nějakým fyzickým síťovým rozhraním a je dostupný pouze pro konkrétní zónu. Z jiné neglobální
+adaptér, který je vytvořený nad fyzickým síťovým rozhraním a je dostupný pouze pro konkrétní zónu. Z jiné neglobální
 zóny tento adaptér není přístupný. Takto vytvořený síťový adaptér může být spravován pouze z globální zóny a ze zóny, ke které
-byl přiřazen v průběhu jejího vytváření.
+byl přiřazen v průběhu jejího vytváření. Pomocí virtuálního adaptéru je možné zóně nastavovat IP adresu a připojit ji tak
+do konkrétní sítě.
 
-Druhou úrovní izolace zón je souborový systém. Globální zóna spravuje svůj vlastní souborový systém ve kterém se nachází
+Druhou úrovní izolace zón je souborový systém. Globální zóna spravuje svůj vlastní souborový systém, ve kterém se nachází
 standardní adresářová struktura operačních systému typu UNIX. Můžeme v něm nalézt adresář \textit{/etc} sloužící pro globální
 systémovou konfiguraci, adresář \textit{/bin} obsahující uživatelsky spustitelné programy nebo například adresář \textit{/sbin},
 který uchovává programy spustitelné pod privilegovaným uživatelem. Každá neglobální zóna potřebuje pro svůj běh velmi podobné
-prostředí, a proto má svůj vlastní souborový systém, který se nachází někde v hierarchii souborového systému globální zóny.
+prostředí, a proto má svůj vlastní souborový systém, který se nachází v hierarchii souborového systému globální zóny.
 Podle typu zón popsaných v kapitole \ref{chapter:zones:types} může být tento souborový systém částečně sdílený se souborovým
 systémem globální zóny a nebo může obsahovat kompletně nezávislý obraz zóny. Při spouštění zóny pak dojde pomocí příkazu
 \verb|chroot(1)| k přepnutí kořenu souborového systému a zóna pracuje pouze se svojí částí souborového systému. V případě 
-sdílené části souborového systému jsou tyto části připojeny v režimu read-only \cite{virt1}. Tím je zajištěno, že souborové
-systémy jednotlivých zón jsou vzájemně izolované a nemohou se vzájemně ovlivnit. Správu těchto souborových systémů je opět
-možné provádět pouze z konkrétní zóny a nebo ze zóny globální.
+sdílené části souborového systému jsou tyto části připojeny v režimu read-only \cite{cvut:presentation:virt11}. Tím je zajištěno,
+že souborové systémy jednotlivých zón jsou vzájemně izolované a nemohou se vzájemně ovlivnit. Správu těchto souborových systémů
+je opět možné provádět pouze z konkrétní zóny a nebo ze zóny globální.
 
 Mimo izolace na úrovni sítě a souborového systému Solaris Zones implementuje ještě izolaci na úrovni procesů. Každá neglobální
 zóna má svůj plánovač a může spouštět svoje vlastní procesy. Procesy běžící v jedné neglobální zóně nejsou žádným způsobem 
@@ -51,25 +54,23 @@ pouze procesy příslušící dané zóně.
 \subsection{Typy zón}
 \label{chapter:zones:types}
 Jak bylo zmíněno výše, virtualizační technika Solaris Zones umožňuje v rámci jedné globální zóny spouštět mnoho neglobálních
-zón. Každá neglobální zóna má vlastnost zvanou \textit{brand}, která určuje typ neglobální zóny. Tato vlastnost se specifikuje
-při konfiguraci zóny v globální zóny a dle přehledu \cite{oracle:solaris:zones:brands} může typ zóny mít následující hodnoty:
-
+zón. Každá neglobální zóna má vlastnost zvanou \textit{brand}, která určuje její typ. Tato vlastnost se specifikuje
+při konfiguraci zóny v globální zóně a dle přehledu \cite{oracle:solaris:zones:brands} může typ zóny mít následující hodnoty:
 \begin{itemize}
- \item \textit{solaris}
- \item \textit{solaris-kz}
- \item \textit{solaris10}
+ \item \textit{solaris},
+ \item \textit{solaris-kz},
+ \item \textit{solaris10}.
 \end{itemize}
-
-\textit{Brand} neboli typ zóny určuje jakým způsobem se zóna bude po spuštění chovat. Implicitním typem zóny v Solaris Zones
+Typ zóny neboli \textit{brand} určuje jakým způsobem se zóna bude po spuštění chovat. Implicitním typem zóny v Solaris Zones
 je \textit{solaris}, kterému se také jinak přezdívá nativní zóna nebo také tenká zóna. Dalším typem zóny je \textit{solaris-kz},
-kde zkratka za pomlčkou v názvu odpovídá slovnímu spojením kernel zone. Jak název napovídá, tato zóna má vlastní jádro
+kde zkratka za pomlčkou v názvu odpovídá slovnímu spojením kernel zone. Tato zóna má vlastní jádro
 operačního systému a někdy se jí také přezdívá plná nebo tlustá zóna. Posledním typem zón, kterou Solaris Zones umí vytvářet
 je \textit{solaris10}. Hlavním úkolem této zóny je zajišťovat zpětnou kompatibilitu s operačním systémem Solaris 10 a umožňuje
 uvnitř této zóny spouštět aplikace určené pro tento systém.
 
-V následujících podkapitolách jsou podrobněji popsány výše zmíněné typy zón.
+V následujících kapitolách jsou podrobněji popsány výše zmíněné typy zón.
 \subsubsection{Nativní zóna}
-\label{chapter:zones:native}
+\label{chapter:zones:types:native}
 Nativní neboli tenká zóna umožňuje administrátorovi vytvořit zónu, která má sdílené jádro operačního systému s globální zónou.
 Jinými slovy verze jádra operačního systému musí být stejná jako v globální zóně. Tento typ zóny je izolovaný pouze nad svým
 souborovým systémem a nemá standardně nemá k dispozici informace o žádném fyzickém zařízení systému. Souborové systémy ostatních
@@ -100,7 +101,7 @@ Nativní zóna je implicitní typ zóny v Solaris Zones a pokud administrátor n
 vytvořená zóna právě typu \textit{solaris}. Tento typ zóny může být provozován na všech systémech, které podporují operační
 systém Oracle Solaris 11.3 \cite{oracle:solaris:zones:brands}.
 \subsubsection{Kernel zóna}
-\label{chapter:zones:kernel}
+\label{chapter:zones:types:kernel}
 Druhým typem zóny, který virtualizační technika Solaris Zones umožňuje vytvářet, je kernel zóna nebo také tlustá zóna. Tento
 typ zóny obsahuje vlastní jádro operačního systému a na rozdíl od nativní zóny ho nesdílí s globální zónou. Kernel zóna
 tedy může být provozována na jiné verzi jádra než globální zóna. V důsledku toho kernel zóna podporuje funkcionalitu,
@@ -145,7 +146,7 @@ kernel-zone     supported
 
 
 \subsubsection{Branded zóna}
-\label{chapter:zones:branded}
+\label{chapter:zones:types:branded}
 Branded zóny byly vytvořeny pro zpětné zajištění kompatibility se staršími verzemi operačního sytému Solaris. Díky technologii
 \textit{BrandZ} \cite{oracle:solaris:zones:brands} umožňují spouštění aplikací určených pro operační systém Solaris 10 na 
 systému s OS Solaris 11. Aplikace mohou běžet v nezměněné formě v bezpečném prostředí, které je zajištěno neglobální zónou.
