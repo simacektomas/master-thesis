@@ -1,323 +1,344 @@
 % Virtualization chapter about concept, types, examples and implementation
 \label{chapter:virtualization}
+Jak je z názvu kapitoly patrné, hlavním obsahem následující části práce bude virtualizace a to především odvětví, které se
+věnuje výpočetní technice. Virtualizace je velice komplexní téma, a proto je nutné řádně specifikovat z jakého úhlu pohledu
+se se toto téma řeší.
 
-Jak je z názvu kapitoly patrné, hlavním obsahem následující části práce bude virtualizace a to především odvětví, které se věnuje výpočetní technice. Virtualizace je velice komplexní téma, a proto je nutné řádně
-specifikovat z jakého úhlu pohledu se na toto téma koukáme.
-
-Po představení obecného konceptu virtualizace se proto podíváme na několik oblastí využité této technologie v informačních technologiích. Detailní popis všech oblastí virtualizace není předmětem této práce, a proto
-se ve zbytku diplomové práce budeme věnovat pouze tématu virtualizace serverů. I takto specifikované téma ale obsahuje mnoho virtualizačních principů a technik, které si u jednotlivých typů virtuálních strojů představíme.
-Jelikož virtualizace zažívá v dnešní době velký rozvoj, podíváme se také na jednotlivé scénáře nasazení serverů využívající virtualizaci. V poslední části této kapitoly jsou blíže představeny vybrané principy
-virtualizace a základy virtualizace CPU, paměti a I/O zařízení. TODO (uvidíme jestli bude třeba popisovat vše)
-
+Po představení obecného konceptu virtualizace v úvodu této kapitole, je představeno několik oblastí informačních technologií,
+které tuto techniku využívají. Detailní popis všech oblastí virtualizace není předmětem této práce, a proto se zbytek diplomové
+páce věnuje tématu virtualizace serverů. I takto specifikované téma však obsahuje mnoho virtualizačních principů a technik,
+které budou u jednotlivých typů virtuálních strojů představeny. Jelikož virtualizace zažívá v dnešní době velký rozvoj, podíváme
+budou v závěru kapitoly zmíněny některé scénáře nasazení serverů využívající virtualizaci.
 \section{Obecná definice virtualizace}
-\label{section:virtualization:definition}
-
-Než se pustíme do popisu jednotlivých typů virtualizace detailněji, je vhodné definovat tento pojem v obecném slova smyslu. Slovo virtuální je dle \cite{oxford:dictionary:virtual} definováno následovně.
-
+\label{chapter:virtualization:definition}
+Před popisem jednotlivých virtualizačních technik je nutné definovat pojem virtualizace v obecném slova smyslu. Slovo virtuální
+je v anglickém jazyce dle \cite{oxford:dictionary:virtual} definováno následovně.
 \begin{definition}[Virtual]
   \label{definition:virtual}
   Almost or nearly as described, but not completely or according to strict definition.
 \end{definition}
 
 Ve výpočetní technice má tento výraz podle stejného zdroje \cite{oxford:dictionary:virtual} podobnou definici.
-
 \begin{definition}[Virtual in computing]
   \label{definition:virtual_computing}
   Not physically existing as such but made by software to appear to do so.
 \end{definition}
 
-Proces virtualizace ve výpočetní technice tedy můžeme definovat jako vytváření virtuálních prostředků, které skrývají nebo upravují podstatu fyzických prostředků před uživatelem. Tento proces zahrnuje vytváření více
-virtuálních prostředků z jednoho fyzického. Jako příklad této virtualizace můžeme použít virtuální paměť, kdy se virtuální paměť více procesů mapuje do hlavní (fyzické) paměti počítače. Na druhou stranu může jít i o
-vytvoření jednoho virtuálního prostředku z více fyzických prostředků. Příkladem pro tento typ virtualizace může být vytvoření jednoho logického disku z několika fyzických a to například v konfiguraci RAID. 
+Proces virtualizace ve výpočetní technice je možné definovat jako vytváření virtuálních prostředků, které skrývají nebo upravují
+podstatu fyzických prostředků před uživatelem. Tento proces zahrnuje vytváření více virtuálních prostředků z jednoho fyzického prostředku.
+Jako příklad této virtualizace je možné použít paměť počítače, kdy se virtuální paměť více procesů mapuje do hlavní (fyzické)
+paměti počítače. V druhém případě může jít i o vytvoření jednoho virtuálního prostředku z více fyzických prostředků. Příkladem
+pro tento typ virtualizace může být vytvoření jednoho logického disku z několika fyzických a to například v konfiguraci RAID. 
 
-Virtualizace si zcela jistě objevuje i v jiných oblastech, ale nás bude zajímat, jak se tento koncept využívá k virtualizaci výpočetní techniky a konkrétně jeho využití v sítích, operačních systémech a také 
-v počítačovém HW. 
-
+Virtualizace se zcela jistě objevuje i v jiných oblastech, ale pro účely této diplomové práce bude důležité, jak se tento koncept
+využívá k virtualizaci výpočetní techniky a konkrétně jeho využití v sítích, operačních systémech a také v počítačovém HW. 
 \section{Virtualizace ve výpočetní technice}
-\label{section:virtualization_in_it}
+\label{chapter:virtualization:it}
+Virtualizace se v dnešní době stala důležitou součástí návrhu počítačových systémů a zdárně se využívá v mnoha oblastech informačních
+technologií. Velkého rozvoje dosáhla především v oblastech virtualizace operačních systémů, procesorů, sítí a programovacích
+jazyků.
 
-Virtualizace se v dnešní době stala důležitou součástí návrhu počítačových systémů a zdárně se využívá v mnoha oblastech informačních technologií. Velkého rozvoje dosáhla především v oblastech virtualizace operačních
-systémů, procesorů, sítí ale také programovacích jazyků.
+Součástí dnešních moderních řešení počítačových systémů už nejsou jenom samotné počítače. Nezbytnou součástí architektury je
+například počítačová síť, která umožňuje počítačům vzájemně komunikovat. Z pohledu architektury a typů zařízení, která se v ní
+vyskytují, je možné hned najít několik oblastí pro využití virtualizace.
+\subsection{Virtualizace serverů}
+\label{chapter:virtualization:it:servers}
+V dnešní době je pro většinu společností téměř nutností nějakým způsobem využívat výpočetních prostředků. Důvodem pro jejich
+použití může být potřeba ukládání a zálohy obchodních záznamů, poskytování interních nebo externích služeb či provozování
+výpočetně náročné aplikace. Ať tak či onak, hlavním poskytovatelem výpočetního výkonu v dnešních počítačových systémech je
+výpočetní server.
 
-Pokud se podíváme na architekturu dnešních počítačových systémů z pohledu struktury a typů zařízení, které se v ní vyskytují, můžeme najít hned několik oblastí ve kterých se virtualizace využívá. 
+Klasický výpočetní server je fyzický počítač (HW), který poskytuje své výpočetní prostředky řídícímu programu. Řídícím programem
+se klasicky myslí operační systém. Servery můžeme rozdělit dle typu běžících uživatelských programů v operačním systému.
+Konkrétně se jedná o aplikační, souborové nebo výpočetní servery, které se specializují na poskytování různých druhů služeb,
+jak je patrné z jejich názvu.
 
-  \subsection{Virtualizace serverů}
-  \label{subsection:server_virtualization}
-  
-  V dnešní době je pro většinu společností téměř nutností nějakým způsobem využívat výpočetních prostředků. Důvod pro jejich použití může být potřeba ukládání a zálohy obchodních záznamů, poskytování interních nebo
-  externích služeb či běh výpočetně náročné aplikace. Ať tak či onak, hlavním poskytovatelem výpočetního výkonu v dnešních počítačových systémech je výpočetní server.
-  
-  Klasický výpočetní server je fyzický počítač (HW), který poskytuje své výpočetní prostředky řídícímu programu. Řídícím programem se klasicky myslí operační systém. Druhy serverů můžeme rozdělit dle typu běžících
-  uživatelských programů v operačním systému. Konkrétně pak hovoříme o aplikačních, souborových nebo výpočetních serverech, které se specializují na poskytování různých druhů služeb, jak je patrné z jejich názvu.
-  
-  Proces virtualizace serverů spočívá v přenesení operačního systému a jeho služeb do virtuálního prostředí, které napodobuje chování HW ale není závislé na nižších vrstvách. Dochází tedy ke zvýšení přenositelnosti a
-  možnosti současného běhu více instancí OS na jednom fyzickém stroji. Vytváření toho virtuálního prostředí je zajištěno speciální softwarovou vrstvou zvanou virtualizační monitor, hraje roli řídícího programu a
-  pracuje mezi HW a jednotlivými instancemi OS. Virtualizační monitor nebo také VMM je detailněji popsán v kapitole \ref{section:vmm}, kde jsou představeny jeho hlavní funkce a jednotlivé typy.
-  
-  Počítačové systémy využívající virtualizace se skládají z dalšího typu serverů tzv. virtualizačních serverů, které slouží jako zdroj fyzických prostředků pro instance OS a jejich uživatelské programy. Tyto servery
-  se vyznačují především velkým množstvím operační paměti a vysokým výpočetním výkonem, který je díky VMM rozdělován mezi hostované operační systémy. Výhody nasazení virtuální infrastruktury jsou dále popsány v
-  kapitole \ref{section:vm_deployment}.
+Proces virtualizace serverů spočívá v přenesení operačního systému a jeho služeb do virtuálního prostředí, které napodobuje
+chování HW, ale není závislé na nižších vrstvách. Dochází tedy ke zvýšení přenositelnosti a možnosti současného běhu více 
+instancí OS na jednom fyzickém stroji. Vytváření tohoto virtuálního prostředí je zajištěno speciální softwarovou vrstvou, která
+se ve většině případů nazývá virtualizační monitor. Tento software hraje roli řídícího programu a pracuje mezi HW a jednotlivými
+instancemi operačních systémů. Virtualizační monitor nebo také VMM je detailněji popsán v kapitole \ref{chapter:virtualization:vmm},
+kde jsou představeny jeho hlavní funkce a jednotlivé typy.
 
-  Tato práce se zaměřuje právě na techniky virtualizace, které jsou v dnešní době aktuální a využívají se k virtualizaci serverů. Práce podrobně představuje virtualizační techniku Solaris Zones of firmy Oracle,
-  která slouží pro vyváření virtuálních strojů (zón), které sdílejí jedno jádro OS.
+Počítačové systémy využívající virtualizace se skládají z dalšího typu serverů, tzv. virtualizačních serverů, které slouží
+jako zdroj fyzických prostředků pro instance operačních systémů a jejich uživatelské programy. Tyto servery se vyznačují 
+především velkým množstvím operační paměti a vysokým výpočetním výkonem, který je díky VMM rozdělován mezi operační systémy.
+Výhody nasazení virtuální infrastruktury jsou popsány v kapitole \ref{chapter:virtualization:deployment}.
 
-  \subsection{Využití virtualizace v sítích}
-  \label{subsection:network_virtualization}
+Tato práce se zaměřuje právě na techniky virtualizace, které jsou v dnešní době aktuální a využívají se k virtualizaci serverů.
+Práce podrobně představuje virtualizační techniku Solaris Zones od firmy Oracle, která slouží pro vyváření virtuálních strojů
+(zón) v rámci jedné instance operačního systému Solaris.
+\subsection{Využití virtualizace v sítích}
+\label{chapter:virtualization:it:networks}
+Oblast komunikačních sítí je další neméně významnou oblastí pro využití virtualizačních technik. Bez síťové infrastruktury by
+mezi sebou počítače nemohli komunikovat, a tudíž by jejich využití nemělo takový potenciál. V dnešní době je tato infrastruktura
+značně rozsáhlá a to v některých případech ztěžuje její správu. S virtualizací přichází do sítí možnost dynamické konfigurace
+sítě, což umožňuje rychle měnit její topologii. To vše lze uskutečnit z jednoho místa a bez nutnosti zasahovat do fyzických
+zařízení sítě.
 
-  Oblast komunikačních sítí je další neméně významnou oblastí pro využití virtualizačních technik. Bez síťové infrastruktury by mezi sebou počítače nemohli komunikovat, a tudíž by jejich využití nemělo takový potenciál.
-  V dnešní době je tato infrastruktura značně rozsáhlá a to v některých případech ztěžuje její správu. S virtualizací přichází do sítí možnost dynamické konfigurace sítě a to i její topologie. To vše lze uskutečnit z 
-  jednoho místa a bez nutnosti zasahovat do fyzických zařízení sítě.
+Virtualizace sítí je koncept, který se v mnoha ohledech podobá virtualizaci serverů. V případě serverů, se VMM stará o reprodukci
+vlastností fyzických prostředků v SW. Podobně je to tomu i v případě virtualizace sítí, kde existuje funkční ekvivalent VMM, který
+reprodukuje síťové komponenty v SW. Administrátor má tak možnost za chodu vytvářet virtuální síťové komponenty, jako je 
+\textit{switch}, \textit{router}, \textit{firewall} nebo \textit{load balancer}. To vše v rámci desítek sekund. Tento síťový
+VMM také umožňuje spravovat nové virtuální sítě, které zahrnují všechny standardní síťové služby a kvalitu služeb 
+\cite{article:vmware:network_virtualization}.
+\subsection{Virtualizace desktopu}
+\label{chapter:virtualization:it:desktop}
+Společně s virtualizací serverů a sítí je virtualizace desktopu posledním typem virtualizace, která stojí za zmínku. Pojem
+desktop značí klasický stolní počítač, který má obrazovku, myš a klávesnici.
 
-  Virtualizace sítí je koncept, který se v mnoha ohledech podobná virtualizaci serverů. V případě serverů, se VMM stará o reprodukci vlastností fyzických prostředků v SW. Podobně je to tomu i v případě virtualizace sítí,
-  kde existuje funkční ekvivalent VMM, který reprodukuje síťové komponenty v SW. Administrátor má tak možnost za chodu vytvářet virtuální síťové komponenty jako je switch, router, firewall nebo load balancer a to vše v
-  rámci desítek sekund. Tento síťový VMM také umožňuje spravovat nové virtuální sítě, které zahrnují všechny standardní síťové služby a kvalitu služeb.\cite{article:vmware:network_virtualization}
-
-  \subsection{Virtualizace desktopu}
-  \label{subsection:desktop_virtualization}
-  
-  Společně s virtualizací serverů a sítí je virtualizace desktopu posledním typem virtualizace, která stojí za zmínku. Pod pojmem desktop si představme klasický stolní počítač, který má obrazovku, myš a klávesnici.
-
-  S desktopem je klasicky spojeno grafické uživatelské prostředí, pomocí kterého uživatel ovládá počítač, instaluje aplikace nebo přizpůsobuje prostředí. Bez využití virtualizace nebo další podpůrných systémů jsou 
-  všechny informace o uživatelském nastavení uloženy na desktopu a uživatel se k nim dostane pouze z toho samého stroje. Virtualizací desktopu je rozuměno oddělení uživatelského prostředí a nastavení od fyzického
-  stroje. Jednou z možností je přesunutí tohoto prostředí do virtuálního stroje, který je centrálně spravován a spouštěn, když uživatel potřebuje. Tento koncept umožňuje uživateli přístup ke svému prostředí téměř
-  bez ohledu na lokalitu nebo platformu. Mezi další benefity zavedení virtualizovaného desktopu patří zvýšení bezpečnosti a zjednodušení správy celého systému. Tyto výhody pramení především z centralizaci tohoto
-  řešení.
-  
-
-  
+S desktopem je klasicky spojeno grafické uživatelské prostředí, pomocí kterého uživatel ovládá počítač, instaluje aplikace
+nebo přizpůsobuje prostředí. Bez využití virtualizace nebo další podpůrných systémů jsou všechny informace o uživatelském
+nastavení uloženy lokálně na počítači a uživatel se k nim dostane pouze z konkrétního stroje. Virtualizací desktopu je rozuměno
+oddělení uživatelského prostředí a nastavení od lokálního počítače. Jednou z možností je přesunutí tohoto prostředí do virtuálního
+stroje, který je centrálně spravován a spouštěn v případě potřeby uživatele. Tento koncept umožňuje uživateli přístup ke svému
+prostředí téměř bez ohledu na lokalitu nebo platformu. Mezi další benefity zavedení virtualizovaného desktopu patří zvýšení
+bezpečnosti a zjednodušení správy celého systému. Tyto výhody pramení především z centralizaci tohoto řešení.  
 \section{Virtuální stroj}
-\label{section:virtual_machine}
+\label{chapter:virtualization:virtual_machine}
+V kapitole \ref{chapter:virtualization:definition} je pojem virtualizace definován jako virtualizace fyzických (HW) prostředků.
+Virtualizace celého systému nebo komponenty na určité vrstvě architektury počítače znamená mapování jeho rozhraní na rozhraní
+nižší vrstvy. Mezi tyto komponenty může patřit procesor, paměť nebo I/O zařízení. Způsob mapování může reprezentovat komponentu
+počítače v jiném smyslu než fyzicky existuje.
 
-V části \ref{section:virtualization:definition} jsme si definovali virtualizaci obecně jako virtualizaci fyzických (HW) prostředků.  Virtualizace systému nebo komponenty jako je procesor, paměť nebo I/O zařízení na určité vrstvě
-architektury počítače znamená mapování jeho rozhraní na rozhraní nižší vrstvy způsobem, který může reprezentovat v jiném smyslu než fyzicky existuje.
+Tento koncept virtualizace nemusí být aplikován pouze na jednotlivé subsystémy jako například disky, ale může být obecně 
+použit na celý systém. Pro tento účel je zavedena speciální SW vrstva, která operuje mezi konkrétními vrstvami počítačového
+systému, aby bylo dosaženo požadované funkcionality. Tato vrstva poskytuje vyšším vrstvám rozhraní a všechny prostředky nižší
+vrstvy tak, že vyšší vrstvy nemají o existenci této vrstvy ponětí a přitom může docházet k virtualizaci celého systému. Tímto
+způsobem může virtuální stroj obejít kompatibilitu některých komponent fyzického stroje nebo omezení HW prostředků.
 
-Tento koncept virtualizace nemusí být aplikován pouze na jednotlivé subsystémy jako například disky, ale může být zobecněn na celý systém. Pro tento účel je zavedena speciální SW vrstva, která operuje mezi konkrétními
-vrstvami počítačového systému, aby bylo dosaženo požadované architektury. Tato vrstva poskytuje vyšším vrstvám rozhraní a všechny prostředky nižší vrstvy tak, že vyšší vrstvy nemají o existenci této vrstvy ponětí a přitom
-dochází k virtualizaci celého systému. Tímto způsobem může virtuální stroj obejít kompatibilitu některých komponent fyzického stroje nebo omezení HW prostředků.
+Pro účely klasifikace virtuálních strojů je v následující kapitole představena architektura klasického počítačového systému.
+\subsection{Architektura počítačového systému}
+\label{chapter:virtualization:virtual_machine:computer_architecture}
+Jelikož virtuální stroje operují na rozhraních jednotlivých vrstev architektury počítačového systému, je nutné se řádně tyto 
+vrstvy řádně představit. Tyto vrstvy reprezentují několik úrovní abstrakce v počítačovém systému, které mají za úkol odstínit
+složité implementační detaily některých rozhraní. Čím výše se daná vrstva v hierarchii nachází, tím abstraktnější a jednodušší
+funkce poskytuje.
 
-Než budeme pokračovat s klasifikací virtuálních strojů, představíme si architekturu klasického počítačového systému.
+Každá z vrstev má dobře definované rozhraní, což umožňuje vývoj vyšších vrstev nezávisle na implementaci nižších vrstev,
+pokud tyto vrstvy budou dodržovat definované rozhraní. Pro příklad můžou být uvedeni výrobci Intel a AMD, kteří vyrábějí
+mikroprocesory implementující instrukční sadu IA-32 (x86) \cite{book:iee:vm_architecture}. Zatímco nezávisle na vývoji
+těchto procesorů můžou vývojáři softwaru vyvíjet aplikace, které se kompilují do této instrukční sady. Takto zkompilovaný
+program pak může být bez problému spuštěn na každém počítači s procesorem architektury IA-32.
 
-  \subsection{Architektura počítačového systému}
-  \label{subsection:computer_architecture}
-  
-  Jelikož implementace virtuální strojů operují na rozhraních jednotlivých vrstev architektury počítačového systému, je nutné se řádně s těmito vrstvami seznámit. Tyto vrstvy reprezentují několik úrovní abstrakce v
-  počítačovém systému, které mají za úkol odstínit složité implementační detaily některých rozhraní. Čím výše se v této hierarchii nacházíme, tím abstraktnější a jednodušší funkce máme k dispozici.
-  
-  Každá z vrstev má dobře definované rozhraní, což umožňuje vývoj vyšších vrstev nezávisle na implementaci nižších vrstev, pokud tyto vrstvy budou dodržovat toto rozhraní. Jako příklad si můžeme vzít výrobce procesorů
-  Intel a AMD vyrábějící mikroprocesory, které implementují instrukční sadu IA-32 (x86) \cite{book:iee:vm_architecture}. Zatímco nezávisle na vývoji těchto procesorů můžou vývojáři softwaru vyvíjet aplikace, které
-  se kompilují do této instrukční sady. Takto zkompilovaný program pak může být bez problému spuštěn na každém počítači s procesorem architektury IA-32.
-  
-  Na druhou stranu komponenty navržené pro jeden typ rozhraní nebudou fungovat s rozhraním jiného typu. Jednoduše řečeno program sestavený pomocí instrukcí x86 se nebude dát spustit na počítači s procesorem architektury
-  SPARC. Nicméně díky některým technikám virtualizace se tohoto dá dosáhnout. 
-  
-  Obrázek \ref{figure:computer_architecture} ukazuje hierarchii počítačového systému a některé jeho SW i HW vrstvy. Dále jsou na obrázku vyznačeny následující rozhraní.
-  
-  \begin{itemize}
-   \item Instruction set architecture - ISA
-   \item Application binary interface - ABI
-   \item Application programming interface - API
-  \end{itemize}
+Na druhou stranu komponenty navržené pro jeden typ rozhraní nebudou fungovat s rozhraním jiného typu. Jednoduše řečeno program
+sestavený pomocí instrukcí x86 se nebude dát spustit na počítači s procesorem architektury SPARC. Nicméně díky některým technikám
+virtualizace je tohoto přenosu možno dosáhnout. 
 
-  Tyto tři rozhraní jasně definují rozmezí mezi HW a SW a určují architekturu počítačového systému. Uživatelské programy jsou zcela odkázány na funkcionalitu, která je jim poskytnuta kombinací těchto rozhraní.
-
-    \begin{figure}
-      \centering
-      \includegraphics[scale=0.3]{assets/figures/ca.png}
-      \caption[Architektura počítačového systému]{Architektura počítačového systému \cite{book:iee:vm_architecture}}
-      \label{figure:computer_architecture}
-    \end{figure}
-
-
-    \subsubsection*{Instruction set architecture}
-    \label{subsubsection:isa}
-    
-    Instrukční sada neboli ISA definuje rozhraní mezi HW a SW. Rozdělit jí můžeme na dvě části a to na systémovou a uživatelskou instrukční sadu. Rozhraní s číslem 4 na obrázku \ref{figure:computer_architecture}
-    reprezentuje uživatelskou instrukční sadu, která obsahuje instrukce dostupné pro všechny uživatelské programy i knihovny. Rozhraní s číslem 3 na stejném obrázku pak reprezentuje systémovou instrukční sadu a zahrnuje
-    instrukce dostupné pouze operačnímu systému. Tyto instrukce je možné vykonávat pouze v privilegovaném režimu procesoru a jsou zodpovědné za správu HW prostředků.
-
-    \subsubsection*{Application binary interface}
-    \label{subsubsection:abi}
-    
-    Fyzické prostředky a zařízení dostupné v fyzickém systému spravuje operační systém, který k nim poskytuje přístup ostatním programům skrze svoje rozhraní. Toto rozhraní (číslo 2) se nazývá systémové a společně s uživatelskou
-    částí (číslo 4) tvoří tzv. \textit{application binary interface} neboli ABI. Toto rozhraní tedy neposkytuje aplikačním programům přímý přístup k HW prostředkům, ale zprostředkovává je skrze systémová volání.
-    Operační systém tak 
-
-    \subsubsection*{Application programming interface}
-    \label{subsubsection:api}
-    
-    Důležitou vrstvou softwarového vybavení počítače jsou uživatelské knihovny. Tyto knihovny skrývají implementační detaily systémových volání a poskytují rozhraní (číslo 1) pro vyšší programovací jazyky
-    jako je C nebo C++. Společně s uživatelskou částí instrukční sady (číslo 4) tvoří rozhraní nazývané \textit{application programming interface} neboli API. Uživatelské programy pak mohou využívat tohoto rozhraní,
-    což přináší výhody v přenositelnosti na systémy, které nabízejí stejné API .
-
+Obrázek \ref{figure:computer_architecture} ukazuje hierarchii počítačového systému a některé jeho SW i HW vrstvy. Dále jsou
+na obrázku vyznačeny následující rozhraní.
+\begin{itemize}
+  \item Instruction set architecture - \textbf{ISA}
+  \item Application binary interface - \textbf{ABI}
+  \item Application programming interface - \textbf{API}
+\end{itemize}
+Tyto tři rozhraní jasně definují rozmezí mezi HW a SW a určují architekturu počítačového systému. Uživatelské programy jsou
+zcela odkázány na funkcionalitu, která je jim poskytnuta kombinací těchto rozhraní.
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.3]{assets/png/ca.png}
+  \caption[Architektura počítačového systému]{Architektura počítačového systému \cite{book:iee:vm_architecture}}
+  \label{figure:computer_architecture}
+\end{figure}
+\subsubsection{Instruction set architecture}
+\label{chapter:virtualization:virtual_machine:computer_architecture:isa}
+Instrukční sada neboli \textbf{ISA} definuje rozhraní mezi HW a SW. Rozdělit jí můžeme na dvě části a to na systémovou a
+uživatelskou instrukční sadu. Rozhraní s číslem 4 na obrázku \ref{figure:computer_architecture} reprezentuje uživatelskou
+instrukční sady, která obsahuje instrukce dostupné pro všechny uživatelské programy i knihovny. Rozhraní s číslem 3 na stejném
+obrázku pak reprezentuje systémovou instrukční sadu a zahrnuje instrukce dostupné pouze operačnímu systému. Tyto instrukce je
+možné vykonávat pouze v privilegovaném režimu procesoru a jsou zodpovědné za správu HW prostředků.
+\subsubsection{Application binary interface}
+\label{chapter:virtualization:virtual_machine:computer_architecture:abi}
+Fyzické prostředky a zařízení dostupné ve fyzickém systému spravuje operační systém, který k nim poskytuje přístup ostatním
+programům skrze svoje rozhraní. Toto rozhraní (číslo 2) se nazývá systémové a společně s uživatelskou částí (číslo 4) tvoří
+tzv. \textit{application binary interface} neboli \textbf{ABI}. Toto rozhraní tedy neposkytuje aplikačním programům přímý
+přístup k HW prostředkům, ale zprostředkovává je skrze systémová volání. Operační systém tak má může udržovat kompletní přehled
+o využití jednotlivých prostředků.
+\subsubsection{Application programming interface}
+\label{chapter:virtualization:virtual_machine:computer_architecture:api}
+Důležitou vrstvou softwarového vybavení počítače jsou uživatelské knihovny. Tyto knihovny skrývají implementační detaily
+systémových volání a poskytují rozhraní (číslo 1) pro vyšší programovací jazyky jako je C nebo C++. Společně s uživatelskou
+částí instrukční sady (číslo 4) tvoří rozhraní nazývané \textit{application programming interface} neboli \textbf{API}.
+Uživatelské programy pak mohou využívat tohoto rozhraní, což přináší výhody v přenositelnosti na systémy, které nabízejí
+stejné API .
 \section{Klasifikace virtuálních strojů}
-\label{section:clasification}
-
-Abychom mohli rozlišit jednotlivé typy virtuálních strojů, musíme se podívat v jaké části počítačové architektury operují a tedy jakou vrstvu virtualizují. V části \ref{subsection:computer_architecture} jsme definovali
-tři dobře definované rozhraní počítačového systému a je logické, že virtualizační software bude virtualizovat nějakou z nich. Dle rozdělení v \cite{book:iee:vm_architecture} můžeme virtuální stroje obecně rozdělit na
-následující dva druhy v závislosti na tom, které rozhraní počítačové architektury virtualizují.
-
+\label{chapter:virtualization:clasification}
+Aby bylo možné rozlišit jednotlivé typy virtuálních strojů, je nutné se podívat v jaké části počítačové architektury operují
+a tedy jakou vrstvu virtualizují. V části \ref{chapter:virtualization:virtual_machine:computer_architecture} byly představeny 
+tři dobře definovaná rozhraní počítačového systému a je logické, že virtualizační software bude virtualizovat nějaké z nich.
+Dle rozdělení v \cite{book:iee:vm_architecture} můžeme virtuální stroje obecně rozdělit na následující dva druhy v závislosti
+na tom, které rozhraní počítačové architektury virtualizují.
 \begin{itemize}
   \item \textit{Systémové virtuální stroje}
   \item \textit{Virtuální stroje v procesech}
 \end{itemize}
+Jak může být z názvu patrné, \textit{systémové virtuální stroje} poskytují kompletní systémové prostředí, které podporuje
+operační systém a jeho aplikace. Operační systém využívá ke svému běhu \textbf{ISA} fyzického systému. Systémový virtuální
+stroj tedy musí poskytovat operačnímu systému stejné rozhraní jako OS očekává. Tímto způsobem nabízí operačnímu systému
+přístup k HW prostředkům fyzického stroje a součástí tohoto způsobu zprostředkování může být i virtualizace těchto prostředků.
 
-Jak může být z názvu patrné, \textit{systémové virtuální stroje} poskytují kompletní systémové prostředí, které podporuje operační systém a jeho aplikace. Operační systém využívá ke svému běhu ISA systému. Systémový virtuální
-stroj tedy musí poskytovat operačnímu systému stejné rozhraní jako OS očekává. Nabízí tak operačnímu systému přístup k HW prostředkům fyzického stroje, které mohou být virtualizovány. 
-
-Na druhou stranu procesy využívají ke svému běhu mimo uživatelské části ISA také ABI nebo v případě vyšších programovacích jazyků API. Virtuální stroje, které se specializují na virtualizaci těchto dvou systémových 
-rozhraní, budeme nazývat \textit{virtuální stroje v procesech}. Hlavním účelem tohoto typu virtuálního stroje je podpora jednoho procesu. Její činnost začíná v okamžiku vytvoření procesu a končí v okamžiku jeho ukončení.
+Na druhou stranu procesy využívají ke svému běhu mimo uživatelské části \textbf{ISA} také \textbf{ABI} nebo v případě vyšších
+programovacích jazyků \textbf{API}. Virtuální stroje, které se specializují na virtualizaci těchto dvou systémových 
+rozhraní, se nazývají \textit{virtuální stroje v procesech}. Hlavním účelem tohoto typu virtuálního stroje je podpora jednoho
+procesu. Její činnost začíná v okamžiku vytvoření procesu a končí v okamžiku jeho ukončení.
 
 V následujících podkapitolách jsou popsané jednotlivé typy virtuálních strojů. Tato klasifikace byla převzata z \cite{book:iee:vm_architecture} a upravena podle požadavků práce.
+\subsection{Terminologie}
+\label{chapter:virtualization:clasification:terms}
+Pro další účely diplomové práce zde budou definovány některé pojmy, které se v architektuře počítačového systému s virtuálním
+strojem vyskytují. 
 
-  \subsection*{Terminologie}
-  
-  Pro účely dalších částí diplomové práce si definujeme některé pojmy, které se v architektuře počítačového systému s virtuálním strojem vyskytují. 
-  
-  Po přidání virtualizačního SW mezi nějaké vrstvy počítačového systému nám vzniknou tři části. Tuto skutečnost popisuje obrázek \ref{figure:computer_architecture}, který zároveň ukazuje na jaké místo zaujímá virtualizační
-  software v případě systémových virtuální strojů (b) a virtuálních strojů v procesech (a).
-  
-  Softwarová vrstvy, které se v hierarchii počítačového systému nachází nad virtualizačním SW (je jim poskytováno rozhraní), se souhrnně nazývají \textit{guest}. V případě systémových virtuálních strojů se dá také 
-  mluvit o \textit{guest OS}, což je operační systém běžící ve virtuální prostředí.
-  
-  Na druhou stranu vrstvy poskytující rozhraní virtualizačnímu SW neboli se nacházejí níže v hierarchii, nazývame \textit{host}. 
-  
-  Poslední vrstva, která zbývá popsat je samotný virtualizační SW. V případě systémových virtuálních strojů se typicky nazývá virtualizační monitor neboli VMM. Pro virtualizační SW v druhém typu virtuálních strojů se
-  používá název \textit{runtime}. 
-  
-  Jak je naznačeno na obrázku \ref{figure:computer_architecture}, typ virtuálního stroje je jasně určen strukturou hosta a virtualizačního SW. Systémové virtuální stroje se tedy skládají z HW vrstvy a virtualizačního
-  monitoru. V případě virtuálních strojů v procesech se vrstva hosta skládá z HW a hostitelského operačního systému, ve kterém je spouštěn \textit{runtime}.
+Po přidání virtualizačního SW mezi nějaké dvě vrstvy počítačového systému vzniknou tři oddělené části. Tuto skutečnost popisuje
+obrázek \ref{figure:system_vs_proces}, který zároveň ukazuje cílové umístění virtualizačního software v případě systémových
+virtuální strojů (b) a virtuálních strojů v procesech (a). Softwarové vrstvy, které se v hierarchii počítačového systému nachází
+nad virtualizačním SW (je jim poskytováno rozhraní), se souhrnně nazývají \textit{guest}. V případě systémových virtuálních strojů
+se dá také mluvit o \textit{guest OS}, což je operační systém běžící ve virtuální prostředí. Vrstvy nacházející se pod vritualizačním
+SW se nazývají \textit{host}. Tyto vrstvy poskytují rozhraní virtualizačnímu SW, který ho zprostředkovává vyšším vrstvám hierarchie.
 
-  \begin{figure}
-    \centering
-    \includegraphics[scale=0.3]{assets/figures/procesvm_vs_sysvm.png}
-    \caption[Virtuální stroj v procesu versus systémové virtuální stroje ]{Virtuální stroje v procesech (a) versus systémové virtuální stroje (b) \cite{book:iee:vm_architecture}}
-    \label{figure:computer_architecture}
-  \end{figure}
-  
-  
-  \subsection{Virtuální stroje v procesech}
-  \label{subsection:proces_vm}
-  
-  Jak již bylo zmíněno tento typ virtuálního stroje poskytuje uživatelským programům virtuální ABI nebo API. Různé implementace těchto virtuálních strojů si kladou za cíl splnění různých kritérií. Některé se snaží
-  zajistit přenositelnost mezi různými počítačovými platformami a jiné se snaží optimalizovat instrukce uživatelského programu. Následovat bude stručný výčet jednotlivých typů virtuálních strojů, které spadají 
-  do této kategorie.      
-  
-    \subsubsection*{Virtualizace na úrovni OS}
-    \label{subsubsection:os_level_virtualization}
-    
-    Pro představení prvního zástupce z této rodiny virtuálních strojů nemusíme chodit daleko. Jako virtuální stroj můžeme totiž považovat operační systémy, které umožňují současný běh více procesů najednou. Operační
-    systém poskytuje každému procesu iluzi, že na systému běží sám. Z tohoto důvodu je nutné sdílet fyzickou paměť, CPU a jiná HW zařízení mezi běžícími procesy. Operační systém poskytne každému procesu stejně velký
-    izolovaný virtuální adresní prostor, který je mapován do fyzické paměti počítače. Procesor se sdílí mezi procesy tak, že dochází k tzv .přepínání kontextu, což znamená uložení všech registrů a načtení registrů
-    procesu, který má přidělený procesor. Přístup k ostatním HW zařízením systému je řízen skrze systémové volání operačního systému. Konečně můžeme říct, že OS poskytuje virtuální prostředí pro každý proces v systému.
-    
-    TODO partišnování zdrojů operačního systému.
-    
-    \subsubsection*{Emulátory a překladače}
-    \label{subsubsection:emulation}
-    
-    Jak bylo zmíněno výše, některé implementace těchto virtuální strojů jsou zaměřeny na přenositelnost programů mezi jednotlivými počítačovými architekturami. Tyto virtuální stroje zpracovávají instrukce jiné instrukční
-    sady než vykonává systém hosta a poté je dynamicky překládají do instrukční sady hosta. Konkrétní implementace by mohla například umožňovat vykonávat programy zkompilované pro architekturu IA-32 na systému s
-    architekturou SPARC. Těmto virtuálním strojům říkáme překladače nebo emulátory, jelikož emulují prostředí dostupné na jiných architekturách a mapují ho do architektury hosta.
-    
-    Techniky překladu instrukcí jsou detailněji popsaný v kapitole \ref{subsubsection:isa_emulation}. Jen pro ukázku si zmíníme techniku interpretace, která jednotlivé instrukce nejprve načte, dekóduje a poté vykoná
-    ekvivalentní instrukci nebo sadu instrukcí pomocí instrukční sady hosta.
-    
-    \subsubsection*{Virtuální stroje v HLL}
-    \label{subsubsection:hll_vm}
-    
-    Virtuální stroje napsané ve vyšších programovacích jazycích přímo navazují na výše popsané téma přenositelnosti mezi platformami. Nevýhoda emulátorů spočívá ve faktu, že se specializují na překlad jedné instrukční sady
-    do druhé. Pokud bychom tedy chtěli docílit přenositelnosti mezi všemi platformami, museli bychom vytvořit emulátory pro každou kombinaci instrukčních sad. Jelikož je toto řešení poněkud složité a náročné na
-    implementaci, můžeme k vytvoření virtuálního stroje použít právě vyšší programovací jazyky. Virtuální stroj napsaný v nějakém HLL se tedy neopírá o konkrétní architekturu, ale o samotný programovací jazyk a jeho výhody.
-    Takto vytvořený virtuální stroj přijímá vlastní jazyk a využívá konkrétního HLL k jeho provádění. Takto je zajištěna přenositelnost programů, které jsou napsané v jazyce virtuálního stroje, mezi systémy, nakterých jsou dostupné
-    potřebné knihovny a samotná implementace virtuálního stroje.
-    
-    Nejznámějším zástupcem této kategorie virtuálních strojů je Java virtual machine od společnosti Sun Microsystems. Tento virtuální stroj provádí instrukce vyššího programovacího jazyka zvaného Java a dnes existuje mnoho
-    implementací v nejrůznějších programovacích jazycích. Implementace HotSpot, která je napsaná v jazyce C++ a kterou v dnešní době vyvíjí a udržuje společnost Oracle, je pravděpodobně neznámější a nejvíce využívanou
-    implementací JVM.
-    
-  \subsection{Systémové virtuální stroje}
-  \label{subsection:system_vm}
-  
-  Druhým typem virtuálních strojů jsou tzv. \textit{systémové virtuální stroje}, které kompletně virtuálizují celou HW platformu. Virtualizační software je většinou umístěn hned na HW počítače a jeho hlavním úkolem je
-  virtualizovat ISA. Tímto způsobem \textit{systémové virtuální stroje} vytvářejí virtuální prostředí pro běh operačního systému a jeho aplikací a dokonce umožňují současný běh různých operačních systémů na jednom HW stroji.
-  
-    \subsubsection*{Virtuální počítače}
-    \label{subsubsection:virtual_computer}
-    
-    Nejznámějším a pravděpodobně nejpoužívanějším zástupcem z této kategorie virtuálních strojů jsou tzv. \textit{virtuální počítače}. Tento typ virtuálního stroje umožňuje současný běh více operačních systému na jednom
-    fyzickém počítači. Všechny operační systémy musí využívat instrukce stejné instrukční sady, kterou vykonává host. Jinými slovy tento typ virtuálního stroje žádným způsobem nepřekládá instrukce do jiné instrukční sady.
-    
-    Dle umístnění virtualizačního monitoru v architektuře počítače, můžeme rozdělit tento typ virtuálního stroje do dvou hlavních kategorií. 
-    
-    \begin{itemize}
-     \item Nativní VMM
-     \item Hosted VMM
-    \end{itemize}
+Poslední vrstvou systému je samotný virtualizační SW. V případě systémových virtuálních strojů se standardně nazývá virtualizační m
+onitor neboli VMM. Pro virtualizační SW v druhém typu virtuálních strojů se používá název \textit{runtime}. Tato vrstva tedy
+virtualizuje prostředky nižších vrstev a prezentuje tak povahu systému jiným způsobem. 
 
-    Hlavní rozdíl mezi těmito dvěma typy spočívá v umístění virtualizačního monitoru v architektuře počítače. Zatímco \textit{nativní VMM} má přímou kontrolu nad HW počítače, \textit{hosted VMM} běží uvnitř operačního systému,
-    který spravuje HW prostředky. Oba tyto typy VMM jsou detailně popsány v kapitole \ref{section:vmm}.
-    
-    \subsubsection*{Virtualizace celého systému}
-    \label{subsubsection:whole_system_virtualization}
-    
-    V případě, kdy operační systém a jeho aplikace používají stejnou instrukční sadu jako nižší HW vrstvy, má virtuálizační monitor za úkol spravovat přístup k HW a sdílet ho mezi virtuální počítače. Pokud bychom chtěli
-    ve virtuální stroji spouštět operační systém používající odlišnou instrukční sadu, musíme zajistit emulaci prostředí. Jinými slovy VMM musí vytvořit virtuální prostředí pro konkrétní OS tak, aby si OS myslel, že běží
-    na odpovídající HW platformě. Tento typ virtuálního stroje nazýváme \textit{virtualizace celého systému} a jak je z názvu patrné, mimo instrukční sady můžou být virtualizovány i některá I/O zařízení.
-    
-    Virtualizace celého systému se hojně využívá případech, kdy je nutné udržet v chodu systémy, který běží na speciálních HW platformách. V tomto případě se vytvoří emulace celého prostředí a systém se přesune do
-    takto vytvořeného prostředí. Systém i jeho aplikace nepoznají žádný rozdíl, jelikož je celé prostředí virtualizováno. Tento typ virtuálního stroje je v mnoha ohledech podobný virtuálnímu stroji popsanému v \ref{subsubsection:emulation}.
-    
-    \subsubsection*{Resource partitioning}
-    \label{subsubsection:partitioning}
-    
-    Frekvence dnešních procesorů již není hlavním měřítkem jejich výkonosti, jak tomu kdysi bylo. Moderní procesory škálují svůj výkon s počtem výpočetních jader a díky tomu můžeme nezávisle spouštět více výpočetních úloh
-    najednou. Tyto jádra jsou propojeny sdílenou pamětí, která zajišťuje prostor pro ukládání dat a komunikaci. Tohoto faktu využívá technika zvaná \textit{resource partitioning}, která prostředky vícejádrového systému
-    spojuje do částí.
-    
-    \textit{Hard partitioning} je technika, kdy jsou fyzické prostředky počítače rozděleny do disjunktních částí. Každá tato část se chová jako nezávislý systém a většinou má vlastní CPU (jádro), paměť, I/O zařízení i
-    adaptér pro připojení k síti. Jednotlivé fyzické komponenty nebo jejich části jsou tedy přímo přiřazeny konkrétní části (partition) systému. V takto rozděleném systému pak můžeme současně provozovat několik instancí operačních systémů.
-    Tato technika zajišťuje velkou míru izolace pro běžící operační systémy, neboť každý OS má k dispozici vlastní disjunktní prostředí, ve kterém může operovat. Pokud nastane SW nebo HW chyby v jedné části (partition) systému, aplikace
-    a OS běžící v ostatních částech nejsou nijak omezeny.
-    
-    Druhým přístupem k rozdělování zdrojů je technika zvaná \textit{logical partitioning}. V tomto případě fyzické prostředky nejsou exkluzivně přiděleny jednotlivým operačním systémům, ale dochází k jejich sdílení na
-    SW úrovni. Ke sdílení procesoru a jeho jader se například může používat časový multiplexu, který umožňuje střídání OS ve využívání procesoru. Tato technika umožňuje lepší využití fyzických prostředků než \textit{hard partitioning},
-    kde některé prostředky mohou kvůli malé zátěži zůstat nevyužity.          
+Jak je naznačeno na obrázku \ref{figure:system_vs_proces}, typ virtuálního stroje je určen strukturou hosta a umístěním virtualizačního
+SW. Systémové virtuální stroje se tedy skládají z HW vrstvy a virtualizačního monitoru, který přímo operuje nad fyzickými prostředky
+systému. V případě virtuálních strojů v procesech se vrstva hosta skládá z HW a hostitelského operačního systému, ve kterém je spouštěn
+\textit{runtime}.
+\begin{figure}
+  \centering
+  %\includegraphics[scale=0.3]{assets/figures/procesvm_vs_sysvm.png}
+  \caption[Virtuální stroj v procesu versus systémové virtuální stroje ]{Virtuální stroje v procesech (a) versus systémové virtuální stroje (b) \cite{book:iee:vm_architecture}}
+  \label{figure:system_vs_proces}
+\end{figure}
+\subsection{Virtuální stroje v procesech}
+\label{chapter:virtualization:clasification:process_vm}
+Jak již bylo zmíněno, tento typ virtuálního stroje poskytuje uživatelským programům virtuální \textbf{ABI} nebo \textbf{API}.
+Různé implementace těchto virtuálních strojů si kladou za cíl splnění různých kritérií. Některé se snaží zajistit přenositelnost
+mezi různými počítačovými platformami a jiné se snaží optimalizovat instrukce uživatelského programu. Následovat bude stručný
+výčet jednotlivých typů virtuálních strojů, které spadají do této kategorie virtualizace.      
+\subsubsection{Virtualizace na úrovni OS}
+\label{chapter:virtualization:clasification:process_vm:os_level_virtualization}
+Pro představení prvního zástupce z této rodiny virtuálních strojů není nutné chodit daleko. Jako virtuální stroj je možné považovat
+operační systémy, které umožňují současný běh více procesů současně. Operační systém poskytuje každému procesu iluzi, že na
+systému běží sám. Z tohoto důvodu je nutné sdílet fyzickou paměť, CPU a jiná HW zařízení mezi běžícími procesy. Operační systém
+poskytne každému procesu stejně velký izolovaný virtuální adresní prostor, který je mapován do fyzické paměti počítače. Procesor
+je sdílen mezi procesy tak, že dochází k tzv. přepínání kontextu, což znamená uložení všech registrů a načtení registrů
+procesu, který má přidělený procesor. Přístup k ostatním HW zařízením systému je řízen skrze systémové volání operačního systému.
+Z výše uvedených důvodů je možné říct, že OS poskytuje virtuální prostředí pro každý proces v systému.
 
+Dalším zástupcem virtualizace na úrovni OS je rozdělování zdrojů operačního systému nebo také vytváření zón. Pro tento účel
+operační systém vytvoří pomocí procesů virtuální platformu, které je možné přidělit různé množství dostupných fyzických 
+prostředků. Takto vytvořené virtuální stroje jsou většinou izolované na úrovni souborového systému, sítě a procesů. Jednotlivé
+zóny se chovají jako nezávislé systémy a sdílejí jádro operačního systému s hlavním operačním systémem. Jednotlivé úrovně 
+izolace zajišťují, že jednotlivé zóny nemají žádné informace o jiných zónách a ani je nemohou přímo ovlivnit. Tento typ
+virtualizace bude podrobněji popsán v kapitole \ref{chapter:zones}, která se věnuje virtualizační technologii Solaris Zones.   
+\subsubsection{Emulátory a překladače}
+\label{chapter:virtualization:clasification:process_vm:emulation}
+Jak bylo zmíněno výše, některé implementace těchto virtuální strojů jsou zaměřeny na přenositelnost programů mezi jednotlivými
+počítačovými architekturami. Tyto virtuální stroje zpracovávají instrukce jiné instrukční sady než vykonává systém hosta a poté
+je dynamicky překládají do této instrukční sady. Konkrétní implementace by mohla například umožňovat vykonávat programy zkompilované
+pro architekturu IA-32 na systému s architekturou SPARC. Tyto virtuální stroje se nazývají překladače nebo emulátory, jelikož
+emulují prostředí dostupné na jiných architekturách a mapují ho do architektury hosta.    
+\subsubsection{Virtuální stroje v HLL}
+\label{chapter:virtualization:clasification:process_vm:hll_vm}
+Virtuální stroje napsané ve vyšších programovacích jazycích přímo navazují na výše popsané téma přenositelnosti mezi platformami.
+Nevýhoda emulátorů spočívá ve skutečnosti, že se specializují na překlad jedné instrukční sady do druhé. Pokud by bylo nutné 
+docílit přenositelnosti mezi všemi platformami, musel by být vytvořen emulátory pro každou kombinaci instrukčních sad. Jelikož
+je toto řešení poněkud složité a náročné na implementaci, může být k vytvoření virtuálního stroje použit právě vyšší programovací 
+jazyk. Virtuální stroj napsaný v konkrétním HLL se neopírá o konkrétní architekturu, ale o samotný programovací jazyk a jeho výhody.
+Takto vytvořený virtuální stroj přijímá vlastní jazyk a využívá konkrétního HLL k jeho provádění. Takto je zajištěna přenositelnost
+programů, které jsou napsané v jazyce virtuálního stroje, mezi systémy, na kterých jsou dostupné potřebné knihovny a samotná implementace virtuálního stroje.
+
+Nejznámějším zástupcem této kategorie virtuálních strojů je Java virtual machine od společnosti Sun Microsystems. Tento virtuální
+stroj provádí instrukce vyššího programovacího jazyka zvaného Java a dnes existuje mnoho implementací v nejrůznějších programovacích
+jazycích. Implementace HotSpot \cite{article:java:hotspot}, která je napsaná v jazyce C++ a kterou v dnešní době vyvíjí a 
+udržuje společnost Oracle, je pravděpodobně neznámější a nejvíce využívanou implementací JVM.   
+\subsection{Systémové virtuální stroje}
+\label{chapter:virtualization:clasification:system_vm}
+Druhým typem virtuálních strojů jsou tzv. \textit{systémové virtuální stroje}, které kompletně virtuálizují celou HW platformu.
+Virtualizační software je většinou umístěn hned na HW počítače a jeho hlavním úkolem je virtualizovat \textbf{ISA}. Tímto
+způsobem \textit{systémové virtuální stroje} vytvářejí virtuální prostředí pro běh operačního systému a jeho aplikací a dokonce
+umožňují současný běh různých operačních systémů na jednom HW stroji.
+\subsubsection{Virtuální počítače}
+\label{chapter:virtualization:clasification:system_vm:virtual_computer}
+Nejznámějším a pravděpodobně nejpoužívanějším zástupcem z této kategorie virtuálních strojů jsou tzv. \textit{virtuální počítače}.
+Tento typ virtuálního stroje umožňuje současný běh více operačních systému na jednom fyzickém počítači. Všechny operační systémy
+musí využívat instrukce stejné instrukční sady, kterou vykonává host. Jinými slovy tento typ virtuálního stroje žádným způsobem
+nepřekládá instrukce do jiné instrukční sady.
+
+Dle umístnění virtualizačního monitoru v architektuře počítače, můžeme rozdělit tento typ virtuálního stroje do dvou hlavních kategorií.  
+\begin{itemize}
+  \item Nativní VMM
+  \item Hosted VMM
+\end{itemize}
+Hlavní rozdíl mezi těmito dvěma typy spočívá v umístění virtualizačního monitoru v architektuře počítače. Zatímco 
+\textit{nativní VMM} má přímou kontrolu nad HW počítače, \textit{hosted VMM} běží uvnitř operačního systému, který spravuje
+HW prostředky. Oba tyto typy VMM jsou detailně popsány v kapitole \ref{chapter:virtualization:vmm}.   
+\subsubsection{Virtualizace celého systému}
+\label{chapter:virtualization:clasification:system_vm:whole_system_virtualization}
+V případě, kdy operační systém a jeho aplikace používají stejnou instrukční sadu jako nižší HW vrstvy, má virtuálizační monitor
+za úkol spravovat přístup k HW a sdílet ho mezi virtuální počítače. Pokud by bylo vyžadováno ve spouštění operačního systému
+s odlišnou instrukční sadou, musí být zajištěna emulace prostředí. Jinými slovy VMM musí vytvořit virtuální prostředí pro
+konkrétní OS tak, aby si OS myslel, že je spuštěn na odpovídající HW platformě. Tento typ virtuálního stroje nazýváme \textit{virtualizace celého systému},
+a jak je z názvu patrné, mimo instrukční sady můžou být virtualizovány i některá specifická I/O zařízení.
+
+Virtualizace celého systému se hojně využívá případech, kdy je nutné udržet v chodu systémy, který běží na speciálních HW platformách.
+V tomto případě se vytvoří emulace celého prostředí a systém se přesune do takto vytvořeného prostředí. Systém i jeho aplikace
+nepoznají žádný rozdíl, jelikož je celé prostředí virtualizováno. Tento typ virtuálního stroje je v mnoha ohledech podobný
+virtuálnímu stroji popsanému v \ref{chapter:virtualization:clasification:process_vm:emulation}.
+\subsubsection{Resource partitioning}
+\label{chapter:virtualization:clasification:system_vm:partitioning}
+Frekvence dnešních procesorů již není hlavním měřítkem jejich výkonosti, jak tomu kdysi bylo. Moderní procesory škálují svůj
+výkon s počtem výpočetních jader a díky tomu může být nezávisle spouštěno více výpočetních úloh najednou. Tyto jádra jsou 
+propojeny sdílenou pamětí, která zajišťuje prostor pro ukládání dat a komunikaci. Tohoto faktu využívá technika zvaná 
+\textit{resource partitioning}, která prostředky vícejádrového systému spojuje do částí.
+
+\textit{Hard partitioning} je technika, kdy jsou fyzické prostředky počítače rozděleny do disjunktních částí. Každá tato část
+se chová jako nezávislý systém a většinou má vlastní CPU (jádro), paměť, I/O zařízení i adaptér pro připojení k síti. Jednotlivé
+fyzické komponenty nebo jejich části jsou tedy přímo přiřazeny konkrétní části (partition) systému. V takto rozděleném systému
+pak být současně provozováno několik instancí operačních systémů. Tato technika zajišťuje velkou míru izolace pro běžící operační
+systémy, neboť každý OS má k dispozici vlastní disjunktní prostředí, ve kterém může operovat. Pokud nastane SW nebo HW chyby v
+jedné části (partition) systému, aplikace a OS běžící v ostatních částech nejsou nijak omezeny.
+
+Druhým přístupem k rozdělování zdrojů je technika zvaná \textit{logical partitioning}. V tomto případě fyzické prostředky nejsou
+exkluzivně přiděleny jednotlivým operačním systémům, ale dochází k jejich sdílení na SW úrovni. Ke sdílení procesoru a jeho jader
+se například může používat časový multiplex, který umožňuje střídání OS ve využívání procesoru. Tato technika umožňuje lepší
+využití fyzických prostředků než \textit{hard partitioning}, kde některé prostředky mohou kvůli malé zátěži zůstat nevyužity.
 \section{Nasazení virtuální infrastruktury}
-\label{section:vm_deployment}
+\label{chapter:virtualization:deployment}
+Pro přechod k virtuální infrastruktuře serverů existuje v dnešní době několik důvodů. Jedním z hlavních benefitů virtualizace
+pro dnešní firmy a organizace je značná finanční úspora. Tato úspora se projevuje především ve snížení nákladů organizace na
+pořizování a provoz fyzických zařízení. 
 
-Pro přechod k virtuální infrastruktuře serverů existuje v dnešní době několik dobrých důvodů. Jedním z hlavních benefitů virtualizace pro dnešní firmy a organizace je značná finanční úspora. Tato úspora se
-projevuje především ve snížení nákladů organizace na pořizování a provoz fyzických zařízení. 
-
-Mezi další benefity virtualizace patří především efektivní využití výpočetních zdrojů, vysoká dostupnost běžících aplikací nebo vytvoření oddělených a nezávislých prostředí pro vývoj, testování a nasazení software.
-
-Výhody zavedení virtuální infrastruktury jsou podrobněji popsány v následujících podkapitolách, které se zabývají základními scénáři pro nasazení virtuální infrastruktury.
-
+Mezi další benefity virtualizace patří především efektivní využití výpočetních zdrojů, vysoká dostupnost běžících aplikací nebo
+vytvoření oddělených a nezávislých prostředí pro vývoj, testování a nasazení software. Výhody zavedení virtuální infrastruktury
+jsou podrobněji popsány v následujících podkapitolách, které se zabývají základními scénáři pro nasazení virtuální infrastruktury.
 \subsection{Konsolidace}
-\label{consolidation}
-
-Konsolidace serverů je proces sjednocování systémů z více fyzických serverů na jeden fyzický server, který pro tyto systémy poskytne virtuální prostředí pro jejich běh. Vstupem tohoto procesu je tedy několik systémů na fyzických serverech,
-na kterých běží různé aplikace. Vstup procesu je naznačen na obrázku \ref{consolidation_img} vlevo. Výstupem konsolidace je jeden fyzický server s dostatečnými prostředky, na kterém konsolidované systémy běží jako virtuální počítače.
-Výstup můžeme vidět na obrázku \ref{consolidation_img} vpravo.
-
+\label{chapter:virtualization:deployment:consolidation}
+Konsolidace serverů je proces sjednocování systémů z více fyzických serverů na jeden fyzický server, který pro tyto systémy
+poskytne virtuální prostředí pro jejich běh. Vstupem tohoto procesu je tedy několik systémů na fyzických serverech, na kterých
+jsou spuštěny různé aplikace. Vstup procesu je naznačen na obrázku \ref{figure:consolidation_img} vlevo. Výstupem konsolidace
+je jeden fyzický server s dostatečnými prostředky, na kterém jsou konsolidované systémy spuštěny jako virtuální počítače.
+Výstup můžeme vidět na obrázku \ref{figure:consolidation_img} vpravo.
 \begin{figure}
     \centering    
     \caption{Konsolidace serverů}
-    \label{consolidation_img}
+    \label{figure:consolidation_img}
 \end{figure}
 
-\subsubsection*{Využití scénáře}
+\subsubsection{Využití scénáře}
+\label{chapter:virtualization:deployment:consolidation:use}
+Dnes je zcela běžnou praxí provozovat jednu aplikaci na jednom dedikovaném serveru. Pokud aplikace využívá jen malé procento
+výpočetních zdrojů daného serveru, může administrátor sjednotit více takovýchto serverů do jednoho. Pro organizaci, která vlastní
+tisíce takových serverů, může konsolidace výrazně zmenšit požadavky na prostor, spotřebu energie a provoz fyzických serverů.
+Správnou konsolidací serverů může společnost docílit efektivního využití dostupných prostředků a tím výrazně snížit vynaložené
+finanční prostředky \cite{oracle:virtualization:reasons}.
 
-Dnes je zcela běžnou praktikou provozovat jednu aplikaci na jednom dedikovaném serveru. Pokud aplikace využívá jen malé procento výpočetních zdrojů daného serveru, může administrátor sjednotit více takovýchto serverů
-do jednoho. Pro organizaci, která vlastní tisíce takovýchto serverů může konsolidace výrazně zmenšit požadavky na prostor, spotřebu energie a provoz fyzických serverů. Správnou konsolidací serverů může společnost docílit
-efektivního využití dostupných prostředků a tím výrazně snížit vynaložené finanční prostředky \cite{reasons}.
-
-Rychlý vývoj technologií v oblasti hadware zapříčiňuje rychlé stárnutí některých systémů a přechod ze staršího na nový může být složitý. Obzvláště v případě, kdy systém potřebuje ke svému běhu speciální hadware.
-Aby bylo možné provozovat služby poskytované těmito zastaralými systémy, můžeme je spustit jako virtuální počítač na modernějším hadware. Systém se bude chovat stejně jako kdyby běžel na zastaralém hadware, zatímco
-výkonost služby může těžit z novější a výkonnější hadwarové vrstvy  \cite{reasons}.
-
+Rychlý vývoj technologií v oblasti hardware je příčinou rychlého stárnutí některých systémů. Přechod ze staršího na nový může
+být složitý, obzvláště v případě, kdy systém potřebuje ke svému běhu speciální hardware. Aby bylo možné provozovat služby poskytované
+těmito zastaralými systémy, můžeme je spustit jako virtuální počítač na modernějším hradware. Systém se bude chovat stejně jako
+kdyby běžel na zastaralém hradware, zatímco výkonost služby může těžit z novější a výkonnější hardwarové vrstvy \cite{oracle:virtualization:reasons}.
 \subsection{Izolace}
-
+\label{chapter:virtualization:deployment:isolation}
 Dalším ze scénářů využití virtualizované infrastruktury je izolace aplikací. Proces izolace aplikací spočívá v oddělení dvou a více kritických aplikací běžících na jednom systému do nezávislých virtuálních prostředí.
 Vstupem je jeden systém s aplikacemi, které se mohou negativně ovlivňovat. Vstup izolačního scénáře je naznačen na obrázku \ref{izolation} vlevo. Výstupem je několik nezávislých virtuálních počítačů, ve kterých běží
 jednotlivé aplikace. Výstup izolace aplikací je ukázán na obrázku \ref{izolation} vpravo.
@@ -375,7 +396,7 @@ podobné benefity jako v případě konsolidace popsané v kapitole \ref{consoli
 \end{figure}
 
 \section{Virtualizační monitor}
-\label{section:vmm}
+\label{chapter:virtualization:vmm}
 
 Jak již bylo zmíněno v definici z kapitoly \ref{definitions}, virtualizační monitor je softwarová starající se o virtualizaci fyzických prostředků hosta. Vytváří tedy virtuální prostředí pro běh virtuální počítačů.
 Jinak řečeno VMM vytváří iluzi pro každý virtuální počítač, který si myslí že přímo ovládá HW fyzického systému.
