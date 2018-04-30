@@ -1,30 +1,68 @@
 % Chapter: Introduction
 % Author: Tomáš Šimáček
-Virtualizace je technika, se kterou se dnes v IT můžeme setkat v mnoha podobách. Jednou z hlavních oblastí využití virtualizace je virtualizace serverů a mimo jiné se objevuje i v oblasti
-komunikačních sítí a desktopů. Tato technologie umožňuje vytvářet virtuální prostředí nebo prostředky na fyzickým hardware. Speciální softwarová vrstva zvaná virtualizační monitor (VMM)
-zajišťuje efektivní rozdělování prostředků fyzického systému mezi virtualizované subjekty.
+\label{chapter:introduction}
+Virtualizace je technika, se kterou se dnes v~IT můžeme setkat v~mnoha podobách. Jednou z~hlavních oblastí využití virtualizace,
+je virtualizace serverů a mimo jiné se objevuje i v~oblasti komunikačních sítí nebo desktopů. Tato technologie umožňuje vytvářet
+virtuální prostředky a poskytovat tak kompletní virtuální prostředí. Toto prostředí umožňuje provozovat systémy na jiných
+fyzických architekturách, než pro jaké jsou určeny.
 
-Hlavním tématem této práce je virtualizace serverů, která umožňuje rozdělit jeden fyzický systém na několik nezávislých virtuálních prostředí zvaných virtuální počítač (VM).
-Možnost vytváření VM značně snižuje náklady na pořizování a provoz fyzických strojů, jelikož už není třeba dedikovaný server pro každou instanci OS. A konečně správným rozdělením
-VMs na fyzické servery můžeme docílit ideálního rozdělení zátěže a tím efektivně využít dostupné fyzické prostředky.
+Hlavním tématem této práce je virtualizace serverů, která umožňuje rozdělit jeden fyzický systém do několika nezávislých virtuálních
+prostředí, ve který jsou spouštěny virtuální počítače. Možnost vytváření virtuálních počítačů v~rámci jednoho fyzického systému
+značně snižuje náklady na pořizování a provoz fyzických serverů. Díky virtualizaci již není není třeba pořizovat dedikovaný server pro
+každou instanci operačního systému, který chce společnost provozovat. Správným rozdělením virtuálních na fyzické servery může být
+docíleno ideální rozdělení zátěže a tím mohou být dostupné fyzické prostředky efektivně využity.
 
-Rostoucí počet virtualizovaných serverů může mít za následek obtížnější správu. Automatizované nasazování, instalace nebo zálohování VMs může být značným ulehčením vývoje software,
-testování nebo nasazování aplikací do produkčního prostředí. Tomuto tématu se tato práce věnuje v souvislosti s virtualizačním kontejnerem Solaris Zones.
+Rostoucí počet virtualizovaných serverů může mít za následek obtížnější správu. Automatizované nasazování, instalace nebo
+zálohování virtuálních počítačů může být značným ulehčením správy počítačové infrastruktury, která využívá virtualizačních technik.
+Díky tomuto ulehčení lze jednoduše vytvářet předem definovaná virtuální prostředí, které mohou složit pro vývoj software, testování
+nebo nasazování aplikací do produkčního prostředí. 
 
+V~dnešní době existuje mnoho operačních systémů, které nějakým způsobem poskytují virtualizaci v~rámci svých služeb. Jedním ze zástupců
+takovýchto systému je operační systém Solaris. Exkluzivně pro tento operační systém byla vytvořena virtualizační technika Solaris
+Zones, která umožňuje v~rámci jedné instance operačního systému Solaris vytvářet virtuální počítače nazývané zóny. Nástroje pro správu
+této virtualizační technologie umožňují manipulovat se zónami pouze v~rámci lokálního serveru. Tato diplomová práce se věnuje automatizaci
+procesu vytváření, zálohy a migrace těchto zón a poskytnutí služeb pro správu zón, které se nacházejí na vzdálených serverech.
 \section{Cíle práce}
+\label{chapter:introduction:goals}
+Cílem této diplomové práce je seznámení se s~operačním systémem Solaris a jeho aktuální stabilní verzí 11.3. Součástí popisu tohoto
+operačního systému je i představení podporovaných architektur a jeho základních služeb pro správu softwarových balíčku nebo souborového
+systému ZFS. Především jde ale o~popis základních principů virtualizační techniky Solaris Zones, která umožňuje běh více zón v~rámci 
+jedné instance operačního systému Solaris. Nebude chybět ani porovnání běžně používaných virtualizačních technik.
 
-Prvním cílem této práce je seznámení se s operačním systémem Solaris a jeho funkcemi. Především jde o popis virtualizační techniky Solaris Zones. Důraz je kladen na popis
-základních principů, které umožňují běh více zón v rámci jednoho sdíleného jádra OS.
+Další cíl diplomové práce souvisí s~virtualizační technikou Solaris Zones a má za úkol detailně popsat možnosti konfigurace a instalace
+zón. Součástí tohoto popisu bude i popis administrátorských procesů pro zálohování, obnovu a migraci a v~neposlední řadě také integrace Solaris
+Zones s~ostatními službami operačního systému Solaris.
 
-Dalším cílem je detailní popis možností konfigurace zón, jejich instalace, zálohování a v neposlední řadě také integrace Solaris Zones s ostatními službami operačního systému
-Solaris.
+V~pořadí třetím cílem této diplomové práce je návrh a implementace nástroje pro podporu automatické správy virtualizačního kontejneru
+Solaris Zones na platformě Solaris. Jelikož základní nástroje pro správu této virtualizační technologie neumožňují správu vzdálených
+zón, implementovaný nástroj bude tuto funkcionalitu podporovat. Dále tento nástroj bude umožňovat provádění základních administrátorských
+procesů pro větší množství lokálních i vzdálených zón. Mezi těmito procesy bude zahrnuta automatická konfigurace a instalace, náhrada,
+záloha obnova a migrace zón v~rámci několika virtualizačních serverů. Nástroj bude umožňovat definici softwarových balíků, které mají být
+při instalaci do zóny zahrnuty a to pomocí šablon nebo interaktivně pomocí uživatelského rozhraní.
 
-Třetí cíl této práce je porovnat Solaris Zones s ostatními virtualizačními technologemi.
-
-Posledním cílem této práce je implementace nástroje, který umí spravovat větší množství Solaris Zones. Tento nástroj bude umožňovat (dávkovou a interaktivní) instalaci zón na
-lokální i vzdálené servery, náhradu existujících zón a jejich zálohování. Dále bude umožňovat automatické přidání předem definovaných softwarových balíčků po instalaci zóny.
-
+Posledním cílem této diplomové práce je otestovat implementovaný nástroj. Testovány budou hlavní scénáře využití výsledného nástroje
+a bude změřena doba běhu pro určité funkce nástroje.
 \section{Struktura práce}
+\label{chapter:introduction:structure}
+Struktura této diplomové práce se skládá ze šesti hlavním kapitol a příloh. První kapitola práce se zabývá obecným popisem virtualizace
+a jejím využitím v~informačních technologiích. Dále tato kapitola definuje pojem virtuálního stroje a představuje jednotlivé druhy
+virtualizačních technik. V~závěru první kapitoly je zmíněno několik hlavních scénářů pro nasazení virtuální infrastruktury. Druhá kapitola
+této diplomové práce stručně představuje operační systém Solaris. Důraz je kladen především na podporované platformy a služby, které
+tento operační systém poskytuje. Třetí kapitola obsahuje podrobný popis virtualizační techniky Solaris Zones. Úvod této kapitoly
+popisuje základní principy a typy zón, které je možné v~rámci této technologie vytvářet. Ve zbytku jsou kapitoly jsou představeny
+konkrétní způsoby správy této virtualizační techniky, které se zaměřují na popis konfigurace, instalace, zálohy a migrace zón. 
+Čtvrtá kapitola se zabývá návrhem nástroje po podporu automatické správy virtualizačního kontejneru Solaris Zones. Hlavním obsahem
+této kapitoly je stanovení požadavků na výsledný nástroj a navržení jeho architektury. V~závěru této kapitoly jsou popsány některé
+bezpečnostní aspekty, které by měl uživatel nástroje splňovat. Pátá kapitola této diplomové práce popisuje způsob implementace nástroje,
+jehož návrh byl popsán ve čtvrté kapitole. Úvod této kapitoly popisuje volbu programovacího jazyka, pomocí kterého byl výsledný
+nástroj implementován. Zbytek kapitoly popisuje implementaci šablon, uživatelského rozhraní a ostatních funkčních komponent výsledného
+nástroje. Poslední kapitola je věnována testování implementovaného nástroje. Hlavním obsahem kapitoly je popis testování hlavních
+scénářů využití nástroje pro správu Solaris Zones. Praktické ukázky testování jsou obsaženy v~příloze. Závěr této kapitoly se zabývá měřením
+doby běhu některých funkcí výsledného nástroje a rozebírá výsledky měření. 
 
-TODO
+Zdrojové kódy celé diplomové práce a implementovaného nástroje pro podporu automatické správy virtualizačního kontejneru Solaris Zones
+jsou dostupné v~online repozitáři \cite{thesis:repository} nebo na přiloženém médiu.
+
+
+
 
