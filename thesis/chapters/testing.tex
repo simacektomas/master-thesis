@@ -1,121 +1,120 @@
 \label{chapter:testing}
 Poslední kapitola této diplomové práce popisuje testování funkcionality nástroje pro podporu automatické správy virtualizačního
-kontejneru Solaris Zones, jehož implementace je popsána v kapitole \ref{chapter:implementation}. Zaměřuje se především testování
-jednotlivých scénářů použití nástroje a zkoumá jeho chování. Na začátku této kapitoly je definováno prostředí, ve kterém byly
-testy prováděny. Následuje série testů, které zkoumají funkčnost nástroje v konkrétních případech použití. Kapitola je zakončena
+kontejneru Solaris Zones, jehož implementace je popsána v~kapitole \ref{chapter:implementation}. Zaměřuje se především testování
+hlavních scénářů použití nástroje a~zkoumá jeho chování. Na začátku této kapitoly je definováno prostředí, ve kterém byly
+testy prováděny. Následuje série testů, které zkoumají funkcionalitu nástroje v~konkrétních případech použití. Kapitola je zakončena
 měřením, které zkoumá dobu trvání některých funkcí nástroje.
 \section{Definice testovacího prostředí}
 \label{chapter:testing:environment}
 Pro účely testování výše zmíněného nástroje bylo nutné vytvořit prostředí odpovídající jeho cílové platformě. Toto prostředí
-obsahuje několik virtualizačních serverů s operačním systémem Solaris, který bude poskytovat své prostředky neglobálním zónám.
-Tyto servery jsou propojeny počítačovou sítí, pomocí které je lze ovládat. Tato infrastruktura virtualizovaně vytvořena na 
-fyzickém systému s následujícími parametry.
+obsahuje několik virtualizačních serverů s~operačním systémem Solaris, který bude poskytovat své prostředky neglobálním zónám.
+Tyto servery jsou propojeny počítačovou sítí, pomocí které je lze ovládat. Tato infrastruktura byla virtualizovaně vytvořena na 
+fyzickém systému s~následujícími parametry:
 \begin{itemize}
- \item Procesor Intel(R) Xeon(R) CPU E3-1230 v3 (3.30Ghz)
- \item RAM 16GB
- \item Operační systém Windows 10 (64-bit)
+ \item Procesor Intel(R) Xeon(R) CPU E3-1230 v3 (3.30Ghz),
+ \item RAM 16GB,
+ \item Operační systém Windows 10 (64-bit).
 \end{itemize}
 Virtualizace architektury byla docílena pomocí virtualizační technologie Virtualbox, která umožňuje spouštění virtuálních 
-počítačů v rámci jiného operačního systému. Pomocí této technologie byly vytvořeny tři virtuální stroje s operačním systémem
-Solaris ve verzi 11.3. Tyto stroje byly propojeny pomocí virtuální počítačové sítě a nakonfigurovány tak, aby se na ně dalo 
-připojovat pomocí SSH. Dále byly jednotlivým strojů přiřazeny doménové jména \textit{shost}, \textit{shost1} a \textit{shost2},
-a přidány korespondující řádky do souboru \textit{/etc/hosts}. Toto nastavení umožňuje používat specifikované doménové jména
-místo IP adres a zjednoduší tak identifikaci strojů v testovacích ukázkách. 
+počítačů v~rámci jiného operačního systému. Pomocí této technologie byly vytvořeny tři virtuální stroje s~operačním systémem
+Solaris ve verzi 11.3. Tyto stroje byly propojeny pomocí virtuální počítačové sítě a~nakonfigurovány tak, aby se na ně dalo 
+připojovat pomocí SSH. Dále byly jednotlivým strojů přiřazeny doménové jména \textit{shost}, \textit{shost1} a~\textit{shost2}.
+Tyto doménové jména byly nakonfigurovány pomocí souboru \textit{/etc/hosts} na všech zmíněných virtuálních počítačích. Toto
+nastavení umožňuje používat specifikované doménové jména místo IP adres a~zjednoduší tak identifikaci strojů v~testovacích
+ukázkách. 
 
 Jelikož provozování virtualizační technologie Solaris Zones vyžaduje nemalé množství výpočetní prostředků, bylo nutné
-dostupné prostředky fyzického systému rozdělit mezi virtuální stroje. Z tohoto důvodu byly každému virtuálnímu počítači
-přiřazeny následující výpočetní prostředky.
+dostupné prostředky fyzického systému rozdělit mezi virtuální stroje. Z~tohoto důvodu byly každému virtuálnímu počítači
+přiřazeny následující výpočetní prostředky:
 \begin{itemize}
- \item Jedno jádro fyzického procesoru
- \item RAM 3 GB 
- \item Virtuální disk 50 GB (HDD)
+ \item Jedno jádro fyzického procesoru,
+ \item RAM 3 GB,
+ \item Virtuální disk 50 GB (HDD).
 \end{itemize}
 
-Na virtuální počítač s doménovým jménem \textit{shost} byl nainstalován interpret programovacího jazyka Ruby ve verzi 2.4.2.
-Dále byla na stejný počítač nainstalována Java ve verzi 1.8.0\_60 a následně druhý interpret programovacího jazyka Ruby
-tentokrát ve verzi 2.3.3 a implementaci JRuby. Pokud nebude uvedeno jinak, testovaný nástroj bude vždy spouštěn z virtuálního
-počítače s doménovým jménem \textit{shost}.
+Na virtuální počítač s~doménovým jménem \textit{shost} byl nainstalován interpret programovacího jazyka Ruby ve verzi 2.4.2.
+Dále byla na stejný počítač nainstalována Java ve verzi 1.8.0\_60 a~následně druhý interpret programovacího jazyka Ruby
+tentokrát ve verzi 2.3.3 a~implementaci JRuby. Pokud není uvedeno jinak, testovaný nástroj byl vždy spouštěn z~virtuálního
+počítače s~doménovým jménem \textit{shost}.
 
-Posledním učiněným krokem byla konfigurace uživatele \textit{zadmin}, který má práva na vykonávání příkazů nutných k správnému
-chodu implementovaného nástroje. Tyto nástroje byly vyjmenovány v kapitole \ref{chapter:design:architecture:szones}. Uživatel 
-byl pomocí nástroje RBAC vytvořen a nakonfigurován na všech vytvořených virtuálních počítačích.
+Posledním učiněným krokem byla konfigurace uživatele \textit{zadmin}, který má práva na vykonávání příkazů nutných ke správnému
+chodu implementovaného nástroje. Tyto nástroje byly vyjmenovány v~kapitole \ref{chapter:design:architecture:szones}. Uživatel 
+byl pomocí nástroje RBAC vytvořen a~nakonfigurován na všech vytvořených virtuálních počítačích.
 \section{Testování scénářů použití}
 \label{chapter:testing:scenario}
-V následujících kapitolách je popsáno akceptační testování některých scénářů použití nástroje pro podporu automatické správy
-Solaris Zones.  Pro testování aplikace bylo vždy použito popsané prostředí, pokud není uvedeno jinak. Na začátku každého scénáře
-je stanoven cíl, který se by uživatel chtěl pomocí implementovaného nástroje dosáhnout. Následně je popsán stav prostředí, ve
-kterém se sytém nachází před provedením konkrétní akce. Dále proveden korespondující příkaz v uživatelském rozhraní nástroje,
-který má splnit stanovený cíl. Výsledek tohoto kroku je ověřen pomocí systémových příkazů a v závěru je rozhodnuto, zda bylo
+V~následujících kapitolách je popsáno akceptační testování hlavních scénářů použití nástroje pro podporu automatické správy
+Solaris Zones. Pro testování aplikace bylo vždy použito popsané prostředí, pokud není uvedeno jinak. Na začátku každého scénáře
+je stanoven cíl, který by uživatel mohl chtít pomocí implementovaného nástroje dosáhnout. Následně je popsán stav prostředí, ve
+kterém se systém nacházel před provedením konkrétní akce. Dále byl proveden korespondující příkaz v~uživatelském rozhraní nástroje,
+který má splnit stanovený cíl. Výsledek tohoto kroku je ověřen pomocí systémových příkazů a~v~závěru scénáře je rozhodnuto, zda bylo
 dosaženo stanoveného cíle.
-\subsection{Vytvoření neglobálních ze šablony}
+\subsection{Vytvoření neglobálních zón ze šablony}
 \label{chapter:testing:scenario:deploy_template}
 Pro komplexní otestování funkcionality implementovaného nástroje byl zvolen scénář vytvoření několika neglobálních zón pomocí
 šablony. Hlavní důvod pro výběr tohoto scénáře je, že se do tohoto procesu se zapojují téměř všechny části nástroje.
 
-Cílem tohoto scénáře je vytvoření několika neglobálních zón na různých hostech v rámci dané infrastruktury. Jako zdroj byla 
-použita šablona popsaná v kapitole \ref{chapter:implementation:szones:template}. Z šablony byly vybrány některé důležité 
-vlastnosti, které mají vytvořené zóny mít. Typ zóny byl stanoven jako \textit{solaris} s exkluzivní IP adresou. Dále má 
-nainstalovaná zóna obsahovat softwarové balíčky pro správu zdrojového kódu. Tyto balíčky obsahují nástroje \verb|hg| a 
-\verb|git|. Šablona také definuje počáteční heslo uživatele \textit{root} a nastavuje typ tohoto uživatelského účtu na roli.
-Vedle uživatele \textit{root} je v šabloně definován počáteční systémový uživatel, který má být zároveň systémový administrátor.
+Cílem tohoto scénáře je vytvoření několika neglobálních zón na různých hostech v~rámci dané infrastruktury. Jako zdroj byla 
+použita šablona popsaná v~kapitole \ref{chapter:implementation:szones:template}. Z~šablony byly vybrány některé důležité 
+vlastnosti, které mají vytvořené zóny mít. Typ zóny byl stanoven jako \textit{solaris} s~exkluzivní IP adresou. Dále má 
+nainstalovaná zóna obsahovat softwarové balíčky pro správu zdrojového kódu. Tyto balíčky obsahují nástroje \verb|hg|
+a~\verb|git|. Šablona také definuje počáteční heslo uživatele \textit{root} a~nastavuje typ tohoto uživatelského účtu na roli.
+Vedle uživatele \textit{root} je v~šabloně definován počáteční systémový uživatel, který má být zároveň systémový administrátor.
 Vytvářené neglobální zóny mají mít jedno síťové rozhraní se jménem \textit{net0}, které bude konfigurováno automaticky pomocí
-DHCP. Takto definovaná šablona je uložena na severu s doménovým jménem \textit{shost}.
+DHCP. Takto definovaná šablona je uložena na severu s~doménovým jménem \textit{shost}.
 
-Příkaz pro vytvoření čtyř zón pomocí uživatelského rozhraní nástroje je v ukázce kódu \ref{code:test:deployment} na první řádce.
-Tento příkaz říká, že mají být vytvořeny zóny \textit{zdev} a \textit{zdev1} na lokálním serveru a zóna \textit{zdev} na vzdálených
-serverech \textit{shost1} a \textit{shost2}. Jako parametr \textit{specification} je udána cesta k šabloně s výše popsanými 
-vlastnostmi. Dále byl příkazu předán parametr \textit{boot}, který rovnou spustí vytvořené zóny.
+Příkaz pro vytvoření čtyř zón pomocí uživatelského rozhraní nástroje je v~ukázce kódu \ref{code:test:deployment} na první řádce.
+Tento příkaz říká, že mají být vytvořeny zóny \textit{zdev} a~\textit{zdev1} na lokálním serveru a~zóna \textit{zdev} na vzdálených
+serverech \textit{shost1} a~\textit{shost2}. Jako parametr \textit{specification} je udána cesta k~šabloně s~výše popsanými 
+vlastnostmi. Dále byl příkazu předán parametr \textit{boot}, který má rovnou spustit vytvořené zóny.
 
 
-Z konce standardního výstupu nástroje v ukázce kódu \ref{code:test:deployment} je patrné, že vytvoření všech neglobálních zón
-proběhlo v pořádku. Jelikož se pro vytváření zón používá stejná rutina a stejná šablona, musí mít všechny stejné parametry.
+Z~konce standardního výstupu nástroje v~ukázce výpisu programu \ref{code:test:deployment} je patrné, že vytvoření všech neglobálních zón
+proběhlo v~pořádku. Jelikož se pro vytváření zón používá stejná rutina a~stejná šablona, musí mít všechny stejné parametry.
 Pro otestování korektnosti práce nástroje byla použita neglobální zóna \textit{zdev} na vzdáleném serveru \textit{shost2}.
-Korektní vytvoření a spuštění zóny bylo ověřeno pomocí nástroje \verb|zlogin(1)|, který umožňuje připojení ke konzoly dané
-zóny. Úspěšné přihlášení v ukázce kódu \ref{code:test:deployment:result} signalizovalo hned několik věcí. Za prvé se zdárně
-podařilo vytvořit a spustit danou zónu a za druhé byly správně nakonfigurovány uživatelské systémové služby pomocí atributů ze šablony.
-Dále je ukázky \ref{code:test:deployment:result} patrné, že došlo k vytvoření síťového adaptérů \textit{net0} a jeho automatické
-konfigurace pomocí služby DHCP. Daná neglobální zóna tak byla okamžitě po vytvoření dostupná ze sítě. Přítomnost softwarových
-balíčků byla otestována pomocí jejich rozhraní na příkazové řádce jak je vidět v ukázce \ref{code:test:deployment:result}.
-Posledním kritériem úspěchu bylo správné nakonfigurování počátečního systémového uživatele. Jméno a heslo bylo ověřeno již
-při přihlašování do zóny. Zbývalo tedy ověřit jestli uživatel má práva systémového administrátora, což bylo provedeno pomocí
-příkazu \verb|profile|. Výpis na ukázce \ref{code:test:deployment:result} je zkrácený, ale obsahuje profil \textit{System Administrator}.
+Korektní vytvoření a~spuštění zóny bylo ověřeno pomocí nástroje \verb|zlogin(1)|, který umožňuje připojení k~příkazové řádce dané
+zóny. Úspěšné přihlášení v~ukázce výpisu programuódu \ref{code:test:deployment:result} signalizovalo hned několik věcí. Za prvé se zdárně
+podařilo vytvořit a~spustit danou zónu a~za druhé byly správně nakonfigurovány uživatelské systémové služby pomocí atributů ze šablony.
+Dále je z~ukázky výpisu programu \ref{code:test:deployment:result} patrné, že došlo k~vytvoření síťového adaptérů \textit{net0} a~jeho automatické
+konfigurace pomocí služby DHCP. Daná neglobální zóna byla okamžitě po vytvoření dostupná ze sítě. Přítomnost softwarových
+balíčků byla otestována pomocí jejich rozhraní na příkazové řádce, jak je vidět v~ukázce výpisu programu \ref{code:test:deployment:result}.
+Posledním kritériem úspěchu bylo správné nakonfigurování počátečního systémového uživatele. Jméno a~heslo bylo ověřeno již
+při přihlašování do zóny. Zbývalo tedy ověřit, jestli uživatel má práva systémového administrátora, což bylo provedeno pomocí
+příkazu \verb|profile|. Výpis programu na ukázce \ref{code:test:deployment:result} je zkrácený, ale obsahuje profil \textit{System Administrator}.
 
-
-Pomocí výše zmíněných testů bylo ověřeno, že se daná zóna vytvořila, spustila a že měla vlastnosti specifikované v použité šabloně.
-Stejným způsobem byly ověřeny i ostatní vytvářené zóny. Jelikož tyto zóny vykazovaly stejné chování a vlastnosti, byl tento
-test uzavřen a konstatován jako splněný.
+Pomocí výše zmíněných testů bylo ověřeno, že se daná zóna vytvořila, spustila a~že měla vlastnosti specifikované v~použité šabloně.
+Stejným způsobem byly ověřeny i ostatní vytvářené zóny. Jelikož tyto zóny vykazovaly stejné chování a~vlastnosti, byl tento
+test uzavřen a~považován za splněný.
 \subsection{Využití uživatelského žurnálu}
 \label{chapter:testing:scenario:journal}
 Dalším využitím implementovaného nástroje může být využití uživatelského žurnálu. Cílem následujícího scénáře je kontrola 
-funkcionality uživatelského žurnálu a jeho schopnosti informovat uživatele o změnách neglobálních zón v rámci infrastruktury.
-K tomuto účelu byl využitý stav, ve kterém se systém nacházel po testování předchozího scénáře popsaného v kapitole
+funkcionality uživatelského žurnálu a~jeho schopnosti informovat uživatele o~změnách neglobálních zón v~rámci infrastruktury.
+K~tomuto účelu byl využitý stav, ve kterém se systém nacházel po testování předchozího scénáře popsaného v~kapitole
 \ref{chapter:testing:scenario:deploy_template}. Součástí předchozího scénáře bylo vytvoření čtyř zón pomocí implementovaného
-nástroje. Před tímto vytvořením se v systému nenacházely žádné jiné neglobální zóny. V tomto stavu by měl uživatelský žurnál 
-obsahovat čtyři zóny ve stavu \textit{running}. Jak je vidět z ukážky kódu \ref{code:test:journal}, součástí uživatelského
-žurnálu byly opravdu čtyři zóny ve stavu \textit{running} a výpis neobsahoval žádné jiné nesledované neglobální zóny.
-Toto zjištění indikovalo, že nástroj opravdu aktualizuje uživatelský nástroj provedenou akcí.
+nástroje. Před tímto vytvořením se v~systému nenacházely žádné jiné neglobální zóny. V~tomto stavu by měl uživatelský žurnál 
+obsahovat čtyři zóny ve stavu \textit{running}. Jak je vidět z~výpisu programu \ref{code:test:journal}, součástí uživatelského
+žurnálu byly opravdu čtyři zóny ve stavu \textit{running} a~výpis neobsahoval žádné jiné nesledované neglobální zóny.
+Toto zjištění indikovalo, že nástroj opravdu aktualizuje uživatelský nástroj po provedení akcí.
 
 Následně byla simulována situace, kdy jiný uživatel změní nějakým způsobem stav sledované zóny. Konkrétně byla bez pomoci 
-implementovaného nástroje přeinstalována zóna \textit{zdev} na vzdáleném serveru \textit{shost2} a její stav byl změněn z původního
-\textit{running} na \textit{installed}. Dále byla vytvořena nová zóna \textit{zdev-clone} na stejném vzdáleném počítači. V tomto
-případě by měl uživatel při dalším vypsání uživatelského žurnálu zjistit, že se změnil stav a diskový obraz dané zóny 
-\textit{zdev} změnil. Součástí výpisu by měla být i informace o nově vytvořené zóny v rámci infrastruktury. Z ukázky kódu 
-\ref{code:test:journal:change} je vidět, že uživatelský žurnál opravdu informuje uživatele o změně sledované zóny a na konci
-výpisu je zobrazena informace o nově vytvořené zóně. Pro úsporu místa byly ostatní zóny z výpisu vynechány.
-
+implementovaného nástroje přeinstalována zóna \textit{zdev} na vzdáleném serveru \textit{shost2} a~její stav byl změněn z~původního
+\textit{running} na \textit{installed}. Dále byla vytvořena nová zóna \textit{zdev-clone} na stejném vzdáleném počítači. V~tomto
+případě by měl uživatel při dalším vypsání uživatelského žurnálu zjistit, že se změnil stav a~diskový obraz dané zóny 
+\textit{zdev}. Součástí výpisu by měla být i informace o~nově vytvořené zóny v~rámci infrastruktury. Z~ukázky výpisu programu 
+\ref{code:test:journal:change} je vidět, že uživatelský žurnál opravdu informuje uživatele o~změně sledované zóny a~na konci
+výpisu je zobrazena informace o~nově vytvořené zóně. Ostatní sledované zóny byly z~výpisu vynechány.
 
 Pomocí implementovaného nástroje může uživatel neglobální zóny vytvářet, mazat nebo měnit jejich stav. Jak bylo zjištěno
-na začátku této kapitoly, nástroj aktualizuje uživatelský žurnál a jeho konkrétní záznam pokud danou zónu vytváří. Podobným
-způsobem bylo ověřeno, že uživatelský žurnál je aktualizován i při mazání a změně stavu. Dále tento scénář ověřil funkcionalitu
-žurnálu, která má informovat uživatele v případě, kdy dojde ke změně stavu sledované zóny nebo vytvoření nové zóny v rámci
-infrastruktury. Z výše uvedených důvodů bylo testování využití uživatelského žurnálu úspěšné.
+na začátku této kapitoly, nástroj aktualizuje konkrétní záznam v~uživatelském žurnálu, pokud danou zónu vytváří. Podobným
+způsobem bylo ověřeno, že uživatelský žurnál je aktualizován i při mazání a~změně stavu. Dále tento scénář ověřil funkcionalitu
+žurnálu, která má informovat uživatele v~případě, kdy dojde ke změně stavu sledované zóny nebo vytvoření nové zóny v~rámci
+infrastruktury. Z~výše uvedených důvodů bylo testování využití uživatelského žurnálu označeno za úspěšné.
 \subsection{Migrace neglobálních zón}
 \label{chapter:testing:scenario:migration}
-V rámci testování nástroje pro podporu automatické správy virtualizačního kontejneru Solaris Zones byl otestován scénář, který
-zahrnuje migraci neglobálních zón mezi dvěma hosty. Jelikož nástroj umožňuje migraci zón jak z lokálního tak ze vzdálených serverů,
+V~rámci testování nástroje pro podporu automatické správy virtualizačního kontejneru Solaris Zones byl otestován scénář, který
+zahrnuje migraci neglobálních zón mezi dvěma hosty. Jelikož nástroj umožňuje migraci zón jak z~lokálního tak ze vzdálených serverů,
 bylo nutné vybrat komplexní scénář pokrývající tyto možnosti. Pro komplexní ověření této funkcionality nástroje bylo na hostech 
-\textit{shost} a \textit{shost1} vytvořeno několik neglobálních zón, které byly migrovány na cílový vzdálený server \textit{shost2}. 
-Pro účely tohoto scénáře byla využita technika přímého posílání souborového systému, kterou implementovaný nástroj poskytuje.
+\textit{shost} a~\textit{shost1} vytvořeno několik neglobálních zón, které byly migrovány na cílový vzdálený server \textit{shost2}. 
+Pro účely tohoto scénáře byla využita technika přímého přenosu souborového systému, kterou implementovaný nástroj poskytuje.
 Scénář migrace je graficky znázorněn na obrázku \ref{image:testing:migration}.
 \begin{figure}
     \centering    
@@ -124,102 +123,103 @@ Scénář migrace je graficky znázorněn na obrázku \ref{image:testing:migrati
 \end{figure}
 
 Cílem tohoto scénáře je přesunutí neglobálních zón ze zdrojových serverů na cílový server. Na obou zdrojových serverech se na
-začátku testování nacházely následující neglobální zóny.
+začátku testování nacházely následující neglobální zóny:
 \begin{itemize}
- \item \textit{zmigr:localhost}
- \item \textit{zmigr1:localhost}
- \item \textit{zmigr2:shost1}
- \item \textit{zmigr3:shost1}
+ \item \textit{zmigr:localhost},
+ \item \textit{zmigr1:localhost},
+ \item \textit{zmigr2:shost1},
+ \item \textit{zmigr3:shost1}.
 \end{itemize}
-Po provedení migrace by se tyto zóny měli nacházet na cílovém serveru \textit{shost2} a na zdrojových serverech by se neměly
-nacházet žádné neglobální zóny. Uživatelský žurnál zobrazený v ukázce \ref{code:test:migration:before} tuto skutečnost potvrzuje.
+Po provedení migrace by se tyto zóny měly nacházet na cílovém serveru \textit{shost2} a~na zdrojových serverech by se neměly
+nacházet žádné neglobální zóny. Uživatelský žurnál zobrazený ve výpisu programu \ref{code:test:migration:before} potvrzoval
+stav před provedení migrace.
  
 Pro migraci neglobálních zón slouží příkaz \verb|migrate|, který je možné využívat skrze uživatelské rozhraní implementovaného
-nástroje. Právě tento příkaz byl použitý pro testování tohoto scénáře a v ukázce \ref{code:test:migration} je možné vidět jeho
-výstup. Jak je z konce výstupu patrné, všechny zóny byly podle nástroje úspěšně přesunuty na cílový server \textit{shost2}. 
-Pro ověření funkcionality bylo nutné ověřit jestli se zóny opravdu nachází na cílovém serveru, jestli jsou zóny smazány
-ze zdrojových serverů a také jestli nástroj aktualizoval uživatelský žurnál. 
+nástroje. Právě tento příkaz byl použitý pro testování tohoto scénáře a~ve výpisu programu \ref{code:test:migration} je možné vidět jeho
+výstup. Jak je z~konce výstupu patrné, všechny zóny byly podle nástroje úspěšně přesunuty na cílový server \textit{shost2}. 
+Pro ověření funkcionality bylo nutné ověřit, jestli se zóny opravdu nachází na cílovém serveru, jestli jsou zóny smazány
+ze zdrojových serverů a~také jestli nástroj aktualizoval uživatelský žurnál. 
 
-Pomocí nástroje \verb|zoneadm(1)| a příkazu \verb|list| bylo ověřeno, že na vzdáleném serveru se opravdu nachází přesunuté zóny.
+Pomocí nástroje \verb|zoneadm(1)| a~příkazu \verb|list| bylo ověřeno, že na vzdáleném serveru se opravdu nachází přesunuté zóny.
 Na zdrojových serverech byl spuštěn stejný příkaz pro ověření, že se na nich nenachází žádné globální zóny. Výstup těchto kroků
-je zobrazen v ukázce \ref{code:test:migration:list}. Těmito kroky bylo ověřeno, že nástroj správně pracuje se zónami a umožňuje
-jejich přesun v rámci jednotlivých serverů infrastruktury. Dále bylo nutné ověřit, zda nástroj správně aktualizuje konkrétní záznamy
-v uživatelském žurnálu. Stav v ukázce \ref{code:test:migration:before} by se tedy měl změnit tak, že přesouvané zóny budou
-zobrazeny pod hostem \textit{shost2}. Tato skutečnost je potvrzena ukázkou \ref{code:test:migration:after}, která ukazuje očekávaný
-výstup z uživatelského žurnálu.
+je zobrazen ve výpisu programu \ref{code:test:migration:list}. Těmito kroky bylo ověřeno, že nástroj správně pracuje se zónami a~umožňuje
+jejich přesun v~rámci jednotlivých serverů infrastruktury. Dále bylo nutné ověřit, zda nástroj správně aktualizuje konkrétní záznamy
+v~uživatelském žurnálu. Stav ve výpisu programu \ref{code:test:migration:before} by se měl změnit tak, že přesouvané zóny budou
+zobrazeny pod hostem \textit{shost2}. Tato skutečnost je potvrzena výpisem programu \ref{code:test:migration:after}, který ukazuje očekávaný
+výstup uživatelského žurnálu.
 
-Výše popsaný testovací scénář dokazuje správné chování implementovaného nástroje v případě, kdy uživatel využívá administračních
-funkcí pro migraci zón. Test potvrzuje, že uživatel je schopný přesouvat neglobální zóny z lokálního i ze vzdáleného serveru
-na cílový server. Migrace je provedena najednou a nástroj po jejím úspěšném provedení adekvátně aktualizuje uživatelský žurnál.
-Z výše popsaných důvodů bylo testování migračního scénáře označeno za úspěšné.
-\subsection{Záloha a obnova zón}
+Výše popsaný testovací scénář dokazuje správné chování implementovaného nástroje v~případě, kdy uživatel využívá administračních
+funkcí pro migraci zón. Test potvrzuje, že uživatel je schopný přesouvat neglobální zóny z~lokálního i ze vzdáleného serveru
+na cílový server. Migrace je provedena najednou a~nástroj po jejím úspěšném provedení adekvátně aktualizuje uživatelský žurnál.
+Z~výše popsaných důvodů bylo testování migračního scénáře označeno za úspěšné.
+\subsection{Záloha a~obnova zón}
 \label{chapter:testing:scenario:backup_recovery}
-Posledním testovaným scénářem bylo vytvoření zálohy a následná obnova. Jelikož se jedná o dvě samostatné funkce nástroje, byl
-tento test rozdělený do dvou scénářů. V prvním scénáři použití bylo otestováno vytvoření zálohy několika zón. Následující scénář
-potom využil vytvořené zálohy k obnovení zón.
+Posledním testovaným scénářem bylo vytvoření zálohy a~následná obnova. Jelikož se jedná o~dvě samostatné funkce nástroje, byl
+tento test rozdělený do dvou samostatných scénářů. V~prvním scénáři použití bylo otestováno vytvoření zálohy několika zón. 
+Následující scénář potom využil vytvořené zálohy k~obnovení stejných zón.
 \subsubsection{Záloha neglobálních zón}
 \label{chapter:testing:scenario:backup_recovery:backup}
 Cílem tohoto scénáře bylo ověření funkcionality nástroje ve vytváření záloh neglobálních zón. Při procesu vytváření zálohy má
-nástroj za úkol vytvořit archiv souborového systému zálohované zón. Nástroj umožňuje vytvoření zálohy pomocí dvou typů archivů.
-V případě tohoto scénáře byl použit archiv typu UAR. Dále nástroj umožňuje specifikovat vzdálený server a cestu, kam chceme
-zálohu uložit. Pomocí tohoto scénáře bylo ověřeno, zda nástroj tuto funkcionalitu opravdu umožňuje. Pro kompletní ověření
-funkcionality bude sloužit následující scénář, který z vytvořených záloh bude zóny obnovovat. Pro účely tohoto scénáře byly v infrastruktuře vytvořeny následující 
-zóny.
+nástroj za úkol vytvořit archiv souborového systému zálohované zóny. Nástroj umožňuje vytvoření zálohy pomocí dvou typů archivů.
+V~případě tohoto scénáře byl použit archiv typu UAR. Dále nástroj umožňuje specifikovat vzdálený server a~cestu, kam má být
+záloha uložena. Pomocí tohoto scénáře bylo ověřeno, zda nástroj tuto funkcionalitu opravdu umožňuje. Pro kompletní ověření
+funkcionality bude sloužit následující scénář, který z~vytvořených záloh bude zóny obnovovat. Pro účely tohoto scénáře byly
+v~infrastruktuře vytvořeny následující zóny:
 \begin{itemize}
- \item \textit{zback:shost2}
- \item \textit{zback1:shost2}
- \item \textit{zback2:shost1}
- \item \textit{zback3:shost1}
+ \item \textit{zback:shost2},
+ \item \textit{zback1:shost2},
+ \item \textit{zback2:shost1},
+ \item \textit{zback3:shost1}.
 \end{itemize}
 Dále byl na lokálním serveru \textit{shost} vytvořen zálohovací adresář \textit{/zonepool/backup}, ve kterém se před zahájením
 testu nenacházely žádné soubory.
 
-Nástroj pro zálohování zón nabízí příkaz \verb|backup|, který je možný využít v uživatelském rozhraní. Pomocí tohoto příkazu bylo
-spuštěna záloha výše zmíněných zón. Výstup tohoto příkazu je zobrazen v ukázce \ref{code:test:backup} a ukazuje, že záloha
-zón proběhla úspěšně. Zálohy by se podle výstupu programu měly nacházet v složce \textit{/zonepool/backup} na lokálním serveru.
+Nástroj pro zálohování zón nabízí příkaz \verb|backup|, který je možný využít v~uživatelském rozhraní. Pomocí tohoto příkazu byla
+spuštěna záloha výše zmíněných zón. Výstup tohoto příkazu je zobrazen ve výpisu programu \ref{code:test:backup} a~ukazuje, že záloha
+zón proběhla úspěšně. Zálohy by se podle výstupu programu měly nacházet v~složce \textit{/zonepool/backup} na lokálním serveru.
 
-Pomocí standardního nástroje \verb|ls(1)| bylo ověřeno, že se zálohy opravdu vytvořili a že se nachází v určeném adresáři na
+Pomocí standardního nástroje \verb|ls(1)| bylo ověřeno, že se zálohy opravdu vytvořily a~že se nacházely v~určeném adresáři na
 lokálním serveru. Tento testovací scénář potvrzuje, že nástroj je schopný najednou vytvářet zálohy více neglobálních zón
-runě umístěných v infrastruktuře serverů. Dále potvrzuje, že nástroj umí stáhnout zálohy to konkrétního adresáře na předem
-určeném serveru. Z výše zmíněných důvodů bylo testování vytváření zálohy neglobálních zón úspěšné.
+různě umístěných v~infrastruktuře serverů. Dále potvrzuje, že nástroj umí stáhnout zálohy do konkrétního adresáře na předem
+určeném serveru. Z~výše zmíněných důvodů bylo testování vytváření zálohy neglobálních zón úspěšné.
 \subsubsection{Obnova neglobálních zón}
 \label{chapter:testing:scenario:backup_recovery:recovery}
-Posledním testovaným scénářem použití nástroje byla obnova neglobálních zón z archivu. Cílem testování tohoto scénáře bylo 
+Posledním testovaným scénářem použití nástroje byla obnova neglobálních zón z~archivu. Cílem testování tohoto scénáře bylo 
 ověření, zda nástroj umí obnovit (vytvořit) neglobální zóny pomocí dříve vytvořených záloh. Jako zdrojové archivy byly použity
-zálohy vytvořené během předchozího testování. Pro simulaci ztráty dat byly všechny zóny z minulého testování odstraněny a 
-zachovány byly pouze jejich archivy ve složce \textit{/zonepool/backup} na lokálním serveru. Výsledkem obnovy by mělo být
-vytvoření všech zón ze zálohy a jejich umístění na původní servery. 
+zálohy vytvořené během předchozího testování. Pro simulaci ztráty dat byly všechny zóny z~minulého testování odstraněny
+a~zachovány byly pouze jejich archivy ve složce \textit{/zonepool/backup} na lokálním serveru. Výsledkem obnovy by mělo být
+vytvoření všech zón ze zálohy a~jejich umístění na původní servery. 
 
-Ve složce  na začátku testování nacházely čtyři archivy typu UAR, které obsahovaly diskové obrazy a konfigurace jednotlivých
-zón. Nástroj pro podporu automatické správy Solaris Zones poskytuje funkcionalitu pro obnovu zón skrze příkaz \verb|recovery|.
-Pomocí tohoto nástroje byla spuštěna obnova z výše zmíněných archivů. Tento proces je vyznačen v ukázce \ref{code:test:recovery}
-, kde je vidět i výstup tohoto příkazu. Z příkazu je patrné, že pořadí specifikace identifikátorů zón musí odpovídat pořadí
-zadaných archivů. Pokud by toto pořadí nesouhlasilo, došlo by k prohození diskových obrazů daných zón. Podle výstupu nástroje
-proběhla obnova zón v pořádku a zóny by měly být nainstalované na své původní hosty.
+Ve složce \textit{/zonepool/backup} na začátku testování nacházely čtyři archivy typu UAR, které obsahovaly diskové obrazy
+a~konfigurace jednotlivých zón. Nástroj pro podporu automatické správy Solaris Zones poskytuje funkcionalitu pro obnovu zón skrze
+příkaz \verb|recovery|. Pomocí tohoto příkazu byla spuštěna obnova z~výše zmíněných archivů. Tento proces je vyznačen ve výpisu
+programu \ref{code:test:recovery}, kde je vidět i výstup tohoto příkazu. Z~příkazu je patrné, že pořadí specifikace identifikátorů
+zón musí odpovídat pořadí zadaných archivů. Pokud by toto pořadí nesouhlasilo, došlo by k~prohození diskových obrazů daných
+zón. Podle výstupu nástroje proběhla obnova zón v~pořádku a~zóny by měly být nainstalované na své původní hosty.
 
-Stejně jako v ostatních případech vytváření zón bylo pomocí nástroje \verb|zoneadm(1)| a příkazu \verb|list| ověřeno, že se
+Stejně jako v~ostatních případech vytváření zón bylo pomocí nástroje \verb|zoneadm(1)| a~příkazu \verb|list| ověřeno, že se
 obnovené zóny opravdu vytvořily na daných vzdálených serverech. Testování tohoto scénáře potvrdilo, že nástroj umí obnovit
-neglobální zóny ze sady záloh. Tyto zálohy musí mít tvar definovaný v kapitole \ref{chapter:implementation:szones:routines:backup}.
-V případě tohoto scénáře se jednalo o zálohy typu UAR, které byly vytvořeny v rámci předchozího testování. Závěrem je možné říct,
-že testování tohoto scénáře využití bylo úspěšné.
+neglobální zóny ze sady záloh. Tyto zálohy musí mít tvar definovaný v~kapitole \ref{chapter:implementation:szones:routines:backup}.
+V~případě tohoto scénáře se jednalo o~zálohy typu UAR, které byly vytvořeny v~rámci předchozího testování. Z~tohoto důvodu je možné
+označit testování scénáře pro obnovu zón za úspěšné.
 \section{Měření}
 \label{chapter:measurement}
-V rámci testování nástroje pro podporu automatické správy virtualizačního kontejneru Solaris Zones bylo provedeno měření doby
-běhu některých funkčních prvků. Konkrétně se jednalo o měření doby běhu vytváření pomocí klonování a migrace neglobálních zón
-v rámci popsané infrastruktury. V obou případech se přihlíželo k jiným parametrům měření, které jsou detailněji popsány v 
-následujících dvou kapitolách. K měření bylo opět použito prostředí definované v kapitole \ref{chapter:testing:environment}.
+V~rámci testování nástroje pro podporu automatické správy virtualizačního kontejneru Solaris Zones bylo provedeno měření doby
+běhu některých funkčních prvků. Konkrétně se jednalo o~měření doby běhu vytváření pomocí klonování a~migrace neglobálních zón
+v~rámci popsané infrastruktury. V~obou případech se používaly jiné parametry měření, které jsou detailněji popsány
+v~následujících dvou kapitolách. K~měření bylo opět použito prostředí definované v~kapitole \ref{chapter:testing:environment}.
 \subsection{Výkonnost klonování zón}
 \label{chapter:measurement:creation}
-Prvním objektem měření bylo sledování doby běhu nástroje při vytváření zón v závislosti na počtu vytvářených zón. Zóny byly
-vytvářeny z již existující zóny, která byla umístěna na vzdáleném serveru \textit{shost}. Cílovým serverem byl stejný virtuální počítač
-Technika tvoření zón pomocí klonování byla zvolena z důvodu, aby měření nebylo ovlivněno proměnlivou povahou internetového připojení
-a jinými omezeními fyzického systému. Tyto omezení by se mohli projevit v případě, kdy by zóny byly instalovány z oficiálního repozitáře.
+Prvním objektem měření bylo sledování doby běhu nástroje při vytváření zón v~závislosti na počtu vytvářených zón. Zóny byly
+vytvářeny z~již existující zóny, která byla umístěna na vzdáleném serveru \textit{shost}. Cílovým serverem byl stejný virtuální počítač
+Technika tvoření zón pomocí klonování byla zvolena z~důvodu, aby měření nebylo ovlivněno proměnlivou povahou internetového připojení
+a~jinými omezeními fyzického systému. Tyto omezení by se mohli projevit v~případě, kdy by zóny byly instalovány z~oficiálního repozitáře.
 
-V případě tohoto měření byla nejprve vytvořena na cílovém serveru zdrojová neglobální zóna, která sloužila jako předloha.
-Měření bylo prováděno pro různé hodnoty parametru počtu zón, jak je naznačeno v tabulce \ref{table:measuremet:creation}. Větší
+V~případě tohoto měření byla nejprve vytvořena na cílovém serveru zdrojová neglobální zóna, která sloužila jako předloha.
+Měření bylo prováděno pro různé hodnoty parametru počtu zón, jak je naznačeno v~tabulce \ref{table:measuremet:creation}. Větší
 hodnoty parametru nebyly testovány kvůli omezení testovacího prostředí. Pro každou hodnotu parametru bylo měření několikrát
-opakováno a výsledek zprůměrován. Přesné hodnoty naměřených časů je možné vidět v tabulce \ref{table:measuremet:creation}. Graficky
-znázorněné jsou na grafu \ref{graph:measuremet:creation}. Červená křivka v tomto grafu znázorňuje sériové vytváření zón pomocí klonování.
+opakováno a~výsledek zprůměrován. Přesné hodnoty naměřených časů je možné vidět v~tabulce \ref{table:measuremet:creation}. Graficky
+znázorněné jsou na grafu \ref{graph:measuremet:creation}. Červená křivka v~tomto grafu znázorňuje sériové vytváření zón pomocí klonování.
 
 % 1 19.477s 20.466s 19.916s 19.940s
 % 2 24.800s 24.694s 23.912s 22.833s
@@ -230,7 +230,7 @@ znázorněné jsou na grafu \ref{graph:measuremet:creation}. Červená křivka v
 \begin{table}
   \centering
   \label{table:measuremet:creation}
-  \caption{Doba běhu vytváření zón v závislosti na počtu vytvářených zón}
+  \caption{Doba běhu vytváření zón v~závislosti na počtu vytvářených zón}
   \begin{tabular}{ r | c c c c c c}
    Počet zón & 1 & 2 & 4 & 8 & 16 & 20  \\ \hline
    Doba běhu [s] & 19.94 & 24.05 & 41.73 & 77.72 & 128.95 & \\
@@ -240,35 +240,35 @@ znázorněné jsou na grafu \ref{graph:measuremet:creation}. Červená křivka v
 \begin{figure}
   \centering
   \label{graph:measuremet:creation}
-  \caption{Doba běhu vytváření zón v závislosti na počtu vytvářených zón}
+  \caption{Doba běhu vytváření zón v~závislosti na počtu vytvářených zón}
 \end{figure}
 
-Z měření je možné vypozorovat TODO.
+Z~měření je možné vypozorovat TODO.
 \subsection{Různé techniky migrace zón}
 \label{chapter:measurement:migration}
-Druhé měření se zabývá různými technikami způsobu migrace zón a měří dobu jejich trvání. Implementovaný nástroj umožňuje přenášet zóny mezi
-servery pomocí následujících tří technik.
+Druhé měření se zabývá různými technikami způsobu migrace zón a~měří dobu jejich trvání. Implementovaný nástroj umožňuje přenášet zóny mezi
+servery pomocí následujících tří technik:
 \begin{itemize}
- \item Přímá migrace
- \item Migrace pomocí ZFS archivu
- \item MIgrace pomocí UAR archivu
+ \item Přímá migrace,
+ \item Migrace pomocí ZFS archivu,
+ \item Migrace pomocí UAR archivu.
 \end{itemize}
-První technika využívá k migraci přímo příkazy souborového systému ZFS a umožňuje přenášet souborový systém bez nutnosti jeho dočasného
-uložení. Migrace pomocí ZFS archivu je podobná přímé technice, ale v průběhu migrace uloží zdrojový souborový systém do archivu,
-který je následně přenesen na cílový stroj. V případě poslední techniky je použit archiv typu UAR, který je standardním zálohovacím
-nástrojem v operačním systému Solaris. I tato technika vyžaduje dočasné uložení vytvořeného archivu. Provedené měření se zaměřilo
-na porovnání doby trvání migrace pomocí jednotlivých technik.
+První technika využívá k~migraci přímo příkazy souborového systému ZFS a~umožňuje přenášet souborový systém bez nutnosti jeho dočasného
+uložení. Migrace pomocí ZFS archivu je podobná přímé technice, ale v~průběhu migrace uloží zdrojový souborový systém do archivu,
+který je následně přenesen na cílový stroj. V~případě poslední techniky je použitý archiv typu UAR, který je standardním zálohovacím
+nástrojem v~operačním systému Solaris. I~tato technika vyžaduje dočasné uložení vytvořeného archivu. Provedené měření se zaměřilo
+na porovnání doby trvání migrace v~závislosti na počtu migrovaných zón a~zvolené technice migrace.
 
-Pro účel tohoto měření byly na lokálním serveru \textit{shost} neglobální zóny, které byly vždy přesouvány na vzdálený
-server \textit{shost1}. Migrace byla několikrát opakována pro každou zmíněnou techniku a počet migrovaných zón. Výsledná
-doba běhu byla v rámci opakování se stejnými hodnotami parametrů zprůměrována. Naměřené hodnoty doby běhu pro různé počty
-migrovaných zón a různé techniky migrace je možné vidět v tabulce \ref{table:measuremet:migration}. Graficky jsou tyto
-hodnoty vyneseny v grafu \ref{graph:measuremet:migration}.
+Pro účel tohoto měření byly na lokálním serveru \textit{shost} vytvořeny neglobální zóny, které byly vždy přesouvány na vzdálený
+server \textit{shost1}. Migrace byla několikrát opakována pro každou zmíněnou techniku a~počet migrovaných zón. Výsledná
+doba běhu byla v~rámci opakování se stejnými hodnotami parametrů zprůměrována. Naměřené hodnoty doby běhu pro různé počty
+migrovaných zón a~různé techniky migrace je možné vidět v~tabulce \ref{table:measuremet:migration}. Graficky jsou tyto
+hodnoty vyneseny v~grafu \ref{graph:measuremet:migration}.
 \begin{table}
   \centering
   \label{table:measuremet:migration}
-  \caption{Doba běhu migrace zón v závislosti na použité metodě}
-  \begin{tabular}{ r | c c c c c c}
+  \caption{Doba běhu migrace zón v~závislosti na použité metodě}
+  \begin{tabular}{ l | c c c c c c}
    Počet zón & 1 & 2 & 4 & 8 & 16 & 20  \\ \hline
    Doba běhu (Přímá) [s] & 19.94 & 24.05 & 41.73 & 77.72 & 128.95 & \\
    Doba běhu (ZFS) [s] & 19.94 & 24.05 & 41.73 & 77.72 & 128.95 & \\
@@ -279,13 +279,13 @@ hodnoty vyneseny v grafu \ref{graph:measuremet:migration}.
 \begin{figure}
   \centering
   \label{graph:measuremet:migration}
-  \caption{Doba běhu migrace zón v závislosti na použité metodě}
+  \caption{Doba běhu migrace zón v~závislosti na použité metodě}
 \end{figure}
 
-Z měření je možné vypozorovat TODO.
+Z~měření je možné vypozorovat TODO.
 \section{Závěr testování}
 \label{chapter:testing:scenario:conclusion}
-Všechny testované scénáře byly prováděny v rámci prostředí definovaném v kapitole \ref{chapter:testing:environment}. Vybrané 
-scénáře použití by měly pokrývat hlavní funkcionalitu nástroje a jejich splnění by mělo vypovídat funkčnosti celého nástroje.
-Jelikož jejich testování proběhlo bez chyb a s očekávanými výsledky, je možné konstatovat, že funkcionalita splňuje požadavky
-stanovené v kapitole \ref{chapter:design:demands}.
+Všechny testované scénáře byly prováděny v~rámci prostředí definovaném v~kapitole \ref{chapter:testing:environment}. Vybrané 
+scénáře použití by měly pokrývat hlavní funkcionalitu nástroje a~jejich splnění by mělo vypovídat funkčnosti celého nástroje.
+Jelikož testování těchto scénářů proběhlo bez chyb a~s~očekávanými výsledky, je možné konstatovat, že implementovaný nástroj
+splňuje požadavky stanovené v~kapitole \ref{chapter:design:demands} a~obsahuje požadovanou funkcionalitu.
