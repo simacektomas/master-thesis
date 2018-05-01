@@ -456,7 +456,7 @@ prostředkům systému.
 Virtualizační monitor se nazývá \textit{nativní} nebo také \textit{bare-metal}, pokud má přímý přístup k~HW pomocí vlastních ovladačů.
 Obvykle se \textit{nativní} VMM implementuje ve firmwaru počítače nebo jako hlavní řídící program, který se po startu systému
 zavede do hlavní paměti a je mu předáno řízení. Tento přístup poskytuje nejvíce kontroly nad systémem a je také nejefektivnější,
-protože VMM přístup k~HW zařizuje přímo. Architektura nativního VMM je ukázána na obrázku \ref{figure:native_vmm_vmm}.
+protože VMM přístup k~HW zařizuje přímo. Architektura nativního VMM je ukázána na obrázku \ref{figure:native_vmm}.
 
 Pokud virtualizační monitor nepodporuje určité typy procesorů nebo periferních zařízení některých HW platforem, může softwarové
 vybavení VMM limitovat přenositelnost na tyto platformy \cite{cvut:presentation:virt1}.
@@ -489,7 +489,7 @@ efektivní jako \textit{nativní} VMM.
 Některé typy \textit{nativních} VMM vyžadují pro svoji plnou funkčnost jednu nebo více speciálních instancí VM. Tato instance
 většinou slouží pro správu VMM a ostatních instancí VM. Nicméně existují i virtualizační monitory, které využívají výhody
 existujících OS a především jejich podpory velké škály HW ovladačů. V~tomto případě je OS spuštěn ve speciální instanci VM
-a je společně s~jeho ovladači využíván jako komponenta VMM \cite{cvut:presentation:virt11}. Tento typ architektury je naznačen
+a je společně s~jeho ovladači využíván jako komponenta VMM \cite{cvut:presentation:virt1}. Tento typ architektury je naznačen
 na obrázku \ref{figure:servise_vmm}.
 \begin{figure}
     \centering    

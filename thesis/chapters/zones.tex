@@ -1,286 +1,273 @@
 % Detailed description of Solaris Zones configuration, installation, backup etc.
 \label{chapter:zones}
-V úvodu následující kapitoly jsou popsány základní principy a struktura virtualizační techniky Solaris Zones od
+V~úvodu následující kapitoly jsou popsány základní principy a struktura virtualizační techniky Solaris Zones od
 firmy Oracle. Dále se tato kapitola zabývá popisem datových struktur, postupů a nástrojů, které slouží ke správě a manipulaci
 se zónami. Detailnější popis je věnován především administrátorským rutinám pro konfiguraci, instalaci a zálohování zón.
 \section{Virtualizační technika}
 \label{chapter:zones:technique}
 Oracle Solaris Zones je virtualizační technika, která umožňuje běh více virtuálních počítačů na jednom fyzickém stroji. Jak
-bylo zmíněno v kapitole \ref{chapter:solaris}, tato technika je standardní součástí operačního systému Oracle Solaris od 
-verze systému Solaris 10. Aktuální verze je Solaris 11.3, která přináší novou funkcionalitu v podobě podpory starších verzí 
+bylo zmíněno v~kapitole \ref{chapter:solaris}, tato technika je standardní součástí operačního systému Oracle Solaris od 
+verze systému Solaris 10. Aktuální verze je Solaris 11.3, která přináší novou funkcionalitu v~podobě podpory starších verzí 
 operačního systému Solaris.
 
-Virtualizační techniku Solaris Zones je možné zařadit v klasifikaci virtuálních strojů popsané v kapitole \ref{section:clasification}
+Virtualizační techniku Solaris Zones je možné zařadit v~klasifikaci virtuálních strojů popsané v~kapitole \ref{chapter:virtualization:clasification}
 do sekce \textit{virtualizace na úrovni OS}. Jinak řečeno, tato technika rozděluje zdroje hostitelského
 operačního systému jako CPU, paměť nebo I/O zařízení mezi běžící virtuální stroje a zajišťuje izolaci na úrovni procesů,
-souborového systému a sítě. Zónu je možné definovat jako virtuální kontejner běžící v hostitelském operačním systému, který
+souborového systému a sítě. Zónu je možné definovat jako virtuální kontejner běžící v~hostitelském operačním systému, který
 využívá zdrojů hostitelského operačního systému a je izolovaný od ostatních zón.
 
-Standardně se po instalaci operačního systému Solaris nachází v systému jedna zóna. Je to vlastní instance operačního systému
+Standardně se po instalaci operačního systému Solaris nachází v~systému jedna zóna. Je to vlastní instance operačního systému
 a nazývá se \textbf{globální} zóna. Jinými slovy, je to zóna, která běží přímo na hardwaru počítače nebo ve virtualizovaném
 prostředí. Tato zóna má dvě hlavní funkce. Za prvé tato zóna plní funkci hlavního operačního systému a přebírá kontrolu
 nad fyzickými prostředky po startu systému. Za druhé je hlavním centrálním prvkem pro administraci celého systému a ostatních
-zón. Globální zóna poskytuje globální pohled na celý systém a má přehled o všech systémových zdrojích a aktivitách ostatních
-zón. Její role v rámci Solaris Zones je zásadní a její chyba může zapříčinit pád ostatních zón. Z tohoto důvodu je doporučené
+zón. Globální zóna poskytuje globální pohled na celý systém a má přehled o~všech systémových zdrojích a aktivitách ostatních
+zón. Její role v~rámci Solaris Zones je zásadní a její chyba může zapříčinit pád ostatních zón. Z~tohoto důvodu je doporučené
 používat globální zónu pouze pro účely administrace systému a managementu ostatních zón.
 
-Zóny, které jsou spouštěny v rámci globální zóny se nazývají \textbf{neglobální} zóny. Tyto zóny jsou navzájem izolované na
+Zóny, které jsou spouštěny v~rámci globální zóny se nazývají \textbf{neglobální} zóny. Tyto zóny jsou navzájem izolované na
 několika úrovních. První úroveň izolace je izolace na úrovni sítě. Každá neglobální zóna může mít svůj vlastní logický síťový
-adaptér, který je vytvořený nad fyzickým síťovým rozhraním a je dostupný pouze pro konkrétní zónu. Z jiné neglobální
-zóny tento adaptér není přístupný. Takto vytvořený síťový adaptér může být spravován pouze z globální zóny a ze zóny, ke které
-byl přiřazen v průběhu jejího vytváření. Pomocí virtuálního adaptéru je možné zóně nastavovat IP adresu a připojit ji tak
+adaptér, který je vytvořený nad fyzickým síťovým rozhraním a je dostupný pouze pro konkrétní zónu. Z~jiné neglobální
+zóny tento adaptér není přístupný. Takto vytvořený síťový adaptér může být spravován pouze z~globální zóny a ze zóny, ke které
+byl přiřazen v~průběhu jejího vytváření. Pomocí virtuálního adaptéru je možné zóně nastavovat IP adresu a připojit ji tak
 do konkrétní sítě.
 
 Druhou úrovní izolace zón je souborový systém. Globální zóna spravuje svůj vlastní souborový systém, ve kterém se nachází
-standardní adresářová struktura operačních systému typu UNIX. Můžeme v něm nalézt adresář \textit{/etc} sloužící pro globální
+standardní adresářová struktura operačních systému typu UNIX. Můžeme v~něm nalézt adresář \textit{/etc} sloužící pro globální
 systémovou konfiguraci, adresář \textit{/bin} obsahující uživatelsky spustitelné programy nebo například adresář \textit{/sbin},
 který uchovává programy spustitelné pod privilegovaným uživatelem. Každá neglobální zóna potřebuje pro svůj běh velmi podobné
-prostředí, a proto má svůj vlastní souborový systém, který se nachází v hierarchii souborového systému globální zóny.
-Podle typu zón popsaných v kapitole \ref{chapter:zones:types} může být tento souborový systém částečně sdílený se souborovým
+prostředí, a proto má svůj vlastní souborový systém, který se nachází v~hierarchii souborového systému globální zóny.
+Podle typu zón popsaných v~kapitole \ref{chapter:zones:types} může být tento souborový systém částečně sdílený se souborovým
 systémem globální zóny a nebo může obsahovat kompletně nezávislý obraz zóny. Při spouštění zóny pak dojde pomocí příkazu
-\verb|chroot(1)| k přepnutí kořenu souborového systému a zóna pracuje pouze se svojí částí souborového systému. V případě 
-sdílené části souborového systému jsou tyto části připojeny v režimu read-only \cite{cvut:presentation:virt11}. Tím je zajištěno,
+\verb|chroot(1)| k~přepnutí kořenu souborového systému a zóna pracuje pouze se svojí částí souborového systému. V~případě 
+sdílené části souborového systému jsou tyto části připojeny v~režimu read-only \cite{cvut:presentation:virt1}. Tím je zajištěno,
 že souborové systémy jednotlivých zón jsou vzájemně izolované a nemohou se vzájemně ovlivnit. Správu těchto souborových systémů
-je opět možné provádět pouze z konkrétní zóny a nebo ze zóny globální.
+je opět možné provádět pouze z~konkrétní zóny a nebo ze zóny globální.
 
 Mimo izolace na úrovni sítě a souborového systému Solaris Zones implementuje ještě izolaci na úrovni procesů. Každá neglobální
-zóna má svůj plánovač a může spouštět svoje vlastní procesy. Procesy běžící v jedné neglobální zóně nejsou žádným způsobem 
-viditelné ani přímo ovlivnitelné z jiných neglobálních zón. Pokud chce proces z jedné zóny komunikovat s procesem z jiné zóny,
-nemůže k tomu využít mezi procesovou komunikaci, ale musí použít počítačové sítě. Naopak procesy, které běží v rámci jedné
-zóny spolu mohou komunikovat pomocí signálů, sdílené paměti a tak podobně. Všechny procesy běžící v systému mohou být
-spravovány z globální zóny. Globální zóna tedy nabízí globální přehled všech procesů, které jsou spuštěny ve všech běžících
-zónách v systému. Výstup příkazu \verb|ps(1)| v globální zóně zobrazí všechny procesy, zatímco v neglobální zóně budou zobrazeny
+zóna má svůj plánovač a může spouštět svoje vlastní procesy. Procesy běžící v~jedné neglobální zóně nejsou žádným způsobem 
+viditelné ani přímo ovlivnitelné z~jiných neglobálních zón. Pokud chce proces z~jedné zóny komunikovat s~procesem z~jiné zóny,
+nemůže k~tomu využít mezi procesovou komunikaci, ale musí použít počítačové sítě. Naopak procesy, které běží v~rámci jedné
+zóny spolu mohou komunikovat pomocí signálů, sdílené paměti a tak podobně. Všechny procesy běžící v~systému mohou být
+spravovány z~globální zóny. Globální zóna tedy nabízí globální přehled všech procesů, které jsou spuštěny ve všech běžících
+zónách v~systému. Výstup příkazu \verb|ps(1)| v~globální zóně zobrazí všechny procesy, zatímco v~neglobální zóně budou zobrazeny
 pouze procesy příslušící dané zóně.
 \subsection{Typy zón}
 \label{chapter:zones:types}
-Jak bylo zmíněno výše, virtualizační technika Solaris Zones umožňuje v rámci jedné globální zóny spouštět mnoho neglobálních
+Jak bylo zmíněno výše, virtualizační technika Solaris Zones umožňuje v~rámci jedné globální zóny spouštět mnoho neglobálních
 zón. Každá neglobální zóna má vlastnost zvanou \textit{brand}, která určuje její typ. Tato vlastnost se specifikuje
-při konfiguraci zóny v globální zóně a dle přehledu \cite{oracle:solaris:zones:brands} může typ zóny mít následující hodnoty:
+při konfiguraci zóny v~globální zóně a dle přehledu \cite{oracle:solaris:zones:brands} může typ zóny mít následující hodnoty:
 \begin{itemize}
  \item \textit{solaris},
  \item \textit{solaris-kz},
  \item \textit{solaris10}.
 \end{itemize}
-Typ zóny neboli \textit{brand} určuje jakým způsobem se zóna bude po spuštění chovat. Implicitním typem zóny v Solaris Zones
+Typ zóny neboli \textit{brand} určuje jakým způsobem se zóna bude po spuštění chovat. Implicitním typem zóny v~Solaris Zones
 je \textit{solaris}, kterému se také jinak přezdívá nativní zóna nebo také tenká zóna. Dalším typem zóny je \textit{solaris-kz},
-kde zkratka za pomlčkou v názvu odpovídá slovnímu spojením kernel zone. Tato zóna má vlastní jádro
+kde zkratka za pomlčkou v~názvu odpovídá slovnímu spojením kernel zone. Tato zóna má vlastní jádro
 operačního systému a někdy se jí také přezdívá plná nebo tlustá zóna. Posledním typem zón, kterou Solaris Zones umí vytvářet
-je \textit{solaris10}. Hlavním úkolem této zóny je zajišťovat zpětnou kompatibilitu s operačním systémem Solaris 10 a umožňuje
+je \textit{solaris10}. Hlavním úkolem této zóny je zajišťovat zpětnou kompatibilitu s~operačním systémem Solaris 10 a umožňuje
 uvnitř této zóny spouštět aplikace určené pro tento systém.
 
-V následujících kapitolách jsou podrobněji popsány výše zmíněné typy zón.
+V~následujících kapitolách jsou podrobněji popsány výše zmíněné typy zón.
 \subsubsection{Nativní zóna}
 \label{chapter:zones:types:native}
-Nativní neboli tenká zóna umožňuje administrátorovi vytvořit zónu, která má sdílené jádro operačního systému s globální zónou.
-Jinými slovy verze jádra operačního systému musí být stejná jako v globální zóně. Tento typ zóny je izolovaný pouze nad svým
-souborovým systémem a nemá standardně nemá k dispozici informace o žádném fyzickém zařízení systému. Souborové systémy ostatních
-zón jsou nedostupné a konkrétní neglobální zóna o nich nemá žádné informace. Z jejího pohledu existuje pouze její kořenový
+Nativní neboli tenká zóna umožňuje administrátorovi vytvořit zónu, která má sdílené jádro operačního systému s~globální zónou.
+Jinými slovy verze jádra operačního systému musí být stejná jako v~globální zóně. Tento typ zóny je izolovaný pouze nad svým
+souborovým systémem a standardně nemá k~dispozici informace o~žádném fyzickém zařízení systému. Souborové systémy ostatních
+zón jsou nedostupné a konkrétní neglobální zóna o~nich nemá žádné informace. Z~jejího pohledu existuje pouze její kořenový
 souborový systém. Jak již bylo popsáno výše, kořenový sytém nativní zóny může být sdílený se souborovým systémem globální
-zóny a sdílet tak základní systémové nástroje. Pokud chceme této zóně delegovat nějaký typ zařízení, musíme tak učinit při
-konfiguraci zóny v globální zóně. Tímto způsobem můžeme nativní zóně zpřístupnit souborové systémy, ZFS pool nebo
-ZFS dataset. Takto definované prostředky pak po instalaci zóny můžeme z této zóny využívat.
+zóny a sdílet tak základní systémové nástroje. Neglobální zóně je možné delegovat nějaký typ zařízení. Tento krok musí být
+učiněn při konfiguraci zóny v~globální zóně. Tímto způsobem je možné nativní zóně zpřístupnit souborové systémy, ZFS pool nebo
+ZFS dataset. Takto definované prostředky jsou po instalaci dostupné uvnitř konkrétní zóny.
 
-Dále tento typ zóny má svoji vlastní databázi produktů, která obsahuje informace o všech nainstalovaných softwarových
-komponentech v konkrétní globální zóně. Opět platí, že konkrétní neglobální zóna vidí pouze své balíčky. Díky tomu je možné
-instalovat dodatečné softwarové balíčky do neglobálních zón, které nemusí být nainstalované v globální zóně
-\cite{oracle:solaris:zones:brands}. Některé softwarové balíčky jsou ale společné s globální zónou (kernel) a nelze tedy
-provádět kompletní aktualizaci bez zásahu do globální zóny. 
+Tento typ zóny má svoji vlastní databázi produktů, která obsahuje informace o~všech nainstalovaných softwarových
+komponentech v~konkrétní neglobální zóně. Opět platí, že konkrétní neglobální zóna vidí pouze své balíčky. Díky tomu je možné
+instalovat dodatečné softwarové balíčky do neglobálních zón, které nemusí být nainstalované v~globální zóně
+\cite{oracle:solaris:zones:brands}. Některé softwarové balíčky jsou však společné s~globální zónou (jádro OS) a nelze
+provádět jejich kompletní aktualizaci bez zásahu do globální zóny. 
 
 Nativní zóna podporuje dva typy síťových rozhraní, které mohou být zóně při konfiguraci přiřazeny. Prvním typem je sdílená 
-adresa neboli \textit{shared-ip}. Tento typ síťového rozhraní sdílí ip adresu s nějakým fyzickým rozhraním globální zóny. 
-Pokud chce neglobální zóna komunikovat s okolím, bude v hlavičce paketu ip adresa globální zóny a při obdržení odpovědi
-globální zóna přesměruje paket na virtuální síťové rozhraní konkrétní globální zóny. Zde můžeme pozorovat podobnost s
-technikou NAT v sítích. Jako druhý typ rozhraní můžeme použít exkluzivní rozhraní nebo také \textit{exclusive-ip}, které
-nesdílí ip adresu s globální zónou, ale má svoji vlastní. V tomto případě veškerý síťový provoz generovaný touto zónou bude
-mít v hlavičce jinou ip adresu než zóna globální.
+adresa neboli \textit{shared-ip}. Tento typ síťového rozhraní sdílí IP adresu s~nějakým fyzickým rozhraním globální zóny. 
+Pokud chce neglobální zóna komunikovat s~okolím, bude v~hlavičce paketu IP adresa globální zóny a při obdržení odpovědi
+globální zóna přesměruje paket na virtuální síťové rozhraní konkrétní globální zóny. Zde je možné pozorovat podobnost
+s~technikou NAT v~sítích. Jako druhý typ adresy je možné použít exkluzivní rozhraní nebo také \textit{exclusive-ip}, které
+nesdílí IP adresu s~globální zónou, ale má svoji vlastní. V~tomto případě veškerý síťový provoz generovaný touto zónou bude
+mít v~hlavičce jinou IP adresu než zóna globální.
 
 Tento typ zóny nepodporuje vytváření další neglobálních zón. Jinými slovy se nativní neglobální zóna nemůže chovat jako
-globální zóna a vytvářet nové zóny uvnitř sebe. Stejně tak z nativní zóny nemůžeme vytvářet ani spravovat jiné neglobální zóny.
+globální zóna a vytvářet nové zóny uvnitř sebe. Stejně tak z~nativní zóny nemůže být vytvořena ani spravována jiná neglobální
+zóna.
 
-Nativní zóna je implicitní typ zóny v Solaris Zones a pokud administrátor nespecifikuje jinak při vytváření zóny, bude nově
+Nativní zóna je implicitní typ zóny v~Solaris Zones a pokud administrátor nespecifikuje jinak při vytváření zóny, bude nově
 vytvořená zóna právě typu \textit{solaris}. Tento typ zóny může být provozován na všech systémech, které podporují operační
 systém Oracle Solaris 11.3 \cite{oracle:solaris:zones:brands}.
 \subsubsection{Kernel zóna}
 \label{chapter:zones:types:kernel}
 Druhým typem zóny, který virtualizační technika Solaris Zones umožňuje vytvářet, je kernel zóna nebo také tlustá zóna. Tento
-typ zóny obsahuje vlastní jádro operačního systému a na rozdíl od nativní zóny ho nesdílí s globální zónou. Kernel zóna
-tedy může být provozována na jiné verzi jádra než globální zóna. V důsledku toho kernel zóna podporuje funkcionalitu,
+typ zóny obsahuje vlastní jádro operačního systému a na rozdíl od nativní zóny ho nesdílí s~globální zónou. Kernel zóna
+tedy může být provozována na jiné verzi jádra než globální zóna. V~důsledku toho kernel zóna podporuje funkcionalitu,
 které nelze pomocí nativní zóny dosáhnout.
 
-Stejně jako v případě nativní zóny i kernel zóna obsahuje vlastní databázi instalovaných softwarových balíčků. Jelikož i 
-kernel zóna je neglobální, nelze z ní žádným způsobem vidět balíčky ostatních zón. Na rozdíl od nativní zóny administrátor
-může provádět aktualizaci všech balíčků, protože kernel zóna nesdílí nic s globální zónou. Žádné balíčky tedy nejsou závislé
+Stejně jako v~případě nativní zóny i kernel zóna obsahuje vlastní databázi instalovaných softwarových balíčků. Jelikož i 
+kernel zóna je neglobální, nelze z~ní žádným způsobem vidět balíčky ostatních zón. Na rozdíl od nativní zóny administrátor
+může provádět aktualizaci všech balíčků, protože kernel zóna nesdílí nic s~globální zónou. Žádné balíčky tedy nejsou závislé
 na balíčkách globální zóny.
 
-V případě síťových rozhraní kernel zóny podporují pouze rozhraní typu \textit{exclusive-ip} a neumožňuje sdílet síťovou adresu
-s globální zónou.
+V~případě síťových rozhraní kernel zóny podporují pouze rozhraní typu \textit{exclusive-ip} a neumožňuje sdílet síťovou adresu
+s~globální zónou. Rozhraní typu \textit{shared} je pro tento typ nedostupné.
 
 Na rozdíl od nativní zóny se kernel zóny mohou chovat jako globální zóny uvnitř hostitelské globální zóny. Jinými slovy je
-možné uvnitř kernel zóny vytvářet další neglobální zóny a vytvářet tak hierarchickou strukturu virtuální strojů. Je na zvážení
-administrátora, jestli daný scénář vyžaduje tuto strukturu.
+možné uvnitř kernel zóny vytvářet další neglobální zóny a vytvářet tak hierarchickou strukturu virtuálních strojů. Je na zvážení
+administrátora, jestli daný scénář použití vyžaduje tuto strukturu.
 \subsubsection*{Požadavky}
-Jelikož provoz kernel zóny se liší od provozu standardní nativní zóny, liší se i požadavky na hostitelský systéme. Požadavky
-se liší v závislosti na platformě. Pro jednoduchost si uvedeme pouze požadavky pro systémy s architekturou x86 a procesorem 
-intel. Podle specifikace \cite{oracle:solaris:zones:kernel_zones_requiremets} se na hostitelský systém kladou následující
-požadavky.
-
+\label{chapter:zones:types:kernel:demands}
+Jelikož provoz kernel zóny se liší od provozu standardní nativní zóny, liší se i požadavky na hostitelský systém. Požadavky
+se liší v~závislosti na platformě. Pro jednoduchost si uvedeme pouze požadavky pro systémy s~architekturou x86. Podle specifikace
+\cite{oracle:solaris:zones:kernel_zones_requiremets} se na hostitelský systém kladou následující požadavky:
 \begin{itemize}
- \item Procesor musí být typu Nehalem nebo novější
- \item Virtualizace CPU (VT-x) 
- \item Podpora virtualizace paměti (RVI, EPT)
- \item Ochrana paměti
+ \item Procesor typu Nehalem (nebo novější),
+ \item Virtualizace CPU (VT-x) ,
+ \item Podpora virtualizace paměti (RVI, EPT),
+ \item Ochrana paměti.
 \end{itemize}
-
-Výše zmíněné požadavky kladou nároky na HW vybavení hostitelského systému. Spolu s těmito požadavky musí být v globální zóně
+Výše zmíněné požadavky kladou nároky na HW vybavení hostitelského systému. Spolu s~těmito požadavky musí být v~globální zóně
 nainstalovaný balíček \textit{brand/brand-solaris-kz}, který umožňuje vytváření kernel zón. Administrátor může pomocí příkazu
-\verb|virtinfo(1)| zjistit, jaký typ virtualizace je v globální zóně podporován. Výpis programu na virtualizované platformě
-VMvare, kde jsou splněné výše zmíněné požadavky může vypadat následovně.
-
-\begin{verbatim}
+\verb|virtinfo(1)| zjistit, jaký typ virtualizace je v~globální zóně podporován. Výpis programu ve virtualizované platformě
+VMvare, kde jsou splněné výše zmíněné požadavky je zobrazen na v~ukázce výpisu programu \ref{code:virtinfo}.
+\begin{lstlisting}[caption={Výpis příkazu virtinfo}, label={code:virtinfo}]  
 zadmin@shost:~$ virtinfo
 NAME            CLASS     
 vmware          current   
 non-global-zone supported
 kernel-zone     supported
-\end{verbatim}
-
-
+\end{lstlisting}
 \subsubsection{Branded zóna}
 \label{chapter:zones:types:branded}
-Branded zóny byly vytvořeny pro zpětné zajištění kompatibility se staršími verzemi operačního sytému Solaris. Díky technologii
+\textit{Branded} zóny byly vytvořeny pro zpětné zajištění kompatibility se staršími verzemi operačního sytému Solaris. Díky technologii
 \textit{BrandZ} \cite{oracle:solaris:zones:brands} umožňují spouštění aplikací určených pro operační systém Solaris 10 na 
 systému s OS Solaris 11. Aplikace mohou běžet v nezměněné formě v bezpečném prostředí, které je zajištěno neglobální zónou.
 
-Z pohledu administrátora se tento typ zóny chová stejně jako nativní zóna a má stejné vlastnosti, které jsou popsané v
-podkapitole \ref{chapter:zones:native}.
+Z~pohledu administrátora se tento typ zóny chová stejně jako nativní zóna a má stejné vlastnosti, které jsou popsané
+v~kapitole \ref{chapter:zones:types:native}.
 \subsubsection{Shrnutí}
 \label{chapter:zones:summary}
 Virtualizační technologie Solaris Zones umožňuje vytvářet neglobální zóny uvnitř primární globální zóny. Neglobální zóny
 poskytují izolované prostředí pro nezávislý a bezpečný běh aplikací. Zóny jsou izolovány na úrovni počítačové sítě,
 souborového systému a běžících procesů, čímž je zajištěno, že se vzájemně nemohou přímo ovlivňovat. Jediný způsob komunikace
-procesů z jiných zón je pomocí počítačové sítě. 
-
-Neglobální zóna může být několika druhů, které poskytují různé vlastnosti. Tabulka \ref{table:zone_comparison} poskytuje stručný
-přehled základních vlastností jednotlivých druhů zón.
-\begin{table}
-  \centering  
-  \caption[Porovnání typů zón a jejich vlastností]{Porovnání typů zón a jejich vlastností}
-  \label{table:zone_comparison}
-\end{table}
+procesů z~jiných zón je pomocí počítačové sítě.
 \section{Administrace}
 \label{chapter:zones:administration}
 Globální zóna slouží hlavně pro účely správy hostitelského systému a všech neglobálních zón. Poskytuje nainstalovaným zónám
-prostředky pro jejich běh a spravuje informace o jejich stavu. Je to klíčové místo pro správu celého systému a správných chod
-neglobálních zón vyžaduje bezproblémový chod globální zóny. Administrátor takového systému by tento fakt vzít v úvahu a
+prostředky pro jejich běh a spravuje informace o~jejich stavu. Je to klíčové místo pro správu celého systému a správných chod
+neglobálních zón vyžaduje bezproblémový chod globální zóny. Administrátor takového systému by tento fakt měl vzít v~úvahu a
 nepoužívat globální zónu jako zdroj pro spouštění uživatelských aplikací.
 
 Proces vytváření zón se skládá ze dvou částí. První částí je konfigurace neglobální zóny, kdy administrátor specifikuje jaké
 parametry má zóna mít a jaké prostředky bude moci využívat. Tento proces zavede zónu do databáze globální zóny a od této
-chvíle je registrovaná v systému. K tomuto účelu nabízí Solaris Zones nástroj \verb|zonecfg(1)|. Více o tomto nástroji a
-možnostech konfigurace zón je popsáno v kapitole \ref{chapter:zones:configuration}.
+chvíle je registrovaná v~systému. K~tomuto účelu nabízí Solaris Zones nástroj \verb|zonecfg(1)|. Tento nástroj a
+možnosti konfigurace zón jsou popsány v~kapitole \ref{chapter:zones:configuration}.
 
-Z předchozího procesu vznikne jakýsi recept na to, jak danou neglobální zónu vytvořit. Nyní je třeba vytvořit souborový systém
-zóny se všemi balíčky, které zóna bude potřebovat ke svému běhu. Této fázi se říká instalace zóny a v jejím průběhu se do
-kořenového souborového systému nahrávají určené balíčky a nastavuje se konfigurační profil zón. Pro tento účel slouží nástroj
-\verb|zoneadm(1)|. Výstupem tohoto procesu je nainstalovaná zóna připravená ke spuštění. Detailněji nástroj pro instalaci zón
+Z~předchozího procesu vznikne předpis na to, jak danou neglobální zónu vytvořit. Nyní je třeba vytvořit souborový systém
+zóny se všemi balíčky, které zóna bude potřebovat ke svému běhu. Této fázi se říká instalace zóny a v~jejím průběhu se do
+kořenového souborového systému nahrávají určené balíčky a nastavuje se systémový profil zón. Pro tento účel slouží nástroj
+\verb|zoneadm(1)|. Výstupem tohoto procesu je nainstalovaná zóna připravená ke spuštění. Nástroj pro instalaci zón
 a proces instalace popisuje kapitola \ref{chapter:zones:instalation}.
 
-Čerstvě nainstalovaná zóna může být opět pomocí nástroje \verb|zoneadm(1)| spuštěna a následně se do ní může privilegovaný 
+Nainstalovaná zóna může být opět pomocí nástroje \verb|zoneadm(1)| spuštěna a následně se do ní může privilegovaný 
 uživatel přihlásit pomocí nástroje \verb|zlogin(1)|.
 \subsection{Administrátor}
 \label{chapter:zones:administration:administrator}
-Jelikož neglobálních zón může být v systému provozováno velké množství, může být pro administrátora globální zóny spravovat 
-celou globální zónu a přitom se starat o všechny neglobální zóny. Pro tento účel může být vytvořen uživatel, který se bude
-starat výhradně jenom o neglobální zóny. Tento uživatel bude mít práva na správu všech neglobálních zón.
+Jelikož neglobálních zón může být v~systému provozováno velké množství, může být pro administrátora globální zóny složité spravovat 
+celou globální zónu a přitom se starat o~všechny neglobální zóny. Pro tento účel může být vytvořen uživatel, který se bude
+starat výhradně jenom o~neglobální zóny. Tento uživatel bude mít práva na správu všech neglobálních zón.
 
 Pokud by i tak bylo neglobálních zón mnoho, je možné jednotlivým neglobálním zónám přiřadit vlastního administrátora. Ten
-se bude moc do zóny přihlásit pomocí příkazu \verb|zlogin(1)| a provádět údržbu a správu systému.
+bude mít možnost se do zóny přihlásit pomocí příkazu \verb|zlogin(1)| a provádět údržbu a správu systému.
 \subsection{Stavový model zón}
 \label{chapter:zones:administration:states}
-V Solaris Zones má neglobální zóna definovaný stavový model. Jsou to stavy, ve kterých se zóna během jejího životního cyklu
-může nacházet. Zónu můžeme převést z jednoho stavu do druhého pouze nějakou kombinací nástrojů \verb|zonecfg(1)| a
-\verb|zoneadm(1)|. Podle specifikace \cite{oracle:solaris:zones:states} se neglobální zóna může nacházet v jednom z
-následujících sedmi stavů.
+V~Solaris Zones má neglobální zóna definovaný stavový model. Jsou to stavy, ve kterých se zóna během jejího životního cyklu
+může nacházet. Zónu můžeme převést z~jednoho stavu do druhého pouze použitím nástrojů \verb|zonecfg(1)| a
+\verb|zoneadm(1)|. Podle specifikace \cite{oracle:solaris:zones:states} se neglobální zóna může nacházet v~jednom
+z~následujících sedmi stavů:
 \begin{itemize}
- \item \textit{Configured}
- \item \textit{Incomplete}
- \item \textit{Unavailable}
- \item \textit{Installed}
- \item \textit{Ready}
- \item \textit{Running}
- \item \textit{Shutting down/Down}
+ \item \textit{Configured},
+ \item \textit{Incomplete},
+ \item \textit{Unavailable},
+ \item \textit{Installed},
+ \item \textit{Ready},
+ \item \textit{Running},
+ \item \textit{Shutting down/Down}.
 \end{itemize}
-V každém z těchto stavů může administrátor používat pouze nějakou podmnožinu příkazů, které zónu ovládají. Pro příklad
-můžeme uvést, že nelze zónu spustit pokud se nachází například ve stavu \textit{configured}. Pro spuštění se zóna musí nacházet
-ve stavu \textit{installed}. V následujících odstavcích je stručně shrnut význam jednotlivých stavů.
+V~každém z~těchto stavů může administrátor používat pouze nějakou podmnožinu příkazů, které zónu ovládají. Pro příklad
+může být uvedeno, že zónu nelze spustit pokud se nachází například ve stavu \textit{configured}. Pro spuštění se zóna musí
+nacházet ve stavu \textit{installed} nebo \textit{ready}.
 \subsubsection{Configured}
 \label{chapter:zones:administration:states:configured}
-Stav \textit{configured} značí, že konfigurace zóny je hotová a uložená na perzistentním úložišti. V tuto chvíli se zónou
-ještě nebyl asociován žádný diskový obraz a tedy nemá připojený kořenový souborový systém. Tento stav je v pořadí první stav,
-ve kterém se zóna může od svého vzniku nacházet. Nachází se v něm buď bezprostředně po vytvoření konfigurace pomocí \verb|zonecfg(1)|
-nebo když je zóna odinstalována nebo odpojena.
+Stav \textit{configured} značí, že konfigurace zóny je hotová a uložená na perzistentním úložišti. V~tuto chvíli se zónou
+ještě nebyl spojen žádný diskový obraz a tedy nemá připojený kořenový souborový systém. Tento stav je v~pořadí prvním stavem,
+ve kterém se zóna může od svého vzniku nacházet. Nachází se v~něm buď bezprostředně po vytvoření konfigurace pomocí \verb|zonecfg(1)|
+nebo pokud je zóna odinstalována nebo odpojena.
 \subsubsection{Incomplete}
 \label{chapter:zones:administration:states:incomplete}
-Zóna se nachází ve stavu \textit{incomplete} během procesu instalace a odinstalace. Je to přechodný stav, ale v případě poškození
-nainstalované zóny může být v tomto stavu stále. V případě úspěchu procesu instalace pomocí nástroje \verb|zonecfg(1)| je 
+Zóna se nachází ve stavu \textit{incomplete} během procesu instalace a odinstalace. Je to přechodný stav, ale v~případě poškození
+nainstalované zóny může být v~tomto stavu stále. V~případě úspěchu procesu instalace pomocí nástroje \verb|zoneadm(1)| je 
 stav zóny změněn na stav \textit{installed}. Pokud uspěje proces odinstalování zóny pomocí stejného nástroje, je stav
 změněn na stav \textit{configured}.
 \subsubsection{Unavailable}
 \label{chapter:zones:administration:states:unavailable}
-Ve stavu \textit{unavailable} se zóna nachází v případě, kdy zóna byla v minulosti nainstalována, ale momentálně nemůže být
-spuštěna, přesunuta nebo její validace vrací chybu. Tento stav může mít několik příčin. Jednou z nich může být nedostupnost
+Ve stavu \textit{unavailable} se zóna nachází v~případě, kdy zóna byla v~minulosti nainstalována, ale momentálně nemůže být
+spuštěna, přesunuta nebo její validace vrací chybu. Tento stav může mít několik příčin. Jednou z~nich může být nedostupnost
 zdrojového souborového systému zóny. Souborový systém může být nedostupný chybou administrátora nebo například chybou diskového
 zařízení. Další příčinou může být nekompatibilita softwarového vybavení globální zóny a neglobální zóny. To se může stát například
-ve chvíli kdy migrujeme neglobální nativní zónu z jednoho systému na druhý a tyto dva systémy mají odlišnou verzi jádra.
+ve chvíli, kdy dochází k~migraci neglobální nativní zóny z~jednoho systému na druhý a tyto dva systémy mají odlišnou verzi jádra.
 \subsubsection{Installed}
 \label{chapter:zones:administration:states:installed}
-Stav \textit{installed} signalizuje, že zóna s danou konfigurací je nainstalovaná ve svém kořenovém souborovém systému,
+Stav \textit{installed} signalizuje, že zóna s~danou konfigurací je nainstalovaná ve svém kořenovém souborovém systému,
 ale nemá alokovanou žádnou virtuální platformu pro svůj běh. Jinými slovy ještě nemůže být přímo spuštěna. Zóna ve stavu
 \textit{installed} již může být zálohována nebo migrována mezi různými hosty. 
 \subsubsection{Ready}
 \label{chapter:zones:administration:states:ready}
 Zóna se nachází ve stavu \textit{ready}, právě když je pro ni alokována virtuální platforma pro její běh. To znamená, že jádro
-hostitelského operačního systému Solaris vytvořilo proces \verb|zsched|, vytvořilo virtuální síťové rozhraní a zpřístupnilo
-je neglobální zóně. Obecně jádro inicializovalo všechny prostředky specifikované v konfiguraci zóny a zpřístupnilo je dané
-neglobální zóně. V tomto stavu ještě nebyl spuštěn žádný uživatelský proces asociovaný s konkrétní zónou \cite{oracle:solaris:zones:states}.
-Tento stav je tranzitní a nastává v okamžiku kdy zahajujeme boot zóny pomocí příkazu \verb|zoneadm(1)|.
+hostitelského operačního systému Solaris vytvořilo proces \verb|zsched|. Vytvořilo také virtuální síťové rozhraní a zpřístupnilo
+je neglobální zóně. Obecně jádro inicializovalo všechny prostředky specifikované v~konfiguraci zóny a zpřístupnilo je dané
+neglobální zóně. V~tomto stavu ještě nebyl spuštěn žádný uživatelský proces asociovaný s~konkrétní zónou \cite{oracle:solaris:zones:states}.
+Tento stav je tranzitní a nastává v~okamžiku, kdy zahajujeme boot zóny pomocí příkazu \verb|zoneadm(1)|.
 \subsubsection{Running}
 \label{chapter:zones:administration:states:running}
-Ve stavu \textit{running} se zóna nachází když je spuštěn první uživatelský proces. Většinou se jedná o proces \verb|init(1)|,
+Ve stavu \textit{running} se zóna nachází, pokud je spuštěn první uživatelský proces. Většinou se jedná o~proces \verb|init(1)|,
 který inicializuje celou zónu a umožňuje spouštění procesů uvnitř dané neglobální zóny. Zóna ve stavu \textit{running} má tedy
-alokovanou virtuální platformu v jádru hostitelského operačního systému, inicializované všechny zařízení a spuštěné uživatelské
+alokovanou virtuální platformu v~jádru hostitelského operačního systému, inicializované všechna zařízení a spuštěné uživatelské
 procesy.
 \subsubsection{Shutting down/Down}
 \label{chapter:zones:administration:states:down}
 Posledním stavem respektive dvojicí stavů, ve kterých se může neglobální zóna nacházet jsou stavy \textit{shutting down} resp. 
-\textit{down}. Tyto stavy jsou tranzitní a nastávají ve chvíli, kdy daná zóna zastavuje svůj běh. V případě, kdy nelze zónu
-z nějakého důvodu zastavit, může daná zóna setrvat v některém z těchto dvou stavů \cite{oracle:solaris:zones:states}. 
+\textit{down}. Tyto stavy jsou tranzitní a nastávají ve chvíli, kdy daná zóna zastavuje svůj běh. V~případě, kdy nelze zónu
+z~nějakého důvodu zastavit, může daná zóna setrvat v~některém z~těchto dvou stavů \cite{oracle:solaris:zones:states}. 
 \subsubsection{Doplňkové stavy kernel zón}
 \label{chapter:zones:administration:states:kernel_zones}
-Výše zmíněné stavy jsou společné pro všechny typy zón. Nastávají tedy u nativních zón, kernel zón i branded zón. Pro kernel
-zóny existují ještě další stavy, které zmíníme jenom v rychlosti, jelikož nejsou tolik podstatné. Jedná se o stavy
-\textit{suspended}, \textit{debugging}, \textit{panicked}, \textit{migrating-out} a \textit{migrating-in}. Jména stavů jsou
-samovysvětlující, a proto nemá smysl je podrobněji popisovat.
+Výše zmíněné stavy jsou společné pro všechny typy zón. Nastávají tedy u~nativních zón, kernel zón i branded zón. Pro kernel
+zóny existují ještě další stavy . Jedná se o~stavy \textit{suspended}, \textit{debugging}, \textit{panicked}, \textit{migrating-out}
+a \textit{migrating-in}. Tyto stavy však nejsou pro podstatu práce podstatné a proto jejich podrobný popis bude vynechán.
 \section{Konfigurace}
 \label{chapter:zones:configuration}
-Prvním krokem k vytvoření zóny je zaregistrování její konfigurace do systému Solaris Zones. K tomuto účelu se používá nástroj
-\verb|zonecfg(1)|, který umožňuje vytváře, měnit nebo mazat konfigurace jednotlivých neglobálních zón. Dle manuálových stránek 
-\cite{oracle:manpages:zonecfg} Tento nástroj umožňuje administrátorovi zadávat konfiguraci ve třech následujících režimech.
+Prvním krokem k~vytvoření zóny je zaregistrování její konfigurace do systému Solaris Zones. K~tomuto účelu se používá nástroj
+\verb|zonecfg(1)|, který umožňuje vytvářet, měnit nebo mazat konfigurace jednotlivých neglobálních zón. Dle manuálových stránek 
+\cite{oracle:manpages:zonecfg} tento nástroj umožňuje administrátorovi zadávat konfiguraci ve třech následujících režimech:
 \begin{itemize}
- \item Interaktivně
- \item Dávkově
- \item Pomocí souboru s příkazy
+ \item Interaktivně,
+ \item Dávkově,
+ \item Pomocí souboru s~příkazy.
 \end{itemize}
 První režim zadávání konfigurace vyžaduje aktivní účast uživatele a umožňuje interaktivně zadávat příkazy, které definují
-konfiguraci dané zón. Další dva režimy načítají příkazy k definici konfigurace z jiného zdroje než je interaktivní vstup uživatele.
-V případě dávkového režimu se jedná o vstup příkazů na příkazové řádce, kdy jsou příkazy zřetězeny za sebe a předány nástroji
-\verb|zonecfg(1)| jako parametr. V druhém případě jsou příkazy načteny ze souboru, kde je každý příkaz na samostatné řádce.
+konfiguraci dané zóny. Další dva režimy načítají příkazy k~definici konfigurace z~jiného zdroje než je interaktivní vstup uživatele.
+V~případě dávkového režimu se jedná o~vstup příkazů na příkazové řádce, kdy jsou příkazy zřetězeny za sebe a předány nástroji
+\verb|zonecfg(1)| jako parametr. V~druhém případě jsou příkazy načteny ze souboru, kde je každý příkaz na samostatné řádce.
 
-Všechny režimy mají jednu věc společnou. Tím jsou příkazy, kterými předávají nástroji informace o definici konfigurace zóny.
-Nástroj tedy očekává přesně definovanou syntaxi příkazů, které umí zpracovávat. Konfigurace zóny se skládá z konfigurace 
+Všechny režimy mají jednu věc společnou a to příkazy, kterými předávají nástroji informace o~definici konfigurace zóny.
+Nástroj tedy očekává přesně definovanou syntaxi příkazů, které umí zpracovávat. Konfigurace zóny se skládá z~konfigurace 
 globálních atributů a prostředků. Prostředky mohou reprezentovat síťové rozhraní nebo jiný typ zařízení a mají svoje vlastní
-lokální atributy. Popis všech příkazů, které nástroj \verb|zonecfg(1)| umí zpracovávat je zbytečný, a proto si syntaxi
-ukážeme na následující výpisu \ref{code:zonecfg} konfiguračního souboru zóny.
+lokální atributy. Popis všech příkazů, které nástroj \verb|zonecfg(1)| umí zpracovávat je zbytečný, a proto je syntaxe
+názorně ukázána ve výpisu programu \ref{code:zonecfg}-
 \begin{lstlisting}[caption={Ukázka konfigurace zóny}, float, label={code:zonecfg}]
 zadmin@shost:~$ cat /var/tmp/rzone-test_hu67.zonecfg
 create -b
@@ -297,91 +284,89 @@ set link-protection=mac-nospoof
 set mac-address=auto
 end
 \end{lstlisting}
-V ukázce \ref{code:zonecfg} je patrné, že každá řádka začíná příkazem. Příkaz \verb|create| vytvoří v paměti reprezentaci
+Z výpisu je patrné, že každá řádka začíná příkazem. Příkaz \verb|create| vytvoří v paměti reprezentaci
 konfigurace, která se po dokončení procesu konfigurace uloží do souboru. Následuje sekvence příkazů \verb|set|, které nastavují
-nějaké globální atributy zóny. Více o nich v následující podkapitole \ref{chapter:zones:configuration:global_attributes}. Dále
-můžeme v konfiguračním souboru vidět příkaz \verb|add|, který reprezentuje přidání zdroje k zóně. V tomto případě se jedná
+konkrétní globální atributy zóny. Více o nich v následující kapitole \ref{chapter:zones:configuration:global_attributes}. Dále
+je možné ve výpisu vidět příkaz \verb|add|, který reprezentuje přidání zdroje k zóně. V tomto případě se jedná
 o přidání síťového rozhraní s automatickou konfigurací. Základní typy jednotlivých prostředků popisuje podkapitola 
-\ref{chapter:zones:configuration:global_attributes}. Následuje opět sekvence příkazů \verb|set|, která se ale nyní váže
+\ref{chapter:zones:configuration:global_attributes}. Následuje opět sekvence příkazů \verb|set|, která se však nyní váže
 k předchozímu příkazu \verb|add| a nastavuje tak lokální atributy daného síťového rozhraní. Celý konfigurační soubor je ukončený
 příkazem \verb|end|, který reprezentuje výstup z konfigurace prostředku.
 
-Nástroj \verb|zonecfg(1)| umožňuje dva módy editace konfigurace zóny. Prvním mód je editace konfigurace uložené v souborovém
-systému. Změna konfigurace v tomto módu, žádným způsobem neovlivní běžící zónu. Druhý způsobem je editace konfigurace v takzvaném
-živém módu, která umí ovlivňovat nastavení zóny ve stavu \textit{running}. V tomto případě je například možné dočasně přidat
+Nástroj \verb|zonecfg(1)| umožňuje dva módy editace konfigurace zóny. První mód je editace konfigurace uložené v~souborovém
+systému. Změna konfigurace v~tomto módu žádným způsobem neovlivní běžící zónu. Druhým způsobem je editace konfigurace v~takzvaném
+živém módu, která umí ovlivňovat nastavení zóny ve stavu \textit{running}. V~tomto případě je například možné dočasně přidat
 běžící zóně síťové rozhraní.
 \subsection{Globální atributy}
 \label{chapter:zones:configuration:global_attributes}
-Globální atributy popisují globální vlastnosti zóny jako celku. Neváží se tedy ke konkrétnímu prostředku ale k zóně jako takové.
+Globální atributy popisují globální vlastnosti zóny jako celku. Neváží se tedy ke konkrétnímu prostředku, ale k~zóně jako takové.
 Podle manuálových stránek \cite{oracle:manpages:zonecfg} umožňuje příkaz \verb|zonecfg(1)| konfigurovat třináct globálních
-atributů zóny. V této kapitole nebudeme popisovat všechny, ale zaměříme se na nejdůležitější z nich. Důraz bude kladen především
-na atributy, které jsou nezbytné pro vytvoření zóny.
+atributů zóny. V~této kapitole nebudou popsány všechny, ale důraz bude kladen na ty nejdůležitější.
 \subsubsection{Jméno zóny}
 \label{chapter:zones:configuration:global_attributes:zonename}
-Jedním z hlavních atributů zóny je její jméno. Tento atribut je hlavním identifikátorem zóny v rámci systému a používá se
-pro její specifikaci v rámci nástrojů \verb|zonecfg(1)| a \verb|zoneadm(1)|. Nastavuje se pomocí vlastnosti \textit{zonename},
+Jedním z~hlavních atributů zóny je její jméno. Tento atribut je hlavním identifikátorem zóny v~rámci systému a používá se
+pro její specifikaci v~rámci nástrojů \verb|zonecfg(1)| a \verb|zoneadm(1)|. Nastavuje se pomocí vlastnosti \textit{zonename},
 nemá žádnou implicitní hodnotu a je povinným atributem pro vytvoření neglobální zóny.
-\subsubsection{Cesta k souborovému systému zóny}
+\subsubsection{Cesta k~souborovému systému zóny}
 \label{chapter:zones:configuration:global_attributes:zonepath}
-Klíčovým atributem zóny je cesta k adresáři, kde je připojený kořenový souborový systém neglobální zóny. Tento adresář obsahuje
-všechny nezbytné softwarové balíčky pro běh zóny. V operačním systému Solaris 11 se pro kořenové souborové systémy zón používá
-souborový systém ZFS. Tato skutečnost umožňuje využívat pokročilé funkce ZFS jako například snapshot nebo klonování při správě
+Klíčovým atributem zóny je cesta k~adresáři, kde je připojený kořenový souborový systém neglobální zóny. Tento adresář obsahuje
+všechny nezbytné softwarové balíčky pro běh zóny. V~operačním systému Solaris 11 se pro kořenové souborové systémy zón používá
+souborový systém ZFS. Tato skutečnost umožňuje využívat pokročilé funkce ZFS, jako například snapshot nebo klonování při správě
 a instalaci neglobálních zón. Tento atribut se nastavuje pomocí vlastnosti \textit{zonepath} a je povinným atributem pro 
-vytvoření zóny. V jeho definici je možné používat proměnou \textit{zonename} a jeho implicitní hodnota je nastavena na
-\verb|/system/zones/%{zonename}|.
+vytvoření zóny. V~jeho definici je možné používat proměnou \textit{zonename} a jeho implicitní hodnota je nastavena na
+\textit{/system/zones/\%{zonename}}.
 \subsubsection{Typ zóny}
 \label{chapter:zones:configuration:global_attributes:brand}
-Jak již bylo zmíněno v kapitole \ref{chapter:zones:types}, typ neglobální zóny určuje jak s ní bude globální zóna zacházet.
+Jak již bylo zmíněno v~kapitole \ref{chapter:zones:types}, typ neglobální zóny určuje jakým způsobem s~ní bude globální zóna zacházet.
 Konfigurace typu zóny se provádí pomocí atributu \textit{brand}, který je povinným atributem pro vytvoření zóny. Může nabývat
 hodnot \textit{solaris}, \textit{solaris-kz} nebo \textit{solaris10} a jeho implicitní hodnota je \textit{solaris}.
 \subsubsection{Typ IP adresy}
 \label{chapter:zones:configuration:global_attributes:ip-type}
-Stejně jako předchozí atribut byl i atribut určující typ síťové adresy již zmíněn v kapitole \ref{chapter:zones:types}. V
-krátkosti pouze naznačíme, že tento atribut určuje jestli bude síťová adresa sdílená s adresou globální zóny či nikoli. Tento
-atribut se nastavuje pomocí atributu \textit{ip-type} a může mít hodnoty \textit{shared} a \textit{exclusive}, což je zároveň
-implicitní hodnota.
+Atribut určující typ síťové adresy byl již zmíněn v~kapitole \ref{chapter:zones:types}. Tento atribut určuje jestli bude síťová adresa
+sdílená s~adresou globální zóny či nikoli. Typ je možné nastavit atributu \textit{ip-type} a může mít hodnoty \textit{shared} a 
+\textit{exclusive}, což je zároveň implicitní hodnota.
 \subsubsection{Automatické spouštění a vypínání}
 \label{chapter:zones:configuration:global_attributes:autoboot}
-Jako poslední zmíníme dva atributy, které souvisí se spouštěním a vypínáním neglobálních zón. Atribut \textit{autoboot} vyjadřuje
-jestli se má daná neglobální zóna spustit při startu zóny globální. Tento atribut může nabývat dvou hodnot. Jestliže chceme
-aby se zóna spustila při startu globální zóny, musíme nastavit hodnotu tohoto atributu na \textit{true}. V opačném případě
-nastavíme hodnotu \textit{false}, která je implicitní hodnotou tohoto atributu. O automatické spouštění neglobálních zón se
-stará systémová služba \verb|svc:/system/zones:default|, a proto je nutné, aby byla spuštěna \cite{oracle:manpages:zonecfg}.
+Jako poslední budou zmíněny dva atributy, které souvisí se spouštěním a vypínáním neglobálních zón. Atribut \textit{autoboot} vyjadřuje
+zda se má daná neglobální zóna spustit při startu zóny globální. Tento atribut může nabývat dvou hodnot. Jestliže je vyžadováno,
+aby se zóna spustila při startu globální zóny, musí být hodnota tohoto atributu nastavená na \textit{true}. V~opačném případě
+musí být hodnota nastavená na \textit{false}. O~automatické spouštění neglobálních zón se stará systémová služba \verb|svc:/system/zones:default|.
+Proto je nutné, aby byla tato služba aktivní \cite{oracle:manpages:zonecfg}.
 
-Druhým atributem je atribut \textit{autoshutdown}, který se uplatňuje při vypínání globální zóny a naznačuje co se má stát
-s danou neglobální zónou. Jeho hodnoty mohou být \textit{shutdown} pro korektní vypnutí zóny, \textit{halt} a nebo \textit{suspend}.
+Druhým atributem je atribut \textit{autoshutdown}, který se uplatňuje při vypínání globální zóny a určuje co se má stát
+s~danou neglobální zónou. Jeho hodnoty mohou být \textit{shutdown} pro korektní vypnutí zóny nebo \textit{halt} a \textit{suspend}.
 Implicitně se při vypínání globální zóny používá korektní vypnutí neglobální zóny.
 \subsection{Zdroje}
 \label{chapter:zones:configuration:resources}
-Mimo generických atributů umožňuje nástroj \verb|zonecfg(1)| přidávat do konfigurace zóny takzvané zdroje. Zdroj je objekt
+Mimo generických atributů umožňuje nástroj \verb|zonecfg(1)| přidávat do konfigurace zóny také zdroje. Zdroj je objekt
 nějakého typu, který má svoje lokální atributy a do konfigurace zóny se přidává pomocí příkazu \verb|add|. Zdroj reprezentuje
 většinou nějaké zařízení, souborový systém, prostředky pro přidělování zdrojů zónám nebo například specifikuje uživatele,
-který může zónu administrovat. Některé zdroje mohou být do konfigurace zóny přidány vícekrát. V takovém případě jim \verb|zonecfg(1)|
+který může zónu administrovat. Některé zdroje mohou být do konfigurace zóny přidány vícekrát. V~takovém případě jim \verb|zonecfg(1)|
 automaticky přidělí číselný identifikátor, který daný zdroj jednoznačně určuje. Podle manuálových stránek \cite{oracle:manpages:zonecfg}
-umožňuje konfigurace zón přidávat až jednadvacet různých typů zdrojů. Stejně jako v případě globálních atributu si zde
-popíšeme jenom zdroje, které jsou nejdůležitější pro správný běh neglobální zóny.
+umožňuje konfigurace zón přidávat až jednadvacet různých typů zdrojů. Z~tohoto důvodu budou představy pouze nejdůležitější 
+zdroje, které jsou nezbytné pro vytvoření zóny.
 \subsubsection{Zařízení}
 \label{chapter:zones:configuration:resources:device}
 Prvním typem zdroje, který může být delegován neglobální zóně, je obecné zařízení. Takovým zařízením může být například disk
-nebo disková partition. V případě operačního systému se jedná o takzvané \textit{slice}, které jsou alternativou k diskovým 
+nebo disková partition. V~případě operačního systému Solaris se jedná o~takzvané \textit{slice}, které jsou alternativou k~diskovým 
 partition. 
 
-Použití tohoto zdroje se liší v závislosti na typu neglobální zóny, ke které ho chceme přiřadit. V případě nativní zóny má tento
-zdroj následující  atributy.
+Použití tohoto zdroje se liší v~závislosti na typu neglobální zóny, ke které ho chceme přiřadit. V~případě nativní zóny má tento
+zdroj následující  atributy:
 \begin{itemize}
- \item \textit{match}
- \item \textit{allow-partition}
- \item \textit{allow-raw-io}
+ \item \textit{match},
+ \item \textit{allow-partition},
+ \item \textit{allow-raw-io}.
 \end{itemize}
-Atribut \textit{match} odpovídá jménu zařízení, které chceme delegovat zóně. Hodnotou může být absolutní cesta k zařízení nebo
-regulární výraz, který může specifikovat více zařízení najednou. Druhý atribut \textit{allow-partition} určuje, jestli zóna 
-bude moci používat nástroj \verb|format(1)|, který umožňuje rozdělování disku na jednotlivé partition. Přímý přístup na disk může
-být povolen pomocí atributu \textit{allow-raw-io}.
+Atribut \textit{match} odpovídá jménu zařízení, které chceme delegovat zóně. Hodnotou může být absolutní cesta k~zařízení nebo
+regulární výraz, který může specifikovat více zařízení najednou. Druhý atribut \textit{allow-partition} určuje, jestli 
+bude moci zóna používat nástroj \verb|format(1)|, který umožňuje rozdělování disku na jednotlivé partition. Přímý přístup na disk
+může být povolen pomocí atributu \textit{allow-raw-io}.
 
-V případě kernel zóny je podle manuálových stránek \cite{oracle:manpages:solaris-kz} povinné přidat alespoň jedno diskové zařízení,
+V~případě kernel zóny je podle manuálových stránek \cite{oracle:manpages:solaris-kz} povinné přidat alespoň jedno diskové zařízení,
 které bude sloužit jako hlavní disk. Implicitně je pro kernel zónu vytvořen souborový systém ZFS, který je vyexportovaný jako
-zařízení. Toto zařízení se přidá v průběhu konfigurace a nastaví se mu atribut \textit{bootpri} na hodnotu 0 (primární disk).
-Část konfigurace specifikující úložné zařízení kernel zóny je naznačena v kódu \ref{code:zonecfg:device}
+zařízení. Toto zařízení se přidá v~průběhu konfigurace a nastaví se mu atribut \textit{bootpri} na hodnotu 0 (primární disk).
+Část konfigurace specifikující úložné zařízení kernel zóny je naznačena v~kódu \ref{code:zonecfg:device}
 \begin{lstlisting}[caption={Konfigurace zařízení kernel zóny}, float, label={code:zonecfg:device}]
 add device
 set storage=/dev/zvol/dsk/rpool/VARSHARE/zones/z1/disk
@@ -389,33 +374,33 @@ set bootpri=0
 set id=0
 end
 \end{lstlisting}
-Podle doporučení v \cite{oracle:manpages:zonecfg} může být nebezpečné delegovat zónám obecné zařízení a povolit na ně přímý
-přístup. Tento krok může vést k nestabilitě a ohrožení globální zóny, jelikož uživatelské procesy neglobálních zón mohou
+Podle doporučení v~příručce \cite{oracle:manpages:zonecfg} může být nebezpečné delegovat zónám obecné zařízení a povolit na ně přímý
+přístup. Tento krok může vést k~nestabilitě a ohrožení globální zóny, jelikož uživatelské procesy neglobálních zón mohou
 přímo ovlivňovat delegovaná zařízení.
 \subsubsection{Síťové rozhraní}
 \label{chapter:zones:configuration:resources:network}
 Jelikož spolu neglobální zóny nemohou komunikovat jinak než pomocí počítačové sítě, nástroj \verb|zonecfg(1)| umožňuje delegovat
-neglobálním zónám následující dva typy sítových rozhraní. 
+neglobálním zónám následující dva typy sítových rozhraní:
 \begin{itemize}
- \item Fyzické síťové rozhraní - \textit{net}
- \item Automatické síťové rozhraní - \textit{anet}
+ \item Fyzické síťové rozhraní - \textit{net},
+ \item Automatické síťové rozhraní - \textit{anet}.
 \end{itemize}
 Fyzické síťové rozhraní neboli zdroj \textit{net} umožňuje delegovat do neglobální zóny existující fyzické síťové rozhraní
-z globální zóny. Tento typ zdroje má několik lokálních atributů, které definují jeho zdroj a chování. Hlavním atributem je
-\textit{physical}, který reprezentuje jméno fyzického rozhraní v globální zóně. Jedno fyzické rozhraní nemůže být sdíleno
-napříč více neglobálními zónami. Pomocí další atributů je možné specifikovat například ip adresy, které se mohou k danému 
-rozhraní připojovat, gateway nebo ip adresu rozhraní. 
+z~globální zóny. Tento typ zdroje má několik lokálních atributů, které definují jeho zdroj a chování. Hlavním atributem je
+\textit{physical}, který reprezentuje jméno fyzického rozhraní v~globální zóně. Jedno fyzické rozhraní nemůže být sdíleno
+napříč více neglobálními zónami. Pomocí dalších atributů je možné specifikovat například IP adresy, které se mohou k~danému 
+rozhraní připojovat, gateway nebo IP adresu rozhraní. 
 
-Automatické síťové rozhraní neboli \textit{anet} je druhým síťového zdroje, který může být neglobální zóně přiřazen. Rozdíl
-oproti předchozímu typu je v tom, že tento typ rozhraní nemusí v globální síti existovat a je vytvořeno jako virtuální síťové
+Automatické síťové rozhraní neboli \textit{anet} je druhým typem síťového zdroje, který může být neglobální zóně přiřazen. Rozdíl
+oproti předchozímu typu je v~tom, že tento typ rozhraní nemusí v~globální síti existovat a je vytvořeno jako virtuální síťové
 rozhraní. Jelikož je toto zařízení virtuální, umožňuje administrátorovi nastavovat mnohem větší škálu atributů. Těchto
-atributů je podle manuálových stránek \cite{oracle:manpages:zonecfg} opravdu velké množství a opět si popíšeme jenom některé
-z nich. Nejdůležitějšími atributy jsou \textit{linkname} a \textit{lower-link}. Atribut \textit{linkname} určuje jméno
-síťového rozhraní tak, jak se bude jevit v neglobální zóně. Pomocí tohoto jména je možné toto rozhraní konfigurovat.
-Atribut \textit{lower-link} je v podstatě jméno fyzického nebo virtuálního síťového rozhraní v globální zóně. Jinými slovy
-přes toto zařízení bude proudit provoz generovaný vytvořeným síťovým rozhraním. Další atributy již nebudeme podrobně zmiňovat.
-Ostatní parametry slouží například k nastavování MAC adresy, ochrany linkové vrstvy, VLAN a mnohého dalšího. V ukázce 
-\ref{code:zonecfg:anet} je naznačeno jak by mohla vypadat konfigurace automatického síťového rozhraní pomocí nástroje 
+atributů je podle manuálových stránek \cite{oracle:manpages:zonecfg} velké množství a popis všech není předmětem této práce.
+Nejdůležitějšími atributy jsou \textit{linkname} a \textit{lower-link}. Atribut \textit{linkname} určuje jméno
+síťového rozhraní tak, jak se bude jevit v~neglobální zóně. Pomocí tohoto jména je možné toto rozhraní konfigurovat.
+Atribut \textit{lower-link} je v~podstatě jméno fyzického nebo virtuálního síťového rozhraní v~globální zóně.
+Přes toto zařízení bude proudit provoz generovaný vytvořeným virtuálním síťovým rozhraním.
+Ostatní parametry slouží například k~nastavování MAC adresy, ochrany linkové vrstvy nebo VLAN. V~ukázce 
+\ref{code:zonecfg:anet} je naznačeno, jak by mohla vypadat konfigurace automatického síťového rozhraní pomocí nástroje 
 \verb|zonecfg(1)|.
 \begin{lstlisting}[caption={Konfigurace síťového rozhraní}, float, label={code:zonecfg:anet}]
 add anet
@@ -428,53 +413,53 @@ end
 \subsubsection{Řízení zdrojů}
 \label{chapter:zones:configuration:resources:resource_control}
 Jak již bylo zmíněno výše, neglobální zóny využívají fyzických prostředků hostitelského systému (globální zóny). Aby bylo
-možné zajistit kontrolu na přidělováním prostředků jednotlivým neglobálním zónám, umožňuje konfigurace specifikovat některé
-omezení na využívání zdrojů. Tyto omezení se do konfigurace přidávají jako kterékoli jiné zdroje. Podle manuálových stránek
-\cite{oracle:manpages:zonecfg} existují následující typy zdrojů, které umožňují řízení přidělování fyzických zdrojů.
+možné zajistit kontrolu nad přidělováním prostředků jednotlivým neglobálním zónám, umožňuje konfigurace specifikovat některá
+omezení na využívání zdrojů. Tato omezení se do konfigurace přidávají jako kterékoli jiné zdroje. Podle manuálových stránek
+\cite{oracle:manpages:zonecfg} existují následující typy zdrojů, které umožňují řízení přidělování fyzických zdrojů:
 \begin{itemize}
- \item Exkluzivní CPU - \textit{dedicated-cpu}
- \item Omezení CPU - \textit{capped-cpu}
- \item Omezení paměti - \textit{capped-memory}
+ \item Exkluzivní CPU - \textit{dedicated-cpu},
+ \item Omezení CPU - \textit{capped-cpu},
+ \item Omezení paměti - \textit{capped-memory}.
 \end{itemize}
-První ze zdrojů s názvem \textit{dedicated-cpu} slouží pro alokování určitého počtu procesorů a procesorových jader exkluzivně
-pro použití danou neglobální zónou. V systému dojde k vytvoření množiny procesorů, která v době běhu dané neglobální zóny
+První ze zdrojů s~názvem \textit{dedicated-cpu} slouží pro alokování určitého počtu procesorů a procesorových jader, exkluzivně
+pro použití danou neglobální zónou. V~systému dojde k~vytvoření množiny procesorů, která v~době běhu dané neglobální zóny
 může být využívána pouze danou neglobální zónou. Dokonce ani globální zóna nemůže tyto procesory a jádra využívat. Tento typ
-zdroje umožňuje specifikovat výpočetní zdroje s různou granularitou. Administrátor může zóně přiřadit prostředky na úrovni 
-procesorových jader, procesorů nebo dokonce celých soketů s několika procesory.
+zdroje umožňuje specifikovat výpočetní zdroje s~různou granularitou. Administrátor může zóně přiřadit prostředky na úrovni 
+procesorových jader, procesorů nebo dokonce celých soketů s~několika procesory.
 
 Zdroj \textit{capped-cpu} reprezentuje množství procesorového času, které může být danou zónou využíváno. Tento zdroj má pouze
-jeden numerický atribut, kterým je desetinné číslo určující možné procentuální využití jednoho procesoru. Hodnotou 1 se tedy
-myslí, že daná zóna může využít 100\% procesorového času.
+jeden numerický atribut, kterým je desetinné číslo určující možné procentuální využití jednoho procesoru. Hodnota 1 znamená,
+že daná zóna může využít 100\% procesorového času.
 
-Posledním zdrojem, který si zmíníme v rámci řízení zdrojů zón je \textit{capped-memory}. Tento zdroj se podobá \textit{capped-cpu}
+Posledním zdrojem, který bude zmíněn v~rámci řízení zdrojů zón je \textit{capped-memory}. Tento zdroj se podobá \textit{capped-cpu},
 ale řídí využití paměti. Tento zdroj má tři atributy \textit{physical}, \textit{swap} a \textit{locked}, které se týkají určitého
-druhu paměti. Atribut \textit{physical} souvisí s hlavní operační pamětí počítače a umožňuje administrátorovi specifikovat,
+druhu paměti. Atribut \textit{physical} souvisí s~hlavní operační pamětí počítače a umožňuje administrátorovi specifikovat,
 kolik hlavní paměti může daná zóna využít. Ostatní atributy mají stejný význam, ale týkají se jiné části paměti. Všechny 
-atributy je možné specifikovat v jednotkách kilobyte (K), megabyte (M), gigabyte (G) nebo terabyte (T).
+atributy je možné specifikovat v~jednotkách kilobyte (K), megabyte (M), gigabyte (G) nebo terabyte (T).
 \subsubsection{ZFS Dataset}
 \label{chapter:zones:configuration:resources:dataset}
-Standardně mají neglobální zóny ponětí pouze o svém kořenovém souborovém systému a nevidí žádný jiný. Pokud chce zóna využívat
-nějaké další úložiště, musíme jí delegovat buď celý disk nebo můžeme použít zdroj \textit{dataset}. Tento zdroj reprezentuje
-existující souborový systém ZFS v globální zóně, který je delegován do neglobální zóny jako virtuální ZFS pool. Tento zdroj
-má dva atributy specifikující jméno souborového systému v globální zóně a alias pod kterým bude vytvořen virtuální ZFS pool
-v neglobální zóně.
+Standardně mají neglobální zóny ponětí pouze o~svém kořenovém souborovém systému a nevidí žádný jiný. Pokud chce zóna využívat
+další úložiště, musí jí administrátor delegovat buď celý disk nebo použít zdroj \textit{dataset}. Tento zdroj reprezentuje
+existující souborový systém ZFS v~globální zóně, který je delegován do neglobální zóny jako virtuální ZFS pool. Tento zdroj
+má dva atributy specifikující jméno souborového systému v~globální zóně a alias, pod kterým bude vytvořen virtuální ZFS pool
+v~neglobální zóně.
 \subsubsection{Administrátor zóny}
 \label{chapter:zones:configuration:resources:admin}
-Jak již bylo zmíněno v kapitole \ref{chapter:zones:administration:administrator}, administrátor globální zóny může delegovat 
-administraci neglobální zóny na jiného uživatele. K tomuto účelu se požívá zdroj \textit{admin}, který reprezentuje administrátora
-dané neglobální zóny. Tomuto administrátorovi lze přiřadit různé privilegia, které mu umožňují nějakým způsobem spravovat zónu.
-Podle manuálových stránek \cite{oracle:manpages:zonecfg} jsou možná privilegia následující.
+Jak již bylo zmíněno v~kapitole \ref{chapter:zones:administration:administrator}, administrátor globální zóny může delegovat 
+administraci neglobální zóny na jiného uživatele. K~tomuto účelu se požívá zdroj \textit{admin}, který reprezentuje administrátora
+dané neglobální zóny. Tomuto administrátorovi lze přiřadit různá privilegia, která mu umožňují různým způsobem spravovat zónu.
+Podle manuálových stránek \cite{oracle:manpages:zonecfg} je možné nastavit následující privilegia:
 \begin{itemize}
- \item \textit{login}
- \item \textit{manage}
- \item \textit{copyfrom}
- \item \textit{config}
- \item \textit{liveconfig}
+ \item \textit{login},
+ \item \textit{manage},
+ \item \textit{copyfrom},
+ \item \textit{config},
+ \item \textit{liveconfig}.
 \end{itemize}
-Názvy jednotlivých privilegií odpovídají akcím, které může daný uživatel se zónou provádět. Za zmínění snad stojí jenom 
-privilegium \textit{copyfrom}, které umožňuje administrátorovi vytvářet nové zóny jako klony dané neglobální zóny. V kódu
-\ref{code:zonecfg:admin} je ukázána konfigurace která umožňuje uživateli \textit{zadmin} přihlašování a základní správu dané
-zóny.
+Názvy jednotlivých privilegií odpovídají akcím, které může daný uživatel se zónou provádět. Za zmínku stojí pouze
+privilegium \textit{copyfrom}, které umožňuje administrátorovi vytvářet nové zóny jako klony dané neglobální zóny. V~kódu
+\ref{code:zonecfg:admin} je demonstrována konfigurace, která umožňuje uživateli \textit{zadmin} přihlašování a základní správu
+dané zóny.
 \begin{lstlisting}[caption={Delegace administrace jinému uživateli}, float, label={code:zonecfg:admin}]
 add admin
 set user=zadmin
@@ -483,28 +468,28 @@ end
 \end{lstlisting}
 \subsection{Vytvoření konfigurace}
 \label{chapter:zones:configuration:creating}
-První krok v procesu vytváření neglobální zóny je vytvoření její konfigurace. Konfigurace zóny se vytváří pomocí nástroje 
-\verb|zonecfg(1)| a jeho příkazu \verb|create|. Tento příkaz vytvoří datovou reprezentaci konfigurace v paměti počítače a
-po dokončení konfigurace jí uloží do souboru ve formátu XML v systémovém adresáři \verb|/etc/zones|. Teoreticky jediné co
-administrátor potřebuje k vytvoření standardní zóny je její jméno. K vytvoření konfigurace může administrátor použít
-následující způsoby.
+První krok v~procesu vytváření neglobální zóny je vytvoření její konfigurace. Konfigurace zóny se vytváří pomocí nástroje 
+\verb|zonecfg(1)| a jeho příkazu \verb|create|. Tento příkaz vytvoří datovou reprezentaci konfigurace v~paměti počítače a
+po dokončení konfigurace jí uloží do souboru ve formátu XML v~systémovém adresáři \textit{/etc/zones}. Teoreticky jediné co
+administrátor potřebuje k~vytvoření standardní zóny, je její jméno. K~vytvoření konfigurace může administrátor použít
+následující způsoby:
 \begin{itemize}
- \item Přímá konfigurace
- \item Konfigurace ze šablony
- \item Konfigurace z archivu
+ \item Přímá konfigurace,
+ \item Konfigurace ze šablony,
+ \item Konfigurace z~archivu.
 \end{itemize}
-Přímá konfigurace již byla popsána v kapitole \ref{chapter:zones:configuration} a využívá přímé zadávání příkazů, které obsahují
+Přímá konfigurace již byla popsána v~kapitole \ref{chapter:zones:configuration} a využívá přímé zadávání příkazů, které obsahují
 definici atributů a zdrojů zóny. Tento proces může probíhat buď interaktivně postupným zadáváním příkazů nebo dávkově na
 příkazové řádce.
 
-Druhým způsobem je použití takzvané šablony. Šablona není nic jiného než konfigurace zóny, která je již zaregistrovaná v 
-systému. Pokud tedy administrátor již vytvořil předem nějaké neglobální zóny a chce jejich konfiguraci znovu využít, stačí
-specifikovat jejich jméno jako argument příkazu \verb|create|. Tím vznikne úplně nová konfigurace zóny, která má ale stejné
+Druhým způsobem je použití takzvané šablony. Šablona je pouze konfigurací zóny, která je již zaregistrovaná
+v~systému. Pokud tedy administrátor již vytvořil předem neglobální zóny a chce jejich konfiguraci znovu využít, stačí
+specifikovat jejich jméno jako argument příkazu \verb|create|. Tím vznikne úplně nová konfigurace zóny, která má však stejné
 atributy jako zóna zdrojová. Standardní instalace operačního systému Solaris již obsahuje standardní šablony pro rychlou tvorbu
-neglobálních zón. Tyto šablony se nachází společně s konfiguracemi ostatní zón v adresáři \verb|/etc/zones|. Zvídavý uživatel
+neglobálních zón. Tyto šablony se nachází společně s~konfiguracemi ostatní zón v~adresáři \textit{/etc/zones}. Uživatel
 může zjistit, že adresář obsahuje například šablony \textit{SYSdefault.xml}, \textit{SYSsolaris10.xml} nebo
-\textit{SYSsolaris-kz.xml}, které odpovídají jednotlivým typů neglobálních zón. V ukázce kódu \ref{code:zonecfg:create:template}
-je viditelné rychlé vytvoření konfigurace zóny se jménem \textit{z1}, které využívá systémovou šablonu \textit{SYSdefault}.
+\textit{SYSsolaris-kz.xml}, které odpovídají jednotlivým typů neglobálních zón. V~ukázce výpisu programu \ref{code:zonecfg:create:template}
+je demonstrováno rychlé vytvoření konfigurace zóny se jménem \textit{z1}, které využívá systémovou šablonu \textit{SYSdefault}.
 \begin{lstlisting}[caption={Vytvorení zóny ze systémové šablony}, label={code:zonecfg:create:template}]
 zadmin@shost:~$ zonecfg -z z1 create -t SYSdefault
 zadmin@shost:~$ zonecfg -z z1 export
@@ -522,91 +507,90 @@ set link-protection=mac-nospoof
 set mac-address=auto
 end
 \end{lstlisting}
-Z ukázky je patrné, že šablona \textit{SYSdefault} nastavuje základní atributy zón s použitím implicitních hodnot a přidává
-jedeno síťové rozhraní pro připojení k síti.
+Z~ukázky je patrné, že šablona \textit{SYSdefault} nastavuje základní atributy zón s~použitím implicitních hodnot a přidává
+jedno síťové rozhraní pro připojení k~síti.
 
 Poslední možností pro vytvoření konfigurace zóny je využití archivu. Archiv musí být typu \textit{Unified archive}, což je
-výstup systémového nástroje pro zálohování a archivaci zón nebo celých systémů. Více o tomto archivu je popsáno v kapitole
-\ref{chapter:zones:backup}, která se zabývá zálohováním. Druhou možností archivu je složka se kořenovým souborovým systémem
-zóny, která byla odpojena pomocí příkazu \verb|zoneadm detach|. V tomto případě je konfigurace odpojované zóny nahrána do 
+výstup systémového nástroje pro zálohování a archivaci zón nebo celých systémů. Tento typ archivu je popsán  v~kapitole
+\ref{chapter:zones:backup}, která se zabývá zálohováním. Druhou možností archivu je adresář s~kořenovým souborovým systémem
+zóny, která byla odpojena pomocí příkazu \verb|zoneadm detach|. V~tomto případě je konfigurace odpojované zóny nahrána do 
 kořenového adresáře a nástroj \verb|zonecfg(1)| si jí převezme.
 \subsection{Změna konfigurace}
 \label{chapter:zones:configuration:editing}
 Dalším administrátorským úkonem ve správě Solaris Zones může být změna existující konfigurace zóny. Administrátor může editovat
-konfiguraci zóny jak ve stavech \textit{configured} a \textit{configured} tak i ve stavu \textit{running}. Pokud zóna není spuštěná
-administrátor může editovat pouze konfiguraci, která je uložená v adresáři \verb|/etc/zones|. V případě, že konfigurovaná zóna běží
-může si administrátor vybrat jestli změny chce propagovat do uložené konfigurace nebo do živé konfigurace běžící zóny. 
-Změny, které jsou provedeny pouze v živé konfiguraci zóny, jsou po vypnutí dané zóny ztraceny. Při opětovném startu si zóna
-totiž načte konfiguraci z příslušného souboru.
+konfiguraci zóny jak ve stavech \textit{configured} a \textit{installed}, tak i ve stavu \textit{running}. Pokud daní zóna není spuštěná,
+administrátor může editovat pouze konfiguraci, která je uložená v~adresáři \verb|/etc/zones|. V~případě, že je konfigurovaná zóna spuštěná
+může si administrátor vybrat zda změny chce propagovat do uložené konfigurace nebo do živé konfigurace běžící zóny. 
+Změny, které jsou provedeny pouze v~živé konfiguraci zóny, jsou po vypnutí dané zóny ztraceny. Při opětovném startu si zóna
+načte konfiguraci z~příslušného souboru.
 
 Editace globálních atributů zóny probíhá stejným způsobem jako při jejich vytváření. Pomocí příkazu \verb|set| nástroje
 \verb|zonecfg(1)| administrátor pouze přepíše danou hodnotu atributu. Pokud chce uživatel měnit lokální atributy nějakého zdroje,
-například síťového rozhraní, musí použít příkaz \verb|set| pro jeho výběr jak je naznačeno v \cite{oracle:solaris:zones:modify}
+například síťového rozhraní, musí použít příkaz \verb|select| pro jeho výběr jak je naznačeno v~příručce \cite{oracle:solaris:zones:modify}.
 Dále už může postupovat stejným způsobem jako při nastavování globálních parametrů.
 
 Při ukončování editace konfigurace zóny je nutné použít příkaz \verb|commit|, který dané změny propaguje do perzistentního 
 úložiště nebo do živé konfigurace zóny.
 \subsection{Smazání konfigurace}
 \label{chapter:zones:configuration:deleting}
-Posledním typem operace, která se dá s konfigurací zóny provádět, je mazání. K tomuto účelu slouží příkaz \verb|delete| nástroje
+Posledním typem operace, která se dá s~konfigurací zóny provádět, je mazání. K~tomuto účelu slouží příkaz \verb|delete| nástroje
 \verb|zonecfg(1)|. Tato akce nemůže být vrácena, a proto by si administrátor měl tento úkon řádně promyslet. Po provedení
-příkazu je konfigurace odstraněna jak z paměti počítače tak ze souborového systému. Tento příkaz neodstraní zdrojový souborový
+příkazu je konfigurace odstraněna jak z~paměti počítače tak ze souborového systému. Tento příkaz neodstraní zdrojový souborový
 systém zóny.
 \section{Instalace}
 \label{chapter:zones:instalation}
-Dalším krokem na cestě za funkční neglobální zónou je proces její instalace. Tento proces vyžaduje, aby daná zóna měla v
-systému vytvořenou konfiguraci. Účelem procesu instalace je vytvoření kořenového souborového systému zóny, který obsahuje
+Dalším krokem na cestě za funkční neglobální zónou je proces její instalace. Tento proces vyžaduje, aby daná zóna měla
+v~systému vytvořenou konfiguraci. Účelem procesu instalace je vytvoření kořenového souborového systému zóny, který obsahuje
 softwarové balíky nezbytné pro její správný chod.
 
-Instalace zóny se provádí pomocí nástroje \verb|zoneadm(1)|, který umožňuje několik poskytuje administrátorovi několik způsobů
+Instalace zóny se provádí pomocí nástroje \verb|zoneadm(1)|, který poskytuje administrátorovi několik způsobů
 pro vytvoření kořenového souborového systému zóny. Dle specifikace \cite{oracle:solaris:zones:installation} a manuálových stránek
-\cite{oracle:manpages:zoneadm} jsou podporovány následující typy instalace.
+\cite{oracle:manpages:zoneadm} jsou podporovány následující typy instalace:
 \begin{itemize}
- \item Instalace z repozitáře
- \item Instalace pomocí archivu
- \item Klonování zóny
+ \item Instalace z~repozitáře,
+ \item Instalace pomocí archivu,
+ \item Klonování zóny.
 \end{itemize}
-Výše zmíněné typy instalace se liší hlavně ve způsobu získávání a vytváření zdrojové souborového systému zón. Kritériem pro
-výběr může být například doba trvání instalace, protože mezi jednotlivými typy můžeme pozorovat zásadní rozdíl. Administrátor
-musí při výběru druhu instalace brát v úvahu dostupné prostředky systému a časový interval trvání instalace. Druhy instalace
-budou popsány z pohledu nativní neglobální zóny a rozdíly v instalaci pro kernel zóny budou upřesněny. 
-\subsection{Instalace z repozitáře}
+Výše zmíněné typy instalace se liší hlavně ve způsobu získávání a vytváření zdrojového souborového systému zón. Kritériem pro
+výběr může být například doba trvání instalace, protože mezi jednotlivými typy je možné pozorovat zásadní rozdíl. Administrátor
+musí při výběru druhu instalace brát v~úvahu dostupné prostředky systému a časový interval trvání instalace. Druhy instalace
+budou popsány z~pohledu nativní neglobální zóny a rozdíly v~instalaci pro kernel zóny budou upřesněny. 
+\subsection{Instalace z~repozitáře}
 \label{chapter:zones:instalation:repozitory}
-Prvním typem instalace neglobální zóny je instalace z repozitáře. Repozitář je databáze softwarových balíčků, které jsou pro 
+Prvním typem instalace neglobální zóny je instalace z~repozitáře. Repozitář je databáze softwarových balíčků, které jsou pro 
 operační systém Solaris poskytovány. Standardní poskytovatel této databáze je společnost Oracle, která hlavní databázi balíčku
-poskytuje jako webovou službu dostupnou z \textit{pkg.oracle.com/solaris/release}. Nastavení této služby v systému se provádí
-pomocí nástroje \verb|pkg(1)|, který slouží jako správce softwarových balíků v operačním systému Solaris 11.
+poskytuje jako webovou službu dostupnou z~repozitáře \cite{oracle:solaris:desing:pkg_repository}. Nastavení této služby v~systému
+se provádí pomocí nástroje \verb|pkg(1)|, který slouží jako správce softwarových balíků v~operačním systému Solaris 11.
 
 Instalace touto metodou se provádí pomocí příkazu \verb|install| nástroje \verb|zoneadm(1)|. Jediný povinný argument je jméno
-zóny, pro kterou chce administrátor nainstalovat systém. Tato zóna musí nacházet ve stavu \textit{configured}. Po puštění 
-příkazu začne instalátor stahovat potřebné balíčky z repozitáře a instalovat je do kořenového souborového systému zóny. V případě
-nativní zóny se implicitně instaluje softwarový balík \textit{pkg:/group/system/solaris-small-server}, je virtuální
-a obsahuje pouze závislosti. Z jeho názvu je patrné, že balíky budou umožňovat provozovat zónu jako malý server. Jelikož nativní
-zóna sdílí jádro operačního systému s globální zónou, balíček s jádrem se do nativní zóny neinstaluje. V případě kernel zóny
-zde nastává rozdíl a balíček s jádrem se nainstaluje. Podle článku \cite{oracle:solaris:zones:kernel_version} je možné tímto
-typem instalace nainstalovat pouze stejnou verzi jádra jako používá globální zóna.
+zóny, pro kterou chce administrátor nainstalovat systém. Tato zóna se musí nacházet ve stavu \textit{configured}. Po puštění 
+příkazu začne instalátor stahovat potřebné balíčky z~repozitáře a instalovat je do kořenového souborového systému zóny. V~případě
+nativní zóny se implicitně instaluje softwarový balík \textit{pkg:/group/system/solaris-small-server}. Tento balík je virtuální
+a obsahuje pouze závislosti. Z~jeho názvu je patrné, že balíky budou umožňovat provozovat zónu jako malý server. Jelikož nativní
+zóna sdílí jádro operačního systému s~globální zónou, balíček s~jádrem se do nativní zóny neinstaluje. V~případě kernel zóny
+se instalace liší a balíček s~jádrem se nainstaluje. Podle článku \cite{oracle:solaris:zones:kernel_version} je možné tímto
+v~rámci tohoto typu instalace použít pouze stejnou verzi jádra jako používá globální zóna.
 
-Administrátor může předat příkazu \verb|install| další dva volitelné parametry. Prvním z nich je tzv. \textit{manifest}, který
-předává instalátoru informace o tom, jaké softwarové balíčky má nainstalovat do kořenového souborového systému. Podrobněji 
-je manifest popsán v kapitole \ref{chapter:zones:instalation:repozitory:manifest}. Druhý parametr odpovídá cestě k tzv. 
+Administrátor může předat příkazu \verb|install| další dva volitelné parametry. Prvním z~nich je tzv. \textit{manifest}, který
+předává instalátoru informace o~tom, jaké softwarové balíčky má nainstalovat do kořenového souborového systému. Podrobněji 
+je manifest popsán v~kapitole \ref{chapter:zones:instalation:repozitory:manifest}. Druhý parametr odpovídá cestě k~tzv. 
 systémovému profilu, který specifikuje systémové nastavení. Tento parametr je společný pro všechny typy instalace a je podrobněji
-popsán v kapitole \ref{chapter:zones:instalation:profile}.
+popsán v~kapitole \ref{chapter:zones:instalation:profile}.
 
-Po úspěšném dokončení instalace jsou všechny softwarové balíčky definované v manifestu nainstalované a připravené k použití.
+Po úspěšném dokončení instalace jsou všechny softwarové balíčky definované v~manifestu nainstalované a připravené k~použití.
 Čerstvě nainstalovaná zóna se nachází ve stavu \textit{installed} a čeká na první spuštění. Tento typ instalace trvá nejdelší
-dobu. Je to zapříčiněno tím, že se všechny balíčky musí stáhnou pomocí počítačové sítě.
+dobu. Je to zapříčiněno tím, že se všechny balíčky musí stáhnout pomocí počítačové sítě.
 \subsubsection{Manifest}
 \label{chapter:zones:instalation:repozitory:manifest}
-Manifest je soubor obsahující definici všech softwarových balíčků, které má instalátor nainstalovat do souborového systému zóny.
-Tento soubor je ve formátu XML a je povinnou součástí instalace. V minulé kapitole je řečeno, že tento parametr je volitelný.
-V případě, kdy uživatel nespecifikuje cestu k souboru explicitně, je použit předdefinovaný soubor. Podle specifikace
-\cite{oracle:solaris:zones:manifest} se soubor nachází v adresáři \textit{/usr/share/auto\_install/manifest} a jmenuje
-se \textit{zone\_default.xml}. Právě v tomto souboru je definované, že standardní výbavou každé zóny je softwarový balík 
-\textit{pkg:/group/system/solaris-small-server}.
+Manifest je soubor obsahující definici všech softwarových balíků, které má instalátor nainstalovat do souborového systému zóny.Tento
+soubor je ve formátu XML a je povinnou součástí instalace.  V~případě, kdy uživatel nespecifikuje cestu k~souboru explicitně, je použit
+předdefinovaný soubor. Podle specifikace \cite{oracle:solaris:zones:manifest} se soubor nachází v~adresáři \textit{/usr/share/auto\_install/manifest}
+a jmenuje se \textit{zone\_default.xml}. Právě v~tomto souboru je definované, že standardní výbavou každé zóny je softwarový
+balík \textit{pkg:/group/system/solaris-small-server}.
 
-Administrátor má tedy možnost si vytvořit vlastní XML soubory s definicemi softwarových balíčků. Tyto soubory pak může používat
-při instalaci nových zón. V ukázce kódu \ref{code:manifest} je naznačeno, jak by mohl takový uživatelský manifest vypadat.
-Pro přehlednost je zobrazena pouze část s definicí balíků a zbytek XML dokumentu je vynechán.
+Administrátor má možnost si vytvořit vlastní XML soubory s~definicemi softwarových balíčků. Tyto soubory pak může používat
+při instalaci nových zón. V~ukázce výpisu kódu \ref{code:manifest} je naznačeno, jak by mohl takový soubor vypadat.
+Pro přehlednost je zobrazena pouze část s~definicí balíků a zbytek XML dokumentu je vynechán.
 \begin{lstlisting}[language={XML}, caption={Ukázkový manifest}, label={code:manifest}]
 <software_data action="install">    
     <name>pkg:/group/system/solaris-small-server</name>
@@ -614,33 +598,33 @@ Pro přehlednost je zobrazena pouze část s definicí balíků a zbytek XML dok
     <name>pkg:/developer/versioning/git</name>    
 </software_data>
 \end{lstlisting}
-\subsection{Instalace z archivu}
+\subsection{Instalace z~archivu}
 \label{chapter:zones:instalation:archive}
-Pokud nechceme instalovat zónu přímo z repozitáře můžeme využít možnosti instalace z archivu. Archiv je soubor, který obsahuje
-zdrojový souborový systém zóny neboli diskový obraz. V tomto případě se nemusí balíčky stahovat přes počítačovou síť z repozitáře,
-ale jsou zkopírovány ze zdrojového archivu. V předchozím případě instalátor zajistí, že se z repozitáře stáhnou správné verze
-balíčků a administrátor se o to nemusel starat. V tomto případě může nastat problém s nekompatibilitou balíčků neglobální a 
-globální zóny. Pokud se jedná o nativní zónu pak musí souhlasit verze jádra instalované zóny s verzí jádra globální zóny. 
+Pokud administrátor nechce instalovat zónu přímo z~repozitáře může využít možnosti instalace z~archivu. Archiv je soubor, který obsahuje
+zdrojový souborový systém zóny neboli diskový obraz. V~tomto případě se nemusí balíčky stahovat přes počítačovou síť z~repozitáře,
+ale jsou zkopírovány ze zdrojového archivu. V~předchozím případě instalátor zajistí, že se z~repozitáře stáhnou správné verze
+balíčků. V~tomto případě může nastat problém s~nekompatibilitou balíčků neglobální a 
+globální zóny. Pokud se jedná o~nativní zónu, pak musí souhlasit verze jádra instalované zóny s~verzí jádra globální zóny. 
 Administrátor může instalátoru nastavit, aby při instalaci provedl potřebnou aktualizaci všech balíčků. Tento krok lze provést
-jenom v případě, že verze hosta je vyšší než verze neglobální zóny. V opačném případě se nepodaří zónu z archivu nainstalovat.
+jenom v~případě, že verze hosta je vyšší než verze neglobální zóny. V~opačném případě se nepodaří zónu z~archivu nainstalovat.
 
-Instalace z archivu se provádí opět pomocí příkazu \verb|install| nástroje \verb|zoneadm(1)|, kde administrátor specifikuje
-cestu k danému archivu. Jelikož archiv již obsahuje nainstalované softwarové balíky, není možné použít manifest pro další specifikaci.
-Stejně jako při minulém typu instalace je možné použít systémový profil pro konfiguraci nainstalované zóny. Instalace z 
-archivu je rychlejší než instalace z repozitáře, ale nekompatibilita globální zóny a archivu může vyústit v neúspěch.
+Instalace z~archivu se provádí pomocí příkazu \verb|install| nástroje \verb|zoneadm(1)|, kde administrátor specifikuje
+cestu k~danému archivu. Jelikož archiv již obsahuje nainstalované softwarové balíky, není možné použít manifest pro další specifikaci.
+Stejně jako při minulém typu instalace je možné použít systémový profil pro konfiguraci systému dané zóny. Instalace
+z~archivu je rychlejší než instalace z~repozitáře, ale nekompatibilita globální zóny a archivu může vyústit v~neúspěch instalace.
 \subsection{Klonování}
 \label{chapter:zones:instalation:cloning}
 Posledním podporovaným druhem instalace je klonování zóny. Vstupem klonování je již existující nakonfigurovaná a nainstalovaná
-zóna. Tento proces instalace využívá pokročilé techniky souborového systému ZFS, který umožňuje vytváření klonů z existujících
+neglobální zóna. Tento proces instalace využívá pokročilé techniky souborového systému ZFS, který umožňuje vytváření klonů z~existujících
 souborových systémů. Klon je read-write kopie zdrojového souborového systému. Ve skutečnosti se nevytváří úplná kopie
-souborového systému, ale data se kopírují až v okamžiku kdy se klon změní. Jak říká specifikace \cite{oracle:solaris:zones:clonning},
+souborového systému, ale data se kopírují až v~okamžiku, kdy se klon změní. Jak říká specifikace \cite{oracle:solaris:zones:clonning},
 vytvoření klonu trvá zlomek času klasické instalace. 
 
 Klonování zón se spouští pomocí příkazu \verb|clone| nástroje \verb|zoneadm(1)|, který bere zdrojovou zónu jako parametr. Pro efektivní
-využívání tohoto typu instalace je třeba dodrže následující požadavek. Aby bylo opravdu použito funkce klonování souborového systému
-ZFS musí se zdrojová i cílová zóna nacházet ve stejném ZFS poolu. V opačném případě je zdrojový souborový systém opravu zkopírovaná a
-není využito této techniky. Dále si administrátor musí dát pozor při konfigurování cílové zóny a musí změnit atributy, které
-nemohou zůstat stejné. Především se jedná o atribut \textit{zonepath}, který musí být unikátní.
+využívání tohoto typu instalace je třeba dodržet následující požadavek. Aby byla opravdu použita funkce klonování souborového systému
+ZFS, musí se zdrojová i cílová zóna nacházet ve stejném ZFS poolu. V~opačném případě je zdrojový souborový systém zkopírován a
+není využito této techniky. Dále si je nutné správně nakonfigurovat instalovanou zónu a změnit atributy, které
+nemohou zůstat stejné. Především se jedná o~atribut \textit{zonepath}, který musí být unikátní.
 
 Obrovskou výhodou tohoto typu vytváření zón je rychlost instalace a celková úspora diskového místa systému. Navíc podle specifikace
 \cite{oracle:solaris:zones:clonning} se všechny aktualizace balíčků, které jsou provedeny ve zdrojové zóně automaticky objeví i ve
@@ -649,10 +633,10 @@ všech klonech.
 \label{chapter:zones:instalation:profile}
 Všechny výše zmíněné typy instalace umožňují specifikovat systémový profil, který slouží pro konfiguraci systému. Profil je soubor
 ve formátu XML (podobně jako manifest), který podle specifikace \cite{oracle:solaris:zones:profile} umožňuje konfigurovat
-kteroukoli systémovou službu v rámci SMF. Tento soubor se tedy skládá z popisů konfigurace jednotlivých systémových služeb
-operačního systému Solaris. Prostřednictvím profilu se například specifikuje počáteční heslo uživatele root, konfigurace 
-síťových rozhraní nebo časová zóna systému. Příklad konfigurace uživatele root je naznačen v ukázce kódu \ref{code:profile}.
-Pro přehlednost jsou vynechány ostatní nepodstatné části souboru.
+kteroukoli systémovou službu v~rámci SMF. Tento soubor se skládá z~popisů konfigurace jednotlivých systémových služeb
+operačního systému Solaris. Prostřednictvím profilu se například specifikuje počáteční heslo uživatele \textit{root}, konfigurace 
+síťových rozhraní nebo časová zóna systému. Příklad konfigurace uživatele \textit{root} je naznačen v~ukázce výpisu kódu \ref{code:profile}.
+Pro přehlednost jsou vynechány ostatní části souboru.
 \begin{lstlisting}[language={XML}, caption={Konfigurace uživatele root}, label={code:profile}]
 <service name="system/config-user" version="1" type="service">
   <instance name="default" enabled="true">
@@ -665,30 +649,30 @@ Pro přehlednost jsou vynechány ostatní nepodstatné části souboru.
   </instance>
 </service>
 \end{lstlisting}
-V ukázce je vidět, že konfigurace uživatele root umožňuje specifikovat jeho počáteční heslo, platnost hesla a typ uživatele.
+V~ukázce lze pozorovat, že konfigurace uživatele \textit{root} umožňuje specifikovat jeho počáteční heslo, platnost hesla a typ uživatele.
 
 Konfigurace samostatných služeb je možné vygenerovat pomocí nástroje \verb|sysconfig(1)|, který slouží pro konfiguraci systému.
-Jak je zmíněno v manuálových stránkách \cite{oracle:manpages:sysconfig}, pomocí parametru \textit{grouping} lze stanovit typ
+Jak je zmíněno v~manuálových stránkách \cite{oracle:manpages:sysconfig}, pomocí parametru \textit{grouping} lze stanovit typ
 služby, pro kterou chcete vygenerovat systémový profil. Pokud administrátor při instalaci zóny neuvede soubor se systémovým
 profilem, je po prvním startu zóny spuštěn právě nástroj \verb|sysconfig(1)|. Tento nástroj pak interaktivně nastaví konfiguraci
 požadovaných služeb.
 \section{Správa}
 \label{chapter:zones:management}
-Po procesu instalace se zóna nachází ve stavu \textit{installed} a je možné ji spravovat. S neglobálními zónami jde provádět
-několik základních typů operací, které můžou měnit jejich stav. K účelu správy zón se používá opět nástroj \verb|zoneadm(1)|
+Po procesu instalace se zóna nachází ve stavu \textit{installed} a je možné ji spravovat. S~neglobálními zónami jde provádět
+několik základních typů operací, které můžou měnit jejich stav. K~účelu správy zón se používá nástroj \verb|zoneadm(1)|
 a jeho příkazy. Podle manuálových stránek \cite{oracle:manpages:zoneadm} může administrátor pro základní správu neglobálních
-zón používat následující příkazy.
+zón používat následující příkazy:
 \begin{itemize}
- \item \verb|list|
- \item \verb|ready|
- \item \verb|boot|
- \item \verb|shutdown|
- \item \verb|halt|
+ \item \verb|list|,
+ \item \verb|ready|,
+ \item \verb|boot|,
+ \item \verb|shutdown|,
+ \item \verb|halt|,
 \end{itemize}
-První příkaz v pořadí umožňuje administrátorovi získat přehled o zónách přítomných v lokálním systému a jejich stavech. Jedná
-se o zcela zásadní příkaz, jelikož zobrazuje jména zón, které slouží jako identifikátor. V každém dalším příkazu je nutné 
-specifikovat jméno zóny, na které chceme danou operaci provést. V ukázce kódu \ref{code:list} je předveden výpis příkazu
-\verb|list|. Pro úsporu místa byl z výpisu vynechán atribut \textit{zonepath}
+Příkaz \verb|list| umožňuje administrátorovi získat přehled o~zónách přítomných v~lokálním systému a jejich stavech. Jedná
+se o~zcela zásadní příkaz, jelikož zobrazuje jména zón, které slouží jako identifikátor. V~každém dalším příkazu je nutné 
+specifikovat jméno zóny, pro kterou chce administrátor danou akci vykonat. V~ukázce výpisu programu \ref{code:list} je zobrazen
+výpis příkazu \verb|list|. Z~výpisu byl vynechán atribut \textit{zonepath}.
 \begin{lstlisting}[language=bash, caption={Výpis příkazu zoneadm list}, label={code:list}]
 zadmin@shost:~$ zoneadm list -vic
   ID NAME             STATUS      BRAND      IP    
@@ -698,66 +682,67 @@ zadmin@shost:~$ zoneadm list -vic
    - z1               configured  solaris    excl  
 \end{lstlisting}
 
-Příkaz \verb|boot| slouží pro start zón zatímco příkazy \verb|shutdown| a \verb|halt| slouží k jejímu zastavení. Podrobnější
-informace o těchto příkazech poskytují následující kapitoly.
+Příkaz \verb|boot| slouží pro start zón, zatímco příkazy \verb|shutdown| a \verb|halt| slouží k~jejímu zastavení. Podrobnější
+informace o~těchto jsou popsány v~následujících kapitolách.
 \subsection{Start zóny}
 \label{chapter:zones:management:start}
-Aby se mohla zóna dostat do stavu \textit{running}, je nutné, aby pro ni byla v jádru globální zóny alokována virtuální platforma.
-Jinými slovy musí existovat procesy \textit{zsched} a \textit{zoneadmd} asociované s konkrétní neglobální zónou. Tyto procesy
-se starají o plánování a spouštění procesů v dané zóně a o zpracovávání kontrolních příkazů. Virtuální platforma je pro zónu
-alokována právě tehdy kdy se nachází ve stavu \textit{ready}. Do tohoto stavu může administrátor zónu dostat pomocí příkazu 
+Aby se mohla zóna dostat do stavu \textit{running}, je nutné, aby pro ni byla v~jádru globální zóny alokována virtuální platforma.
+Musí existovat procesy \textit{zsched} a \textit{zoneadmd} asociované s~konkrétní neglobální zónou. Tyto procesy
+se starají o~plánování a spouštění procesů v~dané zóně a o~zpracovávání kontrolních příkazů. Virtuální platforma je pro zónu
+alokována právě tehdy, kdy se nachází ve stavu \textit{ready}. Do tohoto stavu může administrátor zónu dostat pomocí příkazu 
 \verb|ready|, který zařídí vytvoření příslušný procesů, ale ještě nespustí proces \textit{init}.
 
 Zóna ve stavu \textit{ready} je připravená pro spuštění a pomocí příkazu \verb|boot| je možné zahájit její start. Se spuštěním
-procesu \textit{init} a po proběhnutí startu systému je možné se přihlásit ke konzoly. Pokud se zóna před spuštěním příkazu
-\verb|boot| nenacházela ve stavu \textit{ready}, je automaticky spuštěn stejnojmenný příkaz v rámci příkazu \verb|boot|.
+procesu \textit{init} a po proběhnutí startu systému je možné se přihlásit k~příkazové řádce. Pokud se zóna před spuštěním příkazu
+\verb|boot| nenacházela ve stavu \textit{ready}, je automaticky spuštěn stejnojmenný příkaz v~rámci příkazu \verb|boot|.
 
 Podle manuálových stránek \cite{oracle:manpages:zoneadm} má příkaz \verb|boot| několik volitelných parametrů, které slouží
-pro ovlivnění startu systému. Jednou z možností je například zapnout mód pro vypisování detailních informací o startu systému
+pro ovlivnění startu systému. Jednou z~možností je například zapnout mód pro vypisování detailních informací o~startu systému
 (verbose).
 \subsection{Zastavení zóny}
 \label{chapter:zones:management:stop}
 Pro vypnutí zóny poskytuje nástroj \verb|zoneadm(1)| hned dva příkazy. Pro standardní zastavení systému slouží příkaz \verb|shutdown|,
-který je podle manuálových stránek \cite{oracle:manpages:zoneadm} ekvivalentem volání příkazu \verb|/usr/sbin/init 0| v dané zóně.
-Tento příkaz počká až se validně ukončí všechny služby systému. Pomocí dalšího přepínače je možné specifikovat, že chceme aby
+který je podle manuálových stránek \cite{oracle:manpages:zoneadm} ekvivalentem volání příkazu \verb|/usr/sbin/init 0| v~dané zóně.
+Tento příkaz počká, než se validně ukončí všechny služby systému. Pomocí dalšího přepínače je možné specifikovat, aby
 se zóna vzápětí opět nastartovala.
 
-Pokud volání příkazu \verb|shutdown| trvá moc dlouho nebo chceme zónu rychle zastavit, můžeme použít příkaz \verb|halt|. Tento
-příkaz násilně ukončí všechny procesy zóny a přepne zónu do stavu \textit{installed}.
+Pokud volání příkazu \verb|shutdown| trvá dlouho nebo je nutné zónu rychle zastavit, může být administrátor použít příkaz \verb|halt|.
+Tento příkaz násilně ukončí všechny procesy zóny a přepne zónu do stavu \textit{installed}.
 \subsection{Konzole}
 \label{chapter:zones:management:console}
-Přímé ovládání zóny je možné provádět dvěma způsoby. Pokud je uživatel privilegovaný k použití příkazu \verb|zlogin|, může ho
-použít pro připojení ke konzoly dané neglobální zóny. Pomocí této konzole pak může standardně ovládat běžící systém. Pro tento
-způsob ovládání musí být uživatel administrátorem globální zóny nebo musí být specifikovaný v konfiguraci dané zóny jako její
+Přímé ovládání zóny je možné provádět dvěma způsoby. Pokud je uživatel privilegovaný k~použití příkazu \verb|zlogin|, může ho
+použít pro připojení k~příkazové řádce dané neglobální zóny. Pomocí příkazové řádky může standardně ovládat běžící systém. Pro tento
+způsob ovládání musí být uživatel administrátorem globální zóny nebo musí být specifikovaný v~konfiguraci dané zóny jako její
 administrátor.
 
-Druhý způsob se dá použít pouze v případě, že daná zóna má nakonfigurované síťové rozhraní a umožňuje se uživatelům přihlašovat
+Druhý způsob se dá použít pouze v~případě, že daná zóna má nakonfigurované síťové rozhraní a umožňuje se uživatelům přihlašovat
 pomocí nástroje \verb|ssh(1)|.
 \section{Zálohování a obnova}
 \label{chapter:zones:backup}
 Při provozu každého počítačového systému je důležité provádět jeho zálohu pro případ nečekaného selhání. Jinak tomu není ani
-v případě Solaris Zones. Proces vytváření neglobální zóny zahrnoval vytvoření konfigurace a následnou instalaci softwarových
-balíků do zdrojového souborového systému zóny, a proto tyto dvě věci je nutné zálohovat. Některé typy zálohy umí vytvářet kompaktní
-archiv, který obsahuje jak konfiguraci tak i obraz souborového systému zdrojové zóny. V ostatní případech je nutné udržovat
-konfiguraci a obraz disku odděleně nebo v archivu typu \textit{zip} nebo \textit{tar}. 
+v~případě Solaris Zones. Proces vytváření neglobální zóny zahrnoval vytvoření konfigurace a následnou instalaci softwarových
+balíků do zdrojového souborového systému zóny, a proto je nutné tyto dva objekty zálohovat. Některé typy zálohy umí vytvářet
+kompaktní archiv, který obsahuje jak konfiguraci tak i obraz souborového systému zdrojové zóny. V~ostatní případech je nutné
+udržovat konfiguraci a obraz disku odděleně nebo v~archivu typu \textit{zip} nebo \textit{tar}. Následující kapitoly popisují
+dvě základní techniky techniky zálohování Solaris Zones. Základní rozdíl těchto technik spočívá v~použitém typu archivu.
 \subsection{Záloha a obnova pomocí ZFS}
 \label{chapter:zones:backup:zfs}
-Prvním typ zálohovací procedury Solaris Zones využívá archiv, který produkuje souborový systém ZFS. Tento typ zálohy lze použít
-jen v případě, že se souborový systém zálohované zóny nachází v ZFS svazku. V novějších verzích operačního systému Solaris je 
+První typ zálohovací procedury Solaris Zones využívá archiv, který produkuje souborový systém ZFS. Tento typ zálohy lze použít
+jen v~případě, že se souborový systém zálohované zóny nachází v~ZFS svazku. V~novějších verzích operačního systému Solaris je 
 přítomnost souborového systému ZFS standard, ale ve starší verzích tomu tak být nemusí.
 
 Vstupem tohoto typu zálohy je neglobální zóna, která je nakonfigurovaná, nainstalovaná a nachází se ve stavu \textit{installed}.
 Prvním krokem je vytvoření snapshotu zdrojového souborového systému zálohované zóny pomocí příkazu \verb|zfs snapshot|. Snapshot
-je read-only souborový systém, který je kopií zdrojového souborového systému. Rozdíl oproti úplné kopii je v tom, že se data 
-kopírují až v okamžiku, kdy se změní vzor (zdrojový souborový systém). Výhodou této techniky je, že z počátku nezabírá téměř žádné místo a
-vytvoření snapshotu je téměř okamžité. Dalším krokem je konstrukce ZFS archivu z vytvořeného snapshotu. K tomuto účelu se využívá příkaz 
+je read-only souborový systém, který je kopií zdrojového souborového systému. Rozdíl oproti úplné kopii je v~tom, že se data 
+kopírují až v~okamžiku, kdy se změní vzor (zdrojový souborový systém). Výhodou této techniky je, že z~počátku zabírá minimální místo a
+vytvoření snapshotu je téměř okamžité. Dalším krokem je konstrukce ZFS archivu z~vytvořeného snapshotu. K~tomuto účelu se využívá příkaz 
 \verb|zfs send|, který na standardní výstup produkuje datový proud reprezentující daný souborový systém. Úkolem administrátora je
 přesměrovat tento datový proud do archivu, který bude sloužit jako záloha. Pro zmenšení velikosti archivu je možné použit kompresi 
 typu \textit{bzip} nebo \textit{gzip}. Výstupem zálohy je tedy archiv souborového systému ZFS. Konfiguraci zóny musí administrátor 
 zálohovat zvlášť nebo zabalit pomocí nástroje \verb|zip| nebo \verb|tar| do archivu společně se zálohou.
 
-Obnova zóny z tohoto typu archivu spočívá v obnovení konfigurace zóny z archivu  a následné spuštění příkazu \verb|zoneadm attach|,
-který zařídí připojení souborového systému ZFS na správné místo v globální zóně.
+Obnova zóny z~tohoto typu archivu spočívá v~obnovení konfigurace zóny z~archivu a následné spuštění příkazu \verb|zoneadm attach|,
+který připojí kořenový souborový systém neglobální zóny na správné místo v~globální zóně.
 
 Výhodou tohoto typu zálohy je její relativně rychlé vytvoření a možnost jí vykonávat paralelně pro více zón najednou. Další výhodou
 může být přesměrování výstupu příkazu \verb|zfs send| do nástroje \verb|ssh(1)| a rovnou přijímat archiv na vzdáleném serveru.
@@ -766,30 +751,30 @@ může být přesměrování výstupu příkazu \verb|zfs send| do nástroje \ve
 Unified archive neboli UAR \cite{oracle:solaris:zones:uar} je nativní nástroj pro archivování diskových obrazů pro operační systém
 Solaris. Umožňuje archivaci více systému do jednoho unifikovaného archivu. Součástí tohoto archivu může být i záloha neglobálních
 zón. Záloha se provádí pomocí nástroje \verb|archiveadm(1)| a její vytvoření je velice jednoduché. Administrátor na příkazové
-řádce specifikuje jaké zóny chce archivovat a program spustí. Výstupem je archiv s příponou \textit{uar}, který slouží jako záloha
-specifikovaných zóna.
+řádce specifikuje, jaké zóny chce archivovat a program spustí. Výstupem je archiv s~příponou \textit{uar}, který slouží jako záloha
+specifikovaných zón.
 
 Obnova ze zálohy pomocí UAR je stejně jednoduchá jako její vytvoření. Jelikož archiv obsahuje jak diskový obraz tak i konfiguraci
-zóny je možné vše provést pomocí dvou příkazů. Nejprve obnovíme konfiguraci zóny přímo z archivu pomocí nástroje \verb|zonecfg(1)|
-a následovně spustíme příkaz \verb|zoneadm install|, kde jako parametr specifikujeme cestu k archivu.
+zóny, je možné vše provést pomocí dvou příkazů. Nejprve je obnovena konfigurace zóny přímo z~archivu pomocí nástroje \verb|zonecfg(1)|
+a následovně spuštěn nástroj \verb|zoneadm| a jeho příkaz \verb|install|, kde je jako parametr specifikována cestu k~archivu.
 
-Výhodou zálohy pomocí UAR je její jednoduchost. Celý proces je otázkou několika málo příkazů. Nevýhodou naopak je, že uživatel
-potřebuje speciální práva na práci s nástrojem \verb|archiveadm(1)|. Další nevýhodou je fakt, že se nedá vytvářet více archivů
-najednou ale musíme archivovat více zón do jednoho archivu.
+Výhodou zálohy pomocí UAR je její jednoduchost. Celý proces je otázkou několika příkazů. Nevýhodou naopak je, že uživatel
+potřebuje speciální práva na práci s~nástrojem \verb|archiveadm(1)|. Nevýhodou je také fakt, že se nedá vytvářet více archivů
+současně. Použití tohoto příkazu je totiž v~rámci jednoho systému omezené.
 \section{Migrace}
 \label{chapter:zones:migration}
-V rámci infrastruktury, která poskytuje výpočetní zdroje virtuálním strojům, může občas dojít k odstávkám některých serverů.
-Tento případ vyžaduje migraci všech virtuálních strojů na jiné servery, aby nedošlo k přerušení provozu služeb běžících ve 
-virtuálních počítačích. Více serverů využívající virtualizační techniky Solaris Zones mohou být případem takové infrastruktury
-a i Solaris Zones poskytují několik technik pro migraci neglobálních zón.
+V~rámci infrastruktury, která poskytuje výpočetní zdroje virtuálním strojům, může občas dojít k~odstávkám některých serverů.
+Tento případ vyžaduje migraci všech virtuálních strojů na jiné servery, aby nedošlo k~přerušení provozu služeb běžících ve 
+virtuálních počítačích. Více serverů, které využívají virtualizační techniky Solaris Zones, mohou reprezentovat takovou infrastrukturu.
+Solaris Zones poskytují několik technik pro migraci neglobálních zón, které může administrátor využít.
 
-Migrace v kontextu Solaris Zones je přesun neglobální zón z jedné globální zón do globální zóny na vzdáleném počítači. Jak je
-zmíněno v manuálových stránkách \cite{oracle:manpages:zoneadm} a administrátorské příručce \cite{oracle:solaris:zones:migration}
+Migrace v~kontextu Solaris Zones je přesun neglobálních zón z~jedné globální zóny do globální zóny na vzdáleném počítači. Jak je
+zmíněno v~manuálových stránkách \cite{oracle:manpages:zoneadm} a administrátorské příručce \cite{oracle:solaris:zones:migration},
 hlavním nástrojem pro migraci zón je nástroj \verb|zoneadm| a jeho příkazy \verb|attach| a \verb|detach|. Obecně migrace
 probíhá tak, že se nejdříve odpojí diskový obraz dané zóny pomocí příkazu \verb|detach|. Tento krok převede danou zónu
 do stavu \textit{configured}, ale její souborový systém zůstane na původním místě. Poté se souborový systém přenese přímo pomocí
-\verb|zfs send| nebo pomocí archivu na vzdálený počítač. V tomto kroku se využívá technik popsaných v kapitolách 
-\ref{chapter:zones:backup:zfs} a \ref{chapter:zones:backup:uar} s tím rozdílem, že se vytvořený archiv přesune na vzdálený
+\verb|zfs send| nebo pomocí archivu na vzdálený počítač. V~tomto kroku se využívá technik popsaných v~kapitolách 
+\ref{chapter:zones:backup:zfs} a \ref{chapter:zones:backup:uar} s~tím rozdílem, že se vytvořený archiv přesune na vzdálený
 počítač. Před finálním připojením obrazu disku je třeba ještě nakonfigurovat zónu na cílovém stroji. Konečně spuštěním
-příkazu \verb|attach| s odpovídajícím parametrem se začne připojovat diskový obraz ke konfiguraci zóny. Výsledkem je  přenesení
-neglobální zóny z jednoho počítačového systému na druhý.
+příkazu \verb|attach| s~odpovídajícím parametrem se začne připojovat diskový obraz ke konfiguraci zóny. Výsledkem je  přenesení
+neglobální zóny z~jednoho počítačového systému na druhý.
