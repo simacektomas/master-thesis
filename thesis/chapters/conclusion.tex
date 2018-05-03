@@ -2,34 +2,34 @@
 % Author: Tomáš Šimáček
 \label{chapte:conclusion}
 Virtualizace se stala běžnou a možná i nezbytnou součástí dnešního počítačového světa. Teto technika se využívá v~mnoha oblastech
-informačních technologií, kde přináší nezanedbatelné benefity. Virtualizace umožňuje společnostem efektivně využívat dostupné 
+informačních technologií, kde přináší různé benefity. Virtualizace umožňuje společnostem efektivně využívat dostupné 
 fyzické prostředky a tím výrazně ušetřit náklady na provoz fyzických zařízení. Tématem této diplomové práce byla virtualizace serverů,
 která umožňuje současný běh několika virtuálních počítačů v~rámci jednoho fyzického systému.
 
-Jednou z~technik virtualizace serverů je technologie Solaris Zones, která je součástí operačního systému Solaris od firmy Oracle.
+Jednou z~technik virtualizace serverů je technologie Solaris Zones, která je součástí operačního systému Solaris vyvíjeného firmou Oracle.
 Tato virtualizační technika umožňuje běh mnoha virtualizačních kontejnerů v~rámci jedné instance operačního systému Solaris. Tyto
 kontejnery se nazývají zóny a jsou izolovány na úrovni počítačové sítě, souborového systému a spuštěných procesů. Standardně hlavní
 operační systém sdílí svoje jádro s~ostatními zónami, ale tato technika umožňuje vytvářet i zóny s~vlastním jádrem.
 
-Cílem rešeršní části této diplomové práce bylo tuto virtualizační techniku popsat a porovnat s~ostatními běžně využívanými technikami
+Cílem teoretické části této diplomové práce bylo tuto virtualizační techniku popsat a porovnat s~ostatními běžně využívanými technikami
 virtualizace. Dále se práce zaměřila na popis konfigurace, instalace a základních administrátorských rutin pro správu zón.
-Pokročilejší rutiny vyžadují provedení několika kroků, jejichž postupným vykonáváním lze dosáhnout požadovaného výsledku. Z~tohoto
-důvodu bylo hlavním cílem práce vytvořit nástroj, který by tyto procesy automatizoval a umožnil je provádět i pro vzdálené zón.
+Předmětem byly také pokročilé rutiny vyžadují provedení několika kroků, jejichž postupným vykonáváním lze dosáhnout požadovaného výsledku. Z~tohoto
+důvodu bylo hlavním cílem práce vytvořit nástroj, který by tyto procesy automatizoval a umožnil je provádět i pro vzdálené zóny.
 Hlavním důvodem pro vytvoření tohoto nástroje je fakt, že standardní nástroje pro správu Solaris Zones tuto funkcionalitu neposkytují.
 Jelikož Solaris Zones poskytují uživateli pouze rozhraní na příkazové řádce, bylo nutné implementovaný nástroj postavit právě nad tímto
 rozhraním a využívat tak standardní nástroje pro správu zón.
 
-Výsledná implementace nástroje se skládá ze tří částí. První částí je modul Solaris Zones, který poskytuje funkcionalitu ostatním
+Výsledná implementace nástroje se skládá z několika částí. Jednou z nich je modul Solaris Zones, který poskytuje funkcionalitu ostatním
 částem nástroje. Jeho architektura se skládá z~několika hierarchicky uspořádaných vrstev. Nejníže v~hierarchii se nachází vrstva,
 která umožňuje lokální i vzdálené spouštění nástrojů \textit{zonecfg}, \textit{zoneadm}, \textit{archiveadm} a v~neposlední řadě 
 také \textit{zfs}. Ostatní vrstvy modulu využívají těchto příkazů a vytvářejí z~nich sekvence, které reprezentují jednotlivé 
-administrátorské rutiny pro vytváření, mazání, zálohu a migraci zón. Jednotlivé rutiny jsou implementované jako transakce. V~rámci
+administrátorské rutiny pro vytváření, mazání, zálohu, obnovu a migraci zón. Jednotlivé rutiny jsou implementované jako transakce. V~rámci
 transakce je zajištěno, že všechny dočasně vytvořené soubory budou smazány a že všechny provedené změny budou navráceny
 do původního stavu v~případě neúspěchu transakce. Takto implementované rutiny jsou poskytovány ostatním částem nástroje pomocí
 předem definovaného rozhraní. 
 
 Jelikož v~dnešní době existuje mnoho virtualizačních technik s~podobnými vlastnostmi jako Solaris Zones, byla architektura nástroje
-navržena tak, aby se dala v~budoucnu lehce rozšířit o~další modul. Tuto funkcionalitu zajišťuje v~rámci nástroje knihovna, která
+navržena tak, aby se dala v~budoucnu lehce rozšířit o~další moduly. Tuto funkcionalitu zajišťuje v~rámci nástroje knihovna, která
 jasně definuje rozhraní jednotlivých modulů. Pomocí tohoto rozhraní knihovna zprostředkovává funkcionalitu modulů klientským 
 aplikacím. Ve výsledném nástroji je implementován pouze výše zmíněný modul pro podporu správy Solaris Zones. Tato knihovna také
 definuje generickou šablonu, která slouží pro popis konkrétních virtuálních strojů. Výše popsaný modul implementuje rozšíření této
@@ -37,13 +37,13 @@ generické šablony, které umožňuje uživateli specifikovat konfiguraci, soft
 je možné využít pro vytváření většího množství zón s~danými vlastnostmi.
 
 Ovládání nástroje je zajištěno pomocí uživatelského rozhraní, které je uživateli prezentováno pomocí příkazové řádky. Jednotlivé
-příkazy umožňují vyvolat odpovídající funkce modulu pro vytváření, mazání, zálohu nebo migraci zón. Uživatel může jednoduše 
+příkazy umožňují vyvolat odpovídající funkce modulu pro vytváření, mazání, zálohu, obnovu nebo migraci zón. Uživatel může jednoduše 
 specifikovat pro jaké zóny chce danou akci provést. Tyto zóny se mohou nacházet na lokálním i vzdáleném serveru a nástroj
-pro každou specifikovanou zónu vykoná konkrétní akci paralelně (pokud je to možné). Uživatelské rozhraní dále implementuje 
+pro každou specifikovanou zónu vykoná konkrétní akci pokud možno paralelně. Uživatelské rozhraní dále implementuje 
 systém pro správu vzdálených hostů, který umožňuje dané hosty registrovat a specifikovat parametry připojení. Hromadné akce
 poskytované uživatelským rozhraním jsou prováděny právě pro všechny registrované hosty. Jelikož se zónami může manipulovat každý
-privilegovaný uživatel, implementuje tato část nástroje uživatelský žurnál. V~žurnálu jsou udržovány jednotlivé stavy zón, aby
-bylo možné poznat, zda v~době uživatelovo nepřítomnosti nedošlo ke změně stavu zón. Další součástí uživatelského rozhraní je
+privilegovaný uživatel, implementuje tato část nástroje také uživatelský žurnál. V~žurnálu jsou udržovány jednotlivé stavy zón, aby
+bylo možné poznat, zda v~době nepřítomnosti uživatele nedošlo ke změně stavu zón. Další součástí uživatelského rozhraní je
 grafický editor šablon, který uživateli poskytuje možnost interaktivní tvorby a editace šablon. Hlavním smyslem tohoto editoru
 je odstínění uživatele od implementačních detailů šablon. Tohoto grafického rozhraní je využito i v~případě interaktivní instalace
 zón, která uživateli nabízí možnost specifikace vlastností v~průběhu vytváření zón. 
@@ -54,7 +54,7 @@ vytvářených zón. Tato funkcionalita se dá dobře využít v~procesu vývoje
 vývojářských prostředí. Implementované uživatelské rozhraní prezentuje uživateli funkce nástroje v~jednoduché a přehledné formě.
 Grafické součásti nástroje slouží především pro komfortní vytváření a editaci šablon.
 
-Všechny cíle této diplomové práce se podařilo splnit. Implementovaný nástroj pro podporu automatické správy virtualizačního
-kontejneru Solaris Zones poskytuje stanovenou funkcionalitu a splňuje požadavky. Tato skutečnost byla ověřena v~rámci testování
-tohoto nástroje, které je součástí této diplomové práce. Zdrojové kódy a instalační balíček implementovaného nástroje jsou dostupné
-na přiloženém médiu.
+Implementovaný nástroj pro podporu automatické správy virtualizačního
+kontejneru Solaris Zones poskytuje očekávanou funkcionalitu a splňuje stanovené požadavky. Tato skutečnost byla ověřena v~rámci testování
+tohoto nástroje, které je součástí této diplomové práce. Z těchto důvodů je možné konstatovat, že všechny stanovené cíle této diplomové práce 
+byly naplněny. Instalační balík a zdrojové kódy implementovaného nástroje i zdrojové kódy celé diplomové práce jsou dostupné na přiloženém médiu.
