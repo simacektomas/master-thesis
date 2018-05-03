@@ -11,15 +11,15 @@ Prvním krokem  při implementaci bylo zvolení vhodného programovacího jazyka
  \item Operační systém Solaris,
  \item Možnost tvorby grafického rozhraní.
 \end{itemize}
-Nástroj pro automatickou správu virtualizačního kontejneru Solaris Zones staví hlavně nad využíváním
-nástrojů na příkazové řádce a~zpracovávání jejich výstupu. Pro tento účel bylo vhodné zvolit interpretovaný
+Nástroj pro automatickou správu virtualizačního kontejneru Solaris Zones využívá
+nástrojů na příkazové řádce a~zpracovává jejich výstup. Pro tento účel bylo vhodné zvolit interpretovaný
 programovací jazyk, který umožnil jednoduše spustit nástroje a~následně snadno zpracovat jejich výstup. Na základě
 výstupu se pak nástroj rozhodne o~dalším průběhu zpracování uživatelského příkazu. První podmínka není pro volbu jazyka
 tolik omezující. Pro operační systém Solaris existuje implementace standardního kompilátoru \verb|gcc(1)|
 pro jazyk C a~stejně tak implementace virtuálního stroje JVM pro jazyk Java. Většina interpretovaných jazyků
 staví svůj překladač právě nad jedním z~těchto základních programovacích jazyků.
 
-Z~výše uvedených důvodů bylo nutné při volbě jazyka dbát hlavně na dostupnost grafických knihoven pro operační systém
+Z~výše uvedených důvodů bylo nutné při volbě jazyka dbát hlavně na~dostupnost grafických knihoven pro operační systém
 Solaris. \verb|Shell| je standardním skriptovacím jazykem pro většinu operačních systému typu UNIX. Tento program
 interpretuje uživatelské příkazy na příkazové řádce a~následně je provádí. Tato volba by splňovala podmínku platformy,
 ale těžko by se s~pomocí tohoto jazyka vytvářelo grafické uživatelské rozhraní. Z~tohoto důvodu byl zvolen programovací
@@ -27,13 +27,13 @@ jazyk Ruby \cite{ruby}, který umožnil splnit obě stanovené podmínky.
 \subsection{Ruby}
 \label{chapter:implementation:language:ruby}
 Ruby je objektově orientovaný programovací jazyk, který má mnoho možností využití. Jedním ze scénářů využití může být
-právě spouštění příkazů na příkazové řádce a~tvorba uživatelského rozhraní. Objektová povaha tohoto jazyka umožňuje
+právě spouštění příkazů na~příkazové řádce a~tvorba uživatelského rozhraní. Objektová povaha tohoto jazyka umožňuje
 programátorovi využívat všech výhod objektově orientovaného programování. Podle dokumentu \cite{ruby:implementation}
 existuje několik implementací interpretu jazyka Ruby, z~nichž nejpoužívanější jsou YARV \cite{ruby:implementation:yarv} 
 a~JRuby \cite{ruby:implementation:jruby}. Obě tyto implementace jsou dostupné i pro operační systém Solaris.
 
 Pokud chce programátor využívat grafické rozhraní pomocí programovacího jazyka Ruby, je nutné, aby byly v~systému
-nainstalované potřebné grafické knihovny. Standardní knihovny pro programovací jazyk Ruby však nejsou na na operačním
+nainstalované potřebné grafické knihovny. Standardní knihovny pro programovací jazyk Ruby však nejsou na~operačním
 systému Solaris podporované. Z~toho důvodu bylo nutné využít grafické rozhraní, které nabízí implementace JRuby.
 Tato implementace je postavená nad virtuálním strojem JVM a~může využívat grafické knihovny v~něm implementované.
 Navrhovaný nástroj pro automatickou správu virtualizačního kontejneru Solaris Zones tedy využívá programovacího
@@ -50,14 +50,14 @@ správy virtualizačního kontejneru Solaris Zones, který bude popsán v~kapito
 Knihovna poskytuje hlavní rozhraní, pomocí kterého může klient využívat funkcí jednotlivých modulů. Jednotlivé
 moduly tedy slouží jako hlavní zdroj funkcionality pro knihovnu.
 
-Mimo zprostředkovávání komunikace mezi moduly a~klientem slouží knihovna k~validaci šablon, které mají specifikovat
+Mimo zprostředkovávání komunikace mezi moduly a~klientem slouží kni\-ho\-vna k~validaci šablon, které mají specifikovat
 konkrétní virtuální stroj. V~případě šablon knihovna funguje jako vstupní bod, který umí šablonu načíst a~provést
 prvotní validaci. Spouštění těchto operací a~jejich výsledky knihovna zprostředkovává klientovi.
 
 Jelikož moduly mohou implementovat různé typy operací pomocí různých technologií, je nutné ponechat vývojářům velkou volnost
 v~možnostech jejich implementace. Pro účel zajištění jednotné komunikace s~moduly je nutné, aby každý implementovaný modul
-splňoval určité rozhraní. Toto rozhraní zajistí, aby všechny moduly mohly jednotně komunikovat s~knihovnou a~také aby knihovna
-mohla zprostředkovávat jejich funkce klientovi. Definice rozhraní modulu je popsána v~kapitole \ref{chapter:implementation:library:interface}.
+splňoval určité rozhraní. Toto rozhraní zajistí, aby všechny moduly mohly jednotně komunikovat s~knihovnou a~také, aby knihovna
+mohla zprostředkovávat jejich funkce klientovi.
 
 Poslední funkcí knihovny je udržování hlavní konfigurace. V~této konfiguraci je například uchováván seznam implementovaných
 modulů, kořenový adresář knihovny nebo například jméno knihovny. Klientská aplikace má možnost tuto konfiguraci změnit
@@ -65,7 +65,7 @@ a~docílit tak jiného chování knihovny.
 \subsection{Rozhraní modulu}
 \label{chapter:implementation:library:interface}
 Povinné rozhraní modulu slouží především ke komunikaci mezi knihovnou a~samotným modulem. Funkcionalitu, kterou modul
-musí poskytovat, je možné shrnout do následujících tří bodů:
+musí poskytovat, je možné shrnout do následujících bodů:
 \begin{itemize}
  \item Inicializační rutina,
  \item Rozhraní poskytované klientům,
@@ -89,7 +89,7 @@ funkce pro validaci šablon specifikující neglobální zóny.
 
 Vlastní implementace modulu není nijak jinak omezena. Jediným logickým omezením je fakt, že tento modul musí být napsaný
 v~programovacím jazyku Ruby. Pokud modul splní výše zmíněné požadavky, může být jednoduše registrován do knihovny a~klientské
-aplikace ho můžou bezprostředně po inicializaci knihovny využívat. Na obrázku \ref{figure:module:interface} je názorně zobrazeno, 
+aplikace ho můžou bezprostředně po~inicializaci knihovny využívat. Na obrázku \ref{figure:module:interface} je názorně zobrazeno, 
 jakým způsobem knihovna využívá rozhraní modulu a~jakým způsobem je modul poskytován klientské aplikaci.
 \begin{figure}
     \centering    
@@ -100,41 +100,41 @@ jakým způsobem knihovna využívá rozhraní modulu a~jakým způsobem je modu
 \label{chapter:implementation:library:routing}
 Mimo inicializace modulů je hlavní funkcí knihovny přesměrovávat požadavky klientských aplikací na funkční rozhraní 
 implementovaných modulů. K~tomuto účelu obsahuje knihovna hlavní třídu, která virtuálně reprezentuje rozhraní všech modulů
-knihovny. Tato třída se nazývá hlavní rozhraní. Jak již bylo zmíněno v~kapitole \ref{chapter:implementation:library:interface},
+knihovny. Tato třída se nazývá hlavní rozhraní. Jak již bylo zmíněno,
 knihovna si udržuje odkazy na hlavní třídy modulů, které reprezentují jejich funkční rozhraní.
 
-V~okamžiku, kdy klientská aplikace vznese požadavek na zavolání nějaké funkce, knihovna za běhu zjistí jakému modulu daná
+V~okamžiku, kdy klientská aplikace vznese požadavek na zavolání konkrétní funkce, knihovna za běhu zjistí jakému modulu daná
 funkce přísluší a~vyvolá ji. Pokud neexistuje žádný modul, který umí danou funkci provést, dojde k~vyvolání výjimky a~aplikace
-se ukončí. Díky tomuto chování může dojít ke kolizi jmen funkcí. V~takovém případě knihovna použila takovou funkci, kterou
+se ukončí. Díky tomuto chování může dojít ke kolizi jmen funkcí. V~takovém případě by knihovna použila takovou funkci, kterou
 by našla jako první v~pořadí. Z~tohoto důvodu je nutné se vyvarovat opakování jmen funkcí a~nejlépe používat pro funkce určitého
-modulu prefix, který daný modul jasně identifikuje. Například jeho jméno.
+modulu prefix, který daný modul jasně identifikuje, například jeho jméno.
 
 Toto směrování za běhu aplikace je umožněno díky programovacímu jazyku Ruby a~jeho možnosti dynamického volání funkcí za běhu
-programu. Směrování požadavků ke konkrétním modulům knihovny je názorně ukázáno na obrázku \ref{figure:module:interface}.
+programu. Směrování požadavků ke konkrétním modulům knihovny je demonstrováno na obrázku \ref{figure:module:interface}.
 \subsection{Generická šablona}
 \label{chapter:implementation:library:generic}
-Poslední funkcionalitou knihovny je definice generické šablony, která má za úkol specifikovat virtuální stroj. Hlavním úkolem
+Poslední funkcionalitou knihovny je definice generické šablony, která má za~úkol specifikovat virtuální stroj. Hlavním úkolem
 generické šablony je specifikovat typ virtuálního stroje. Tento atribut určuje, který modul knihovny je zodpovědný
 za zpracování a~validaci. Generická šablona by dále měla obsahovat jméno, které bude nějakým způsobem vystihovat a~popisovat
 specifikovaný virtuální stroj. Knihovna tedy zajišťuje validaci těchto dvou atributů a~v~případě úspěchu předá
 šablonu zodpovědnému modulu.
 
 Knihovna poskytuje klientským aplikacím funkce pro načítání a~validaci šablon. V~případě úspěšného načtení šablony
-knihovna vrátí objekt, který je možné použít v~rámci konkrétního modulu. Validace šablony je prováděna ve dvou
-krocích. Knihovna nejprve zjistím, zdali daná šablona obsahuje atribut jména a~typu. Podle typu šablony se knihovna rozhodne
-jakému modulu ji předá na druhý krok validace. Způsob validace je popsaný v~kapitole \ref{chapter:implementation:library:generic:validation}.
+knihovna vrátí objekt, který je možné použít v~rámci konkrétního modulu. Validace šablony je prováděna ve~dvou
+krocích. Knihovna nejprve zjistí, zdali daná šablona obsahuje atribut jména a~typu. Podle typu šablony se knihovna rozhodne
+jakému modulu ji předá na druhý krok validace.
 \subsubsection{Struktura šablony}
 \label{chapter:implementation:library:generic:structure}
 Aby mohla být šablona opakovaně používána pro tvorbu virtuálních strojů, musí být perzistentně uložena v~souborovém systému.
-Pro tento účel je použitý datový formát JSON \cite{json}, který slouží jako reprezentace šablony. Hlavním důvodem využití tohoto
+Pro tento účel je použitý datový formát JSON \cite{json}, který slouží pro reprezentaci šablony. Hlavním důvodem využití tohoto
 formátu je relativně dobrá uživatelská čitelnost a~především snadné zpracování pomocí programovacího jazyka Ruby. Uživatel
 může pro konstrukci šablony použít jednoduchý textový editor nebo grafický editor, který je součástí uživatelského rozhraní
 klientské aplikace. 
 
 Struktura šablony se skládá ze dvou částí. První částí je název a~definice typu šablony. Tato hlavička určuje
-způsob zacházení s~danou šablonou. V~ukázce kódu \ref{code:generic_template} je naznačeno, jak by mohla taková šablona vypadat.
+způsob zacházení s~danou šablonou. V~ukázce kódu \ref{code:generic_template} je naznačeno, jakým způsobem by mohla taková šablona vypadat.
 Atribut \textit{type} určuje o~jaký typ virtuálního stroje se jedná a~k~jakému modulu knihovny přísluší. Druhou povinnou položkou
-v~šabloně je atribut \textit{name}, který má za úkol popsat funkcionalitu virtuálního stroje. Tečky v~ukázce
+v~šabloně je atribut \textit{name}, který má za~úkol popsat funkcionalitu virtuálního stroje. Tečky v~ukázce
 \ref{code:generic_template} reprezentují atributy specifické pro konkrétní typ šablony. Tyto atributy jsou z~ukázky vynechány.
 \begin{lstlisting}[language=json, caption={Generická šablona}, float,label={code:generic_template}]  
 {
@@ -146,8 +146,8 @@ v~šabloně je atribut \textit{name}, který má za úkol popsat funkcionalitu v
 \subsubsection{Validace šablony}
 \label{chapter:implementation:library:generic:validation}
 Šablona musí poskytovat validní definici virtuálního stroje, aby z~ní bylo možné konkrétní virtuální stroj zkonstruovat.
-Pro tento účel je nutné zavést validaci šablon a~jejich atributů. Jelikož je pro ukládání šablon použitý datový formát JSON,
-je pro validaci šablony použité tvz. JSON schéma definované v~\cite{json:schema}. Tento dokument je opět ve formátu
+Pro tento účel je nutné zavést validaci šablon a~jejich atributů. Jelikož je pro ukládání šablon použit datový formát JSON,
+je pro validaci šablony použité tvz. JSON schéma definované ve~specifikaci \cite{json:schema}. Tento dokument je opět ve formátu
 JSON, ale neslouží pro ukládání dat. Jeho funkcí je definovat formát jiného dokumentu JSON. Pomocí tohoto schématu
 je možné specifikovat atributy a~typy jejich hodnot, které má konkrétní typ dokumentu obsahovat.
 
@@ -158,7 +158,7 @@ toto schéma vyžaduje, aby v~dokumentu byly přítomné atributy \textit{name} 
 podrobnější schéma, které má definovat konkrétní typ virtuálního stroje.
 
 Aby bylo možné v~programovacím jazyku Ruby validovat JSON dokumenty, je nutné použít knihovnu, která bude implementovat
-JSON schéma. Pro tento účel aplikace využívá volně dostupné řešení json-schema \cite{json:schema:ruby}, které implementuje
+JSON schéma. Pro tento účel aplikace využívá volně dostupné řešení \textit{json-schema} \cite{json:schema:ruby}, které implementuje
 funkce validace dokumentů typu JSON pomocí schémat.
 \begin{lstlisting}[language=json, caption={Schéma generické šablony}, float, label={code:generic_tmplate:validation}]  
 {
@@ -209,11 +209,11 @@ Nástroje pro správu Solaris Zones neposkytují možnost vytvářet zóny pomoc
 \ref{chapter:zones}, k~úspěšnému vytvoření neglobální zóny se využívají tři soubory. Prvním a~povinným parametrem instalace zóny
 je její konfigurace. Není podmínkou, aby konfigurace zóny byla v~podobě souboru, ale pro automatizaci tohoto procesu je to výhodné.
 Dále je nutné instalátoru předat definici softwarových balíků, které má nainstalovat. Posledním nepovinným parametrem instalace
-je konfigurace systémových služeb. Aby bylo možné nainstalovat zónu pomocí jednoho souboru, musí tato šablona šablona kombinovat
+je konfigurace systémových služeb. Aby bylo možné nainstalovat zónu pomocí jednoho souboru, musí tato šablona kombinovat
 vlastnosti výše zmíněných souborů. 
 
-Kostra šablony pro neglobální zónu je naznačena v~ukázce kódu \ref{code:szones_template}. Z~ukázky je patrné, že šablona obsahuje
-tři sekce, které korespondují s~jednotlivými soubory vyžadovanými při instalaci. Z~ukázky vynechány konkrétní atributy zón.
+Kostra šablony pro neglobální zónu je demonstrována v~ukázce kódu \ref{code:szones_template}. Z~ukázky je patrné, že šablona obsahuje
+tři sekce, které korespondují s~jednotlivými soubory vyžadovanými při instalaci. Z~ukázky jsou vynechány konkrétní atributy zón.
 Modul implementuje JSON schéma, které využívá pro validaci šablony a~pro mechanizmy jejího zpracování. Úkolem modulu při zpracování
 šablony je reprodukce souborů s~konfigurací, manifestem a~systémovým profilem. Tyto soubory nástroj využívá pro instalaci 
 neglobální zóny s~parametry, které jsou v~dané šabloně specifikovány.
@@ -228,7 +228,7 @@ neglobální zóny s~parametry, které jsou v~dané šabloně specifikovány.
    "profile": {...} 
 }
 \end{lstlisting}
-Pokud modul zpracovává rutinu, která využívá šablonu, je v~prvním kroku šablona rozdělena třech zmíněných částí.
+Pokud modul zpracovává rutinu, která využívá šablonu, je v~prvním kroku šablona rozdělena do třech zmíněných částí.
 V~následujícím kroku jsou tyto části převedeny do vnitřní reprezentace a~následně zpracovány.
 \subsubsection{Zpracování konfigurace}
 \label{chapter:implementation:szones:template:configuration}
@@ -251,11 +251,11 @@ se ukončí příkazem \verb|end|. Takto přetransformovaná konfigurace je při
 V~rámci sekce šablony s~názvem \lstinline[language=json]{manifest} může uživatel specifikovat softwarové balíky, které má zóna obsahovat.
 Pro tento účel obsahuje tato část šablony atribut \lstinline[language=json]{packages}, který je typu pole. Hodnotou každého
 prvku pole je obyčejný textový řetězec, který obsahuje jméno softwarového balíku. V~tomto poli může uživatel specifikovat libovolné
-množství balíčků. 
+množství balíků. 
 
 Cílem zpracování této sekce šablony je vytvořit manifest popsaný v~kapitole \ref{chapter:zones:instalation:repozitory:manifest}.
 K~tomuto účelu si modul drží kopii tohoto souboru, která nese název \textit{manifest\_template.xml} a~nachází se v~kořenovém 
-adresáři aplikace ve složce \textit{szones/manifest}. Při zpracovávání manifestu jsou jednotlivé balíčky načteny ze šablony
+adresáři aplikace ve~složce \textit{szones/manifest}. Při zpracovávání manifestu jsou jednotlivé balíky načteny ze šablony
 a~ve správném formátu vloženy do kopie tohoto souboru. Výsledný soubor je možné použít pro instalaci zóny.
 \subsubsection{Zpracování systémového profilu}
 \label{chapter:implementation:szones:template:profile}
@@ -270,7 +270,7 @@ načítány a~vyplňovány hodnotami ze šablony. Tímto způsobem se zkonstruuj
 \label{chapter:implementation:szones:commands}
 Základním stavebním kamenem modulu je vrstva, která zajišťuje vykonávání potřebných příkazů na příkazové řádce.
 Tato vrstva poskytuje vyšším vrstvám modulu možnost vykonávání základní administračních příkazů pro správu Solaris Zones
-a~souborového systému ZFS. Konkrétní příkazy jsou vyjmenovány v~kapitole \ref{chapter:design:architecture:szones}.
+a~souborového systému ZFS.
 
 Pro účel vykonávání příkazů tato vrstva implementuje třídu, která umožňuje provádění příkazů jak na lokálním tak i
 na vzdáleném serveru. Tato třída nevykonává daný příkaz okamžitě, ale umožňuje vyšším vrstvám aplikace vykonání odložit.
@@ -284,9 +284,9 @@ Například umožňuje spouštět nástroj \verb|zonecfg(1)| se jménem konfigur
 vrstvám je poskytnutý standardní výstup a~standardní chybový výstup daného nástroje.
 \subsection{Administrátorské rutiny}
 \label{chapter:implementation:szones:routines}
-Hlavní částí modulu je vrstva tříd, které implementují požadované rutiny pro správu Solaris Zones. Rutiny využívají
+Hlavní částí modulu je vrstva tříd, které implementují požadované rutiny pro~správu Solaris Zones. Rutiny využívají
 nástrojů implementovaných v~nižší vrstvě a~pomocí nich vytvářejí sekvence příkazů nutné k~vykonání požadované administrátorské činnosti.
-Tato vrstva poskytuje pokročilejší rutiny pro vytváření neglobálních zón, zálohu, obnovu, ovládání a~migraci.
+Tato vrstva poskytuje pokročilejší rutiny pro~vytváření neglobálních zón, zálohu, obnovu, ovládání a~migraci.
 \subsubsection{Transakce}
 \label{chapter:implementation:szones:routines:transaction}
 Jednotlivé rutiny jsou implementované jako transakce. Transakce se skládá z~jednotlivých příkazů, které tvoří
@@ -301,7 +301,7 @@ Některé z~těchto entit mají být výstupem transakce. Příkladem může bý
 má být konfigurace zóny a~její diskový obraz výsledkem transakce. Tento případ je nutné rozlišit a~tyto entity smazat pouze 
 v~případě neúspěchu transakce. Tuto funkcionalitu v~rámci modulu zajišťuje třída \verb|Cleanuper|.
 
-Během zálohovacích a~migračních rutin je třeba provádět akce, které nějakým způsobem ovlivní existující zóny. Tyto akce se opět
+Během zálohovacích a~migračních rutin je třeba provádět akce, které konkrétním způsobem ovlivní existující zóny. Tyto akce se opět
 zaznamenávají a~v~případě neúspěchu transakce se ovlivněné zóny vrátí do původního stavu. Příkladem může být zastavení běžící
 zóny z~důvodu její zálohy nebo migrace. Tuto funkcionalitu v~rámci knihovního modulu zajišťuje třída \verb|Rollbacker|.
 
@@ -317,9 +317,8 @@ lokálních neglobálních zón z~následujících zdrojů:
  \item Z~jiné existující zóny (vzdálené i lokální),
  \item Z~archivu zóny.
 \end{itemize}
-
-Prvním způsobem vytvoření zóny je pomocí standardních tří souborů obsahující konfiguraci zóny, manifest a~nastavení systémových
-služeb. V~případě vytváření zóny na vzdáleném serveru dojde v~první řadě ke zkopírování zdrojových souborů na cílový server.
+Prvním způsobem je vytvoření zóny pomocí tří standardních souborů obsahující konfiguraci zóny, manifest a~nastavení systémových
+služeb. V~případě vytváření zóny na vzdáleném serveru dojde v~první řadě ke~zkopírování zdrojových souborů na~cílový server.
 Dále se vytvoří konfigurace zóny pomocí nástroje \verb|zonecfg(1)| ze zdrojového konfiguračního souboru. Následuje spuštění
 instalace zóny z~repozitáře popsané v~kapitole \ref{chapter:zones:instalation:repozitory}, kde se jako parametry předají
 cesty k~souborům s~manifestem a~systémovým profilem. Tato sekvence příkazů se vykoná lokálně nebo v~rámci jednoho SSH spojení
@@ -332,27 +331,26 @@ proběhne vždy na lokálním serveru. Dále rutina pokračuje stejně jako v~p�
 Výše zmíněné rutiny pro vytváření zóny neměly k~dispozici diskový obraz zón a~instalace zóny musela vždy probíhat z~repozitáře.
 Následující dva způsoby tvorby neglobálních zón využívají jako zdroj již existující diskový obraz. První z~těchto dvou postupů
 využívá diskový obraz již existující zóny. Kroky této rutiny je možné rozdělit na části získání diskového obrazu a~samotné instalace
-zóny. Obě tyto části mohou být prováděny buď na lokální serveru nebo na vzdáleném. Server, odkud je zóna získávána, se označuje
-jako \textbf{zdrojový} a~server, kde je vytvářená nová zón,a se nazývá \textbf{cílový}. Před získáním diskového obrazu se 
-nástroj nejprve musí ujistit, jestli je zóna v~konzistentním stavu a~jestli není spuštěná. Pokud je, nástroj ji dočasně zastaví.
+zóny. Obě tyto části mohou být prováděny buď na lokálním serveru nebo na vzdáleném. Server, odkud je zóna získávána, se označuje
+jako \textbf{zdrojový} a~server, kde je vytvářená nová zóna, se nazývá \textbf{cílový}. Před získáním diskového obrazu se 
+nástroj nejprve musí ujistit, jestli je zóna v~konzistentním stavu a~zda není spuštěná. Pokud ano, nástroj ji dočasně zastaví.
 Následuje vytvoření archivu zdrojové zóny pomocí techniky ZFS popsané v~kapitole \ref{chapter:zones:backup:zfs}. Vytvořený archiv je
-následně společně s~konfigurací zdrojové zóny přesunut na cílový server a~následuje druhá část instalace zóny. Tato část probíhá na
+následně společně s~konfigurací zdrojové zóny přesunut na~cílový server a~následuje druhá část instalace zóny. Tato část probíhá na
 cílovém serveru a~zde se nejprve nakonfiguruje cílová zóna s~pomocí konfigurace zóny zdrojové. Následuje samotná část připojení
 diskového obrazu z~poskytnutého archivu. Po tomto procesu je cílová zóna nainstalována na cílový server. Technika klonování
-popsaná v~kapitole \ref{chapter:zones:instalation:cloning} se použije pouze v~případě, že zdrojový a~cílový server jsou 
-identické stroje.
+se použije pouze v~případě, že zdrojový a~cílový server jsou identické stroje.
 
 Poslední podporovanou rutinou pro instalaci neglobálních zón je vytváření z~archivu. Tato rutina předpokládá existenci archivu,
-který může být typu ZFS nebo UAR. Tvorba obou těchto archivů je popsána v~kapitole \ref{chapter:zones:backup}. V~případě tvorby
+který může být typu ZFS nebo UAR. V~případě tvorby
 zóny na vzdáleném serveru se nejprve zkopíruje archiv do dočasného adresáře na cílovém serveru. Na cílovém serveru se z~archivu
 extrahuje konfigurační soubor a~pomocí něj se zóna nakonfiguruje. Následuje proces vytvoření kořenového souborového systému cílové
 zóny z~archivu. Po dokončení tohoto procesu je cílová zóna úspěšně nainstalována na cílovém serveru.
 
 Všechny výše zmíněné typy rutin mají několik společných parametrů, které specifikují chování v~krajních situacích. Prvním
-takovým parametrem je \textit{force}. Tento parametr nabírá na váze v~případě, kdy již existuje zóna se jménem zóny, kterou
+takovým parametrem je \textit{force}. Tento parametr ovlivní rutiny v~případě, kdy již existuje zóna se jménem zóny, kterou
 chce rutina vytvořit. V~případě, že je tento parametr zapnutý, rutina danou existující zónu smaže a~místo ní nainstaluje
 zónu novou. V~opačném případě skončí rutina s~chybou, že se nepodařilo zónu nainstalovat. Druhým parametrem rutin je \textit{boot}.
-Tento parametr určuje, jestli se vytvořená zóna má rovnou spustit. Implicitní hodnota obou parametrů je nastavená na \textit{false}.
+Tento parametr určuje, zda se vytvořená zóna má rovnou spustit. Implicitní hodnota obou parametrů je nastavená na \textit{false}.
 Všechny rutiny pro vytváření neglobálních zón jsou implementované v~rámci třídy \verb|DeploymentRoutines|.
 \subsubsection{Záloha a~obnova zón}
 \label{chapter:implementation:szones:routines:backup}
@@ -375,15 +373,16 @@ s~procesem vytváření zón z~archivu popsaným v~předchozí kapitole. Všechn
 \label{chapter:implementation:szones:routines:migration}
 Migrace v~rámci Solaris Zones je přesun neglobální zóny z~jednoho virtualizačního serveru na druhý. Jedná se jak o~přesun
 konfigurace zóny tak i o~přesun diskového obrazu. Tato administrační rutina se v~mnoha ohledech podobá rutině pro vytvoření
-neglobální zóny z~jiné zóny, která již existuje. Podstatou je vytvoření archivu zóny na zdrojovém serveru a~přesun tohoto archivu
-na server cílový. Jak již bylo popsáno v~předchozí kapitole, vytvoření archivu je možné provést dvojím způsobem. Migrační rutiny
+neglobální zóny z~jiné zóny, která již existuje. Podstatou je vytvoření archivu zóny na~zdrojovém serveru a~přesun tohoto archivu
+na~server cílový. Vytvoření archivu je tedy možné provést dvojím způsobem. Migrační rutiny
 implementovaného nástroje budou umožňovat migraci zón jak s~použitím archivu ZFS tak i s~použitím archivu UAR.
 
 Hlavním rozdílem migrace oproti vytváření zóny z~již existující zóny je v~tom, že původní zóna se v~případě úspěchu transakce smaže.
 Zóna na zdrojovém serveru se smaže až v~případě, kdy je zóna kompletně nakonfigurována a~zdárně nainstalována na
 cílovém serveru. Dřívější smazání zdrojové zóny by mohlo vést ke ztrátě dat.
 
-Dalším rozdílem je typ používaných příkazů. Před procesem vytváření archivu jakéhokoli typu dojde na zdrojovém serveru
+Dalším rozdílem migrace oproti vytváření zóny z~již existující zóny je typ používaných příkazů. Před procesem vytváření archivu
+jakéhokoli typu dojde na zdrojovém serveru
 k~použití nástroje \verb|zoneadm(1)| a~jeho příkazu \verb|detach|, který bezpečně odpojí diskový obraz zóny od její konfigurace.
 Po tomto kroku následuje vytvoření archivu a~jeho přesun na cílový server. Jakmile se dokončí přenos archivu je zóna na cílovém
 serveru nakonfigurována a~následně je její obraz připojen pomocí příkazu \verb|attach|, který má jako argument vytvořený archiv.
@@ -391,7 +390,7 @@ V~případě úspěchu může být konfigurace zóny i jejího obrazu smazána z
 
 Migrační rutiny poskytují ještě jeden typ přenosu diskového obrazu zóny a~to přímo pomocí příkazu \verb|zfs send|
 a~\verb|zfs recv|. Spuštění prvního příkazu na zdrojovém server a~druhého příkazu na druhém serveru v~rámci SSH spojení
-zajistí přenos zdrojového souborového systému z~jednoho serveru na druhý. Příkaz \verb|attach| po tomto přenosu nemá skoro žádnou práci,
+zajistí přenos zdrojového souborového systému z~jednoho serveru na druhý. Příkaz \verb|attach| po tomto přenosu nemá téměř žádnou práci,
 protože nemusí souborový systém extrahovat z~archivu.
 
 Všechny výše zmíněné funkce umožňují migraci mezi všemi hosty dané infrastruktury. Těmito funkcemi je umožněno migrovat 
@@ -400,21 +399,21 @@ možné specifikovat, že zóna na cílovém serveru se může jmenovat jinak ne
 ve třídě s~názvem \verb|MigrationRoutines|.
 \subsubsection{Rutiny pro správu zón}
 \label{chapter:implementation:szones:routines:management}
-Modul Solaris Zones mimo výše zmíněných pokročilejších rutin poskytuje i základní rutiny pro manipulaci a~správu 
+Modul Solaris Zones mimo výše zmíněných pokročilejších rutin poskytuje i~základní rutiny pro manipulaci a~správu 
 neglobálních zón. V~těchto rutinách je zahrnuto spouštění, násilné i nenásilné vypnutí, restart nebo úplné odstranění zóny
-ze systému. Všechny tyto akce je možné provádět jak na lokálním tak i na vzdáleném serveru. Třída poskytující tyto
+ze systému. Všechny tyto akce je možné provádět jak na lokálním tak i~na~vzdáleném serveru. Třída poskytující tyto
 rutiny v~rámci implementovaného modulu se nazývá \verb|BasicRoutines|.
 \subsection{Funkční rozhraní modulu}
 \label{chapter:implementation:szones:api}
 Poslední částí modulu pro správu virtualizačního kontejneru Solaris Zones je rozhraní, které je nabízeno klientským aplikacím
 prostřednictvím knihovny. Pro tyto účely je vytvořena speciální třída, která zprostředkovává administrátorské rutiny popsané 
-v~minulé kapitole. Princip rozhraní funguje stejně jako v~případě knihovny. Toto rozhraní má zaregistrované všechny 
-třídy jejichž metody chce veřejně poskytovat knihovně a~klientským aplikacím. Pokud knihovna obdrží požadavek na volání nějaké
-rutiny, přesměruje tento požadavek právě na toto rozhraní. Rozhraní vyhledá v~rámci zaregistrovaných tříd, zadali umí obsloužit
+výše. Princip rozhraní funguje stejně jako v~případě knihovny. Toto rozhraní má zaregistrované všechny 
+třídy, jejichž metody chce veřejně poskytovat knihovně a~klientským aplikacím. Pokud knihovna obdrží požadavek na volání konkrétní
+rutiny, přesměruje tento požadavek právě na toto rozhraní. Rozhraní vyhledá v~rámci zaregistrovaných tříd, zad umí obsloužit
 konkrétní požadavek. Pokud nějaká z~tříd modulu umí danou rutinu provést, rozhraní vrátí její návratovou hodnotu. V~opačném případě
 je vyvolána výjimka, kterou knihovna odchytí a~případně bude vyhledávat v~ostatních implementovaných modulech.
 
-Ve výsledné implementaci je toto rozhraní reprezentováno třídou \verb|SZONESAPI|, která má zaregistrované třídy korespondující
+Ve výsledné implementaci je rozhraní reprezentováno třídou \verb|SZONESAPI|, která má zaregistrované třídy korespondující
 s~rutinami popsanými v~kapitole \ref{chapter:implementation:szones:routines}.
 \section{Klientská aplikace}
 \label{chapter:implementation:client}
@@ -432,21 +431,19 @@ rozhraní je přehlednost a~možnost vykonávat rutiny pro větší množství n
 specifikovat konkrétní zóny v~uživatelském rozhraní a~klientská aplikace se postará o~vykonání daného příkazu pro všechny
 specifikované neglobální zóny.
 
-Jak bylo zmíněno v~kapitole \ref{chapter:design:demands}, nástroj musí umožňovat správu vzdálených zón. Tato funkcionalita
-je již implementována v~modulu Solaris Zones. Klientská aplikace musí implementovat pouze způsob, jak jednoznačně identifikovat
+Jak bylo uvedeno, nástroj musí umožňovat správu vzdálených zón. Tato funkcionalita
+je již implementována v~modulu Solaris Zones. Klientská aplikace musí tedy implementovat pouze způsob, jakým způsobem jednoznačně identifikovat
 neglobální zónu v~rámci infrastruktury. Dále klientská aplikace spravuje databázi virtualizačních hostů. Pomocí této databáze
-je možné vykonávat některé rutiny hromadně, napříč všemi registrovanými hosty.
+je možné vykonávat některé rutiny hromadně napříč všemi registrovanými hosty.
 
 Poslední funkcionalitou klientské aplikace je udržování tzv. uživatelského žurnálu. Tento žurnál slouží uživateli pro uchovávání
 stavů jednotlivých neglobálních zón. V~případě změny stavu registrované zóny jiným uživatelem, je aplikace schopna dohledat,
 že došlo ke změně.
 \subsection{Rozhraní na příkazové řádce}
 \label{chapter:implementation:client:cli}
-Hlavní ovládací prvek klientské aplikace, ale i celého nástroje, je rozhraní na příkazové řádce. Důvody pro výběr tohoto rozhraní
+Hlavní ovládací prvek klientské aplikace, ale i celého nástroje, je rozhraní na~příkazové řádce. Důvody pro výběr tohoto rozhraní
 byly popsány v~kapitole \ref{chapter:design:ui:cli}. Uživatel může toto rozhraní ovládat pomocí příkazů, které určují typ 
-prováděné operace. Příkazy je možné rozdělit do dvou skupin. První skupina příkazů pouze mění vnitřní stav klientské aplikace a~budou
-popsány níže v~kapitolách \ref{chapter:implementation:client:hosts} a~\ref{chapter:implementation:client:journal}.
-
+prováděné operace. Příkazy je možné rozdělit do dvou skupin. První skupina příkazů pouze mění vnitřní stav klientské aplikace.
 Druhá skupina příkazů slouží ke správě a~manipulaci s~neglobálními zónami. Téměř všechny tyto příkazy vyžadují jako argument jednu
 nebo více neglobálních zón, nad kterými se má provést požadovaná akce. Pro tento účel je nutné zavést unikátní identifikátor,
 který přesně specifikuje neglobální zónu v~rámci několika hostů. Jelikož doménové jméno stroje musí být v~rámci sítě
@@ -460,20 +457,20 @@ pro správu virtualizačního kontejneru Solaris Zones.
 \subsubsection{Deploy}
 \label{chapter:implementation:client:cli:deploy}
 Prvním zástupcem příkazů pro práci s~neglobálními zónami je \verb|deploy|. Úkolem tohoto příkazu je tvorba zón ze zadaných parametrů.
-Jako zdroj pro vytvoření zóny umí tento příkaz využívat všechny způsoby, které poskytuje implementovaný modul Solaris Zones.
+Jako zdroj pro~vytvoření zóny umí tento příkaz využívat všechny způsoby, které poskytuje implementovaný modul Solaris Zones.
 Konkrétně se jedná o~vytvoření pomocí souborů, šablony nebo existující zóny v~rámci infrastruktury. Dále tento příkaz poskytuje
 interaktivní instalaci, která využívá grafického rozhraní. Tento způsob je podrobněji popsán v~kapitole
-\ref{chapter:implementation:gui:interactive}. Implicitní způsob vytvoření zóny je právě pomocí interaktivní instalace.
+\ref{chapter:implementation:gui:interactive}. Pokud uživatel nespecifikuje jinak, použije se pro vytvoření zóny právě interaktivní
+instalace.
 
 Jako argumenty příkazu musí uživatel specifikovat minimálně jednu neglobální zónu pomocí výše zmíněného identifikátoru. Jméno zóny 
-se použije při vytváření a~doménové jméno se použije pro připojení ke vzdálenému hostu. Pro všechny takto specifikované zóny
+se použije při~vytváření a~doménové jméno se použije pro připojení ke vzdálenému hostu. Pro všechny takto specifikované zóny
 je použit stejný zdroj a~příkaz je vykonán paralelně pro každou z~nich.
 
 Volitelnými parametry jsou \textit{boot} a~\textit{force}, jejichž funkčnost byla popsána v~kapitole \ref{chapter:implementation:szones:routines:creation}.
 \subsubsection{Backup}
 \label{chapter:implementation:client:cli:backup}
-Příkaz \verb|backup| slouží pro zálohování zón. Tento příkaz umožňuje zálohovat zóny dvěma způsoby, které již
-byly popsány v~kapitole \ref{chapter:implementation:szones:routines:backup}. Jedná o~archivaci pomocí archivů ZFS nebo UAR.
+Příkaz \verb|backup| slouží pro zálohování zón. Tento příkaz umožňuje zálohovat zóny dvěma způsoby. Jedná o~archivaci pomocí archivů ZFS nebo UAR.
 Struktura tohoto příkazu je velmi podobná předchozímu. Uživatel nejprve musí definovat seznam zón pomocí globálních
 identifikátorů. Aplikace se následně paralelně připojí ke každému specifikovanému hostu a~začne vytvářet zálohy konkrétních zón. 
 V~případě zálohy pomocí ZFS archivu se záloha všech zón na konkrétním serveru provádí paralelně. V~druhém případě se záloha provádí v~rámci
@@ -486,7 +483,7 @@ a~\textit{path} se toto chování dá změnit a~zkopírovat zálohu na vzdálen�
 Opačným příkazem k~příkazu \verb|backup| je \verb|recovery|. Tento příkaz umožňuje obnovovat zóny z~dříve vytvořených záloh.
 Podle typu dané zálohy nástroj rozhodne, jakou techniku obnovy použije. Uživatel tedy nemusí specifikovat, že používá zálohu
 typu UAR nebo ZFS. Syntaxe tohoto příkazu je stejná jako v~případě zálohy. Uživatel specifikuje identifikátory zón, které
-chce obnovit a~pomocí parametru \textit{archives} specifikuje dané zálohy. Pořadí identifikátorů musí odpovídat poradí archivů, jinak
+chce obnovit a~pomocí parametru \textit{archives} specifikuje dané zálohy. Pořadí identifikátorů musí odpovídat pořadí archivů, jinak
 dojde k~záměně diskových obrazů zón.
 
 Volitelné parametry tohoto příkazu jsou \textit{boot} a~\textit{force}, které umožňují obnovované zóny rovnou spustit nebo
@@ -495,8 +492,7 @@ přepsat existující zóny.
 \label{chapter:implementation:client:cli:migrate}
 Příkaz \verb|migrate| zajišťuje přesun neglobálních zón mezi dvěma servery. Tento příkaz umožňuje přenášet větší množství zón
 libovolně rozložených v~infrastruktuře na jeden konkrétní server. Cílový server může být buď lokální nebo vzdálený. Migrace
-je implementována v~několika způsobech, které jsou popsány v~kapitole \ref{chapter:implementation:szones:routines:migration}.
-Jedná se o~migraci pomocí přímé metody nebo pomocí archivu ZFS a~UAR.
+je implementována v~několika způsobech. Jedná se o~migraci pomocí přímé metody nebo pomocí archivu ZFS a~UAR.
 
 Argumenty tohoto příkazu jsou identifikátory neglobálních zón, které chce uživatel přesunout. Pomocí parametru \textit{destination}
 je možné určit na jaký server mají být specifikované zóny přesunuty. Pokud uživatel nespecifikuje jinak, jsou zóny migrovány
@@ -509,8 +505,8 @@ Speciálním příkazem v~rámci uživatelského rozhraní je \verb|template|. T
 dané konfigurace opravdu rychle.
 
 Příkaz \verb|template| obsahuje dva podpříkazy. Prvním z~nich je \verb|create|, který umožňuje vytvořit instanci šablony na 
-jakémkoli vzdáleném serveru. Implicitní chování tohoto příkazu vytvoří instanci specifikované šablony na každém serveru, který
-je v~aplikaci registrovaný. Funkcionalita registrace serverů bude teprve vysvětlena v~kapitole \ref{chapter:implementation:client:host}.
+jakémkoli vzdáleném serveru. Implicitní chování tohoto příkazu vytvoří instanci specifikované šablony na~každém serveru, který
+je v~aplikaci registrovaný.
 Chování tohoto příkazu je podobné jako vytváření zóny ze šablony. Následně může uživatel použít příkaz \verb|deploy|
 s~parametrem \textit{template} a~vytvořit specifikované zóny pomocí funkce klonování. Tento způsob vytváření zóny je výrazně
 rychlejší než všechny ostatní a~navíc šetří místo na disku.
@@ -528,7 +524,7 @@ zónami provést. Jedná se o~příkazy spuštění, nenásilného vypnutí, zas
 Tyto podpříkazy nemají žádné parametry a~pro každou specifikovanou zónu se provádí paralelně.
 \subsubsection{Logování}
 \label{chapter:implementation:client:cli:logs}
-Uživatelské rozhraní vytváří v~domovském adresáři uživatele ve složce \textit{\textasciitilde/.szmgmt/logs} soubory s~průběhem
+Uživatelské rozhraní vytváří ve~složce \textit{\textasciitilde/.szmgmt/logs}, která se nachází v domovském adresáři uživatele, soubory s~průběhem
 jednotlivých transakcí. Pro každou akci s~konkrétní zónou je vytvořený samostatný soubor, kde jsou uloženy informace o~provádění
 konkrétní příkazů. V~informačním výpisu uživatelského rozhraní se uživatel dozví, jaký soubor souvisí s~konkrétní transakcí.
 V~případě chyby transakce zde uživatel může dohledat co danou chybu způsobilo. 
@@ -549,23 +545,23 @@ tři podpříkazy:
 \end{itemize}
 Příkaz \verb|add| slouží pro registrování hostů do aplikace. Jako argument požaduje doménové jméno vzdáleného
 serveru, které je následně uloženo do databáze. Volitelné parametry tohoto příkazu umožňují specifikovat uživatele a~jeho
-privátní klíče, které mají být použity pro připojování k~tomuto serveru. Implicitní hodnoty těchto parametrů je možné vidět
+privátní klíče, které mají být použity pro připojování k~tomuto serveru. Implicitní hodnoty těchto parametrů jsou demonstrovány
 v~ukázce kódu \ref{code:host_spec}.
 
 Druhý příkaz \verb|delete| slouží k~odstranění daného hosta z~databáze aplikace. Při této akci dojde i ke smazání specifikace
 SSH připojení k~tomuto serveru. Poslední příkaz \verb|list| vypíše na standardní výstup seznam všech registrovaných hostů.
 
 Funkcionalita této komponenty značně souvisí se všemi příkazy uživatelského rozhraní, které se připojují ke vzdáleným hostům.
-Uživatel specifikuje neglobální zóny pomocí globální identifikátoru, které obsahují doménová jména. V~okamžiku připojování
+Uživatel specifikuje neglobální zóny pomocí globálních identifikátorů, které obsahují doménová jména. V~okamžiku připojování
 ke konkrétnímu vzdálenému serveru je použito právě nastavení uložené v~databázi. Pokud pro daného hosta neexistuje záznam
-v~databázi, jsou použité implicitní hodnoty.
+v~databázi, jsou použity implicitní hodnoty.
 
-Pro každého uživatele takto komponenta udržuje jeho vlastní databázi v~domovském adresáři. Hlavním důvodem pro toto umístění
+Pro každého uživatele tato komponenta udržuje jeho vlastní databázi v~domovském adresáři. Hlavním důvodem pro toto umístění
 je izolace pohledů jednotlivých uživatelů aplikace.
 \subsubsection{Struktura databáze}
 \label{chapter:implementation:client:hosts:database}
 Databáze hostů je uložena v~několika souborech, které se nacházejí v~adresáři \textit{\textasciitilde/.szmgmt/hosts} konkrétního uživatele.
-Hlavní soubor databáze se nazývá \textit{hosts.json} a~obsahuje seznam doménových jmen jednotlivých hostů. Pro každý záznam 
+Hlavní soubor databáze se nazývá \textit{hosts.json} a~obsahuje seznam doménových jmen jednotlivých hostů. Pro~každý záznam 
 v~tomto souboru je vytvořen další soubor, který obsahuje specifikaci SSH připojení. Název tohoto souboru odpovídá doménovému
 jménu konkrétního serveru. Všechny soubory databáze jsou uloženy v~datovém formátu JSON. V~ukázce kódu \ref{code:host_spec}
 je zobrazeno implicitní nastavení pro uživatele \textit{zadmin} a~server s~doménovým jménem \textit{shost1}.
@@ -585,8 +581,8 @@ zóny. Z~tohoto důvodu se může stát, že neglobální zóna vytvořená jedn
 Standardně Solaris Zones na tuto skutečnost uživatele nijak neupozorní. 
 
 Uživatelský žurnál slouží pro sledování stavů jednotlivých neglobálních zón, se kterými uživatel nějakým způsobem manipuloval.
-Tyto stavy budou sloužit k~informování uživatele o~tom, jestli se daná zóna od předchozí manipulace nějakým způsobem změnila.
-Konkrétně jestli se změnil její stav nebo diskový obraz. Žurnál umožňuje také detekci nových zón, které se v~infrastruktuře
+Tyto stavy budou sloužit k~informování uživatele o~tom, zda se daná zóna od předchozí manipulace nějakým způsobem změnila.
+Konkrétně, zda se změnil její stav nebo diskový obraz. Žurnál umožňuje také detekci nových zón, které se v~infrastruktuře
 od posledního spuštění aplikace objevily.
 
 Práce této komponenty je z~větší části automatická, ale také je umožněno její přímé ovládání pomocí uživatelského rozhraní. Automatická
@@ -607,7 +603,7 @@ a~zaregistrování do žurnálu. Od této chvíle se konkrétní zóna zařadila
 \verb|detrack|, který ze žurnálu odstraní záznam o~dané zóně.
 
 Pokud chce uživatel znát stavy všech zón v~rámci registrovaných hostů, může použít příkaz \verb|update|. Tento příkaz se pomocí
-SSH přihlásí na všechny registrované hosty a~stáhne informace o~všech neglobálních zónách.  Tyto informace jsou následně uloženy
+SSH přihlásí na všechny registrované hosty a~stáhne informace o~všech neglobálních zónách. Tyto informace jsou následně uloženy
 do žurnálu a~všechny zóny se stávají sledovanými. Pro opačnou funkcionalitu slouží příkaz \verb|clear|, který kompletně vymaže
 databázi sledovaných zón.
 
@@ -619,12 +615,12 @@ o~tom uživatel prostřednictvím standardního výstupu informován. Program ta
 Stejně jako v~případě správy vzdálených hostů, je žurnál udržován pro každého uživatele zvlášť. 
 \subsubsection{Struktura databáze}
 \label{chapter:implementation:client:journal:database}
-Uživatelský žurnál je uložený v~souboru \textit{\textasciitilde/.szmgmt/journal/tracked\_zones.json} v~domovském adresáři
+Uživatelský žurnál je uložen v~souboru \textit{\textasciitilde/.szmgmt/journal/tracked\_zones.json} v~domovském adresáři
 konkrétního uživatele. V~tomto souboru jsou uložené atributy sledovaných zón, které slouží pro definici konkrétního stavu zóny.
 Kombinace hodnot těchto atributů by měla zajistit detekci změn, které nemusí být na první pohled patrné. Příkladem takové změny
 může být například přeinstalování zóny a~navození stejného stavu. Při této akci zůstane jméno, konfigurace a~stav zóny stejné,
 ale změní se diskový obraz. Pro tento účel udržuje žurnál u~každé sledované zóny atribut \textit{UUID}, který jednoznačně
-definuje diskový obraz zóny. Porovnáním uložených atributů s~aktuálním stavem zóny je možné zjistit, jestli bylo se zónou 
+definuje diskový obraz zóny. Porovnáním uložených atributů s~aktuálním stavem zóny je možné zjistit, zda bylo se zónou 
 nějakým způsobem manipulováno. Ukládané atributy zóny a~struktura záznamu je patrná z~ukázky kódu \ref{code:journal}.
 V~uživatelském žurnálu je podobný záznam udržován pro každou sledovanou zónu.
 \begin{lstlisting}[language=json, caption={Záznam stavu zóny v~žurnálu}, float,label={code:journal}]  
@@ -657,9 +653,9 @@ který je součástí uživatelského rozhraní klientské aplikace. Po spuště
 které slouží pro editaci šablon.
 
 Horní část editoru obsahuje ovládací panel, který umožňuje uživateli načítat šablony nebo vytvářet nové. Součástí tohoto panelu
-je také tlačítko pro ukončení editoru. Pokud uživatel zvolí možnost načtení šablony, je pomocí několika dialogových oken dotázán
+je také tlačítko pro~ukončení editoru. Pokud uživatel zvolí možnost načtení šablony, je pomocí několika dialogových oken dotázán
 na cestu k~dané šabloně. Po úspěšném zadání cesty se uživateli v~prostřední části editoru zobrazí formulář vyplněný pomocí
-dat z~načtené šablony. Pokud uživatel vybere druhou možnost a~to vytvoření šablony, je v~prostřední části editoru zobrazen 
+dat z~načtené šablony. Pokud uživatel vybere druhou možnost, kterou je vytvoření šablony, je v~prostřední části editoru zobrazen 
 ten samý formulář, ale vyplněný implicitními hodnotami. Ovládací menu společně s~úvodním oknem editoru je zobrazeno na 
 obrázku \ref{image:implemetation:gui:menu}.
 \begin{figure}
@@ -670,10 +666,10 @@ obrázku \ref{image:implemetation:gui:menu}.
 \end{figure}
 Formulář pro vyplňování atributu šablony je umístěn ve středu editoru a~tvoří jeho nejpodstatnější část. Jelikož má struktura 
 šablony neglobální zóny tři části, skládá se i hlavní okno editoru ze tří oddělených částí. Tyto části přímo odpovídají jednotlivým
-sekcím šablony a~nazývají se konfigurace, manifest a~nastavení. Jak je vidět na obrázku \ref{image:implemetation:gui:form}, každá
-sekce editoru má ve spodní části ovládací prvky. Tyto prvky slouží k~přidávání a~odebírání prvků ze šablony. Část s~konfigurací
+sekcím šablony a~nazývají se konfigurace, manifest a~nastavení. Jak je patrné z obrázku \ref{image:implemetation:gui:form}, každá
+sekce editoru má ve spodní části ovládací prvky. Tyto prvky slouží k~přidávání a~odebírání konfiguračních prvků ze šablony. Část s~konfigurací
 umožňuje vybírat z~několika různých typů zdrojů, které lze v~editoru použít. V~druhé části editoru lze přidávat a~odebírat
-softwarové balíčky, které mají být v~instancích dané šablony nainstalované. Poslední část umožňuje přidávat a~odebírat nastavení
+softwarové balíky, které mají být v~instancích dané šablony nainstalované. Poslední část umožňuje přidávat a~odebírat nastavení
 pro definované síťové adaptéry.
 
 Poslední částí editoru je spodní ovládací panel, který obsahuje dvě funkční tlačítka. V~případě použití prvního tlačítka
@@ -692,6 +688,6 @@ vždy vygeneruje validní šablonu. V~případě manuální tvorby musí uživat
 \label{chapter:implementation:gui:interactive}
 Grafické rozhraní je v~nástroji využito ještě v~případě, že uživatel spustí příkaz \verb|deploy| s~parametrem \textit{interactive}.
 V~tomto případě je spuštěna interaktivní instalace a~uživateli je opět zobrazeno grafické okno. Toto okno je stejného charakteru
-jako výše popsaný editor a~slouží ke specifikaci vytvářených zón. Uživatel nyní nebude mít na výběr z~načtení šablon, ale bude muset
-zadat hodnoty ručně. Některé atributy jsou vyplněny implicitními hodnotami a~uživatel musí zadat minimálně počáteční heslo 
+jako výše popsaný editor a~slouží ke specifikaci vlastností vytvářených zón. Uživatel nyní nebude mít na výběr z~načtení šablon, ale bude muset
+zadat hodnoty manuálně. Některé atributy jsou vyplněny implicitními hodnotami a~uživatel musí zadat minimálně počáteční heslo 
 uživatele \textit{root} a~konfiguraci počátečního systémového uživatele.
