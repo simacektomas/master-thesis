@@ -1,5 +1,4 @@
 % Detailed description of Solaris Zones configuration, installation, backup etc.
-\label{chapter:zones}
 V~úvodu následující kapitoly jsou popsány základní principy a struktura virtualizační techniky Solaris Zones od
 firmy Oracle. Dále se tato kapitola zabývá popisem datových struktur, postupů a nástrojů, které slouží ke správě a manipulaci
 se zónami. Detailnější popis je věnován především administrátorským rutinám pro konfiguraci, instalaci a zálohování zón.
@@ -121,22 +120,27 @@ Jelikož provoz kernel zóny se liší od provozu standardní nativní zóny, li
 se liší v~závislosti na platformě. Pro jednoduchost budou uvedeny pouze požadavky pro systémy s~architekturou x86. Podle specifikace
 \cite{oracle:solaris:zones:kernel_zones_requiremets} se na hostitelský systém kladou následující požadavky:
 \begin{itemize}
- \item Procesor typu Nehalem (nebo novější),
- \item Virtualizace CPU (VT-x) ,
- \item Podpora virtualizace paměti (RVI, EPT),
- \item Ochrana paměti.
+ \item procesor typu Nehalem (nebo novější),
+ \item virtualizace CPU (VT-x) ,
+ \item podpora virtualizace paměti (RVI, EPT),
+ \item ochrana paměti.
 \end{itemize}
 Výše zmíněné požadavky kladou nároky na HW vybavení hostitelského systému. Spolu s~těmito požadavky musí být v~globální zóně
 nainstalovaný softwarový balík \textit{brand/brand-solaris-kz}, který umožňuje vytváření kernel zón. Administrátor může pomocí příkazu
 \verb|virtinfo(1)| zjistit, jaký typ virtualizace je v~globální zóně podporován. Výpis programu ve virtualizované platformě
 VMvare, kde jsou splněné výše zmíněné požadavky je zobrazen na v~ukázce výpisu programu \ref{code:virtinfo}.
-\begin{lstlisting}[caption={Výpis příkazu virtinfo}, label={code:virtinfo}]  
+\SaveVerb{virtinfo}|virtinfo(1)|
+\begin{listing}
+  \caption{Výpis příkazu \protect\UseVerb{virtinfo}}
+  \label{code:virtinfo}
+  \begin{minted}{bash}
 zadmin@shost:~$ virtinfo
 NAME            CLASS     
 vmware          current   
 non-global-zone supported
 kernel-zone     supported
-\end{lstlisting}
+  \end{minted}
+\end{listing}
 \subsubsection{Branded zóna}
 \label{chapter:zones:types:branded}
 \textit{Branded} zóny byly vytvořeny pro zpětné zajištění kompatibility se staršími verzemi operačního sytému Solaris. Díky technologii
@@ -186,13 +190,13 @@ může nacházet. Zóna může být převedena z~jednoho stavu do druhého pouze
 Podle specifikace \cite{oracle:solaris:zones:states} se neglobální zóna může nacházet v~jednom
 z~následujících sedmi stavů:
 \begin{itemize}
- \item \textit{Configured},
- \item \textit{Incomplete},
- \item \textit{Unavailable},
- \item \textit{Installed},
- \item \textit{Ready},
- \item \textit{Running},
- \item \textit{Shutting down/Down}.
+ \item \textit{configured},
+ \item \textit{incomplete},
+ \item \textit{unavailable},
+ \item \textit{installed},
+ \item \textit{ready},
+ \item \textit{running},
+ \item \textit{shutting down/down}.
 \end{itemize}
 V~každém z~těchto stavů může administrátor používat pouze konkrétní podmnožinu příkazů, které zónu ovládají. Pro~příklad
 může být uvedeno, že zónu nelze spustit pokud se nachází například ve stavu \textit{configured}. Pro spuštění se zóna musí
@@ -250,9 +254,9 @@ Prvním krokem k~vytvoření zóny je zaregistrování její konfigurace do syst
 \verb|zonecfg(1)|, který umožňuje vytvářet, měnit nebo mazat konfigurace jednotlivých neglobálních zón. Dle manuálových stránek 
 \cite{oracle:manpages:zonecfg} tento nástroj umožňuje administrátorovi zadávat konfiguraci ve třech následujících režimech:
 \begin{itemize}
- \item Interaktivně,
- \item Dávkově,
- \item Pomocí souboru s~příkazy.
+ \item interaktivně,
+ \item dávkově,
+ \item pomocí souboru s~příkazy.
 \end{itemize}
 První režim zadávání konfigurace vyžaduje aktivní účast uživatele a umožňuje interaktivně zadávat příkazy, které definují
 konfiguraci dané zóny. Další dva režimy načítají příkazy k~definici konfigurace z~jiného zdroje než je interaktivní vstup uživatele.
@@ -264,7 +268,10 @@ Nástroj tedy očekává přesně definovanou syntaxi příkazů, které umí zp
 globálních atributů a prostředků. Prostředky mohou reprezentovat síťové rozhraní nebo jiný typ zařízení a mají svoje vlastní
 lokální atributy. Popis všech příkazů, které nástroj \verb|zonecfg(1)| umí zpracovávat je zbytečný, a proto je syntaxe
 názorně zobrazena ve výpisu programu \ref{code:zonecfg}.
-\begin{lstlisting}[caption={Ukázka konfigurace zóny}, float, label={code:zonecfg}]
+\begin{listing}[ht]
+  \caption{Ukázka konfiguračního souboru zóny}
+  \label{code:zonecfg}
+  \begin{minted}{bash}
 zadmin@shost:~$ cat /var/tmp/rzone-test_hu67.zonecfg
 create -b
 set brand=solaris
@@ -279,7 +286,8 @@ set configure-allowed-address=true
 set link-protection=mac-nospoof
 set mac-address=auto
 end
-\end{lstlisting}
+  \end{minted}
+\end{listing}
 Z výpisu je patrné, že každá řádka začíná příkazem. Příkaz \verb|create| vytvoří v paměti reprezentaci
 konfigurace, která se po dokončení procesu konfigurace uloží do souboru. Následuje sekvence příkazů \verb|set|, které nastavují
 konkrétní globální atributy zóny. Dále je možné ve výpisu pozorovat příkaz \verb|add|, který reprezentuje přidání zdroje k zóně.
@@ -361,13 +369,17 @@ V~případě kernel zóny je podle manuálových stránek \cite{oracle:manpages:
 které bude sloužit jako hlavní disk. Implicitně je pro kernel zónu vytvořen souborový systém ZFS, který je vyexportovaný jako
 zařízení. Toto zařízení se přidá v~průběhu konfigurace a nastaví se mu atribut \textit{bootpri} na hodnotu 0 (primární disk).
 Část konfigurace specifikující úložné zařízení kernel zóny je naznačena v~kódu \ref{code:zonecfg:device}
-\begin{lstlisting}[caption={Konfigurace zařízení kernel zóny}, float, label={code:zonecfg:device}]
+\begin{listing}
+  \caption{Ukázka konfigurace zařízení kernel zóny}
+  \label{code:zonecfg:device}
+  \begin{minted}{bash}
 add device
 set storage=/dev/zvol/dsk/rpool/VARSHARE/zones/z1/disk
 set bootpri=0
 set id=0
-end
-\end{lstlisting}
+end   
+  \end{minted}
+\end{listing}
 Podle doporučení v~příručce \cite{oracle:manpages:zonecfg} může být nebezpečné delegovat zónám obecné zařízení a povolit na~ně přímý
 přístup. Tento krok může vést k~nestabilitě a ohrožení globální zóny, jelikož uživatelské procesy neglobálních zón mohou
 přímo ovlivňovat delegovaná zařízení.
@@ -396,14 +408,18 @@ Přes toto zařízení bude proudit provoz generovaný vytvořeným virtuálním
 Ostatní parametry slouží například k~nastavení MAC adresy, ochrany linkové vrstvy nebo VLAN. V~ukázce 
 \ref{code:zonecfg:anet} je naznačeno, jak by mohla vypadat konfigurace automatického síťového rozhraní pomocí nástroje 
 \verb|zonecfg(1)|.
-\begin{lstlisting}[caption={Konfigurace síťového rozhraní}, float, label={code:zonecfg:anet}]
+\begin{listing}[ht]
+  \caption{Ukázka konfigurace síťového rozhraní zóny}
+  \label{code:zonecfg:anet}  
+  \begin{minted}{bash}
 add anet
 set lower-link=auto
 set configure-allowed-address=true
 set link-protection=mac-nospoof
 set mac-address=auto
-end
-\end{lstlisting}
+end   
+  \end{minted}
+\end{listing}
 \subsubsection{Řízení zdrojů}
 \label{chapter:zones:configuration:resources:resource_control}
 Jak již bylo zmíněno výše, neglobální zóny využívají fyzických prostředků hostitelského systému (globální zóny). Aby bylo
@@ -411,9 +427,9 @@ možné zajistit kontrolu nad přidělováním prostředků jednotlivým neglob�
 omezení na využívání zdrojů. Tato omezení se do konfigurace přidávají jako kterékoli jiné zdroje. Podle manuálových stránek
 \cite{oracle:manpages:zonecfg} existují následující typy zdrojů, které umožňují řízení přidělování fyzických zdrojů:
 \begin{itemize}
- \item Exkluzivní CPU - \textit{dedicated-cpu},
- \item Omezení CPU - \textit{capped-cpu},
- \item Omezení paměti - \textit{capped-memory}.
+ \item exkluzivní CPU - \textit{dedicated-cpu},
+ \item omezení CPU - \textit{capped-cpu},
+ \item omezení paměti - \textit{capped-memory}.
 \end{itemize}
 První ze zdrojů s~názvem \textit{dedicated-cpu} slouží pro alokování určitého počtu procesorů a procesorových jader, exkluzivně
 pro použití danou neglobální zónou. V~systému dojde k~vytvoření množiny procesorů, která v~době běhu dané neglobální zóny
@@ -454,12 +470,16 @@ Názvy jednotlivých privilegií odpovídají akcím, které může daný uživa
 privilegium \textit{copyfrom}, které umožňuje administrátorovi vytvářet nové zóny jako klony dané neglobální zóny. V~ukázce kódu
 \ref{code:zonecfg:admin} je demonstrována konfigurace, která umožňuje uživateli \textit{zadmin} přihlašování a základní správu
 dané zóny.
-\begin{lstlisting}[caption={Delegace administrace jinému uživateli}, float, label={code:zonecfg:admin}]
+\begin{listing}[ht]
+  \caption{Ukázka delegace administrátorských oprávnění uživateli}
+  \label{code:zonecfg:admin}  
+  \begin{minted}{bash}
 add admin
 set user=zadmin
 set auths=login,manage
 end
-\end{lstlisting}
+  \end{minted}
+\end{listing}
 \subsection{Vytvoření konfigurace}
 \label{chapter:zones:configuration:creating}
 První krok v~procesu vytváření neglobální zóny je vytvoření její konfigurace. Konfigurace zóny se vytváří pomocí nástroje 
@@ -468,9 +488,9 @@ po dokončení konfigurace jí uloží do souboru ve formátu XML v~systémovém
 administrátor potřebuje k~vytvoření standardní zóny, je její jméno. K~vytvoření konfigurace může administrátor použít
 následující způsoby:
 \begin{itemize}
- \item Přímá konfigurace,
- \item Konfigurace ze šablony,
- \item Konfigurace z~archivu.
+ \item přímá konfigurace,
+ \item konfigurace ze šablony,
+ \item konfigurace z~archivu.
 \end{itemize}
 Přímá konfigurace již byla popsána v~kapitole \ref{chapter:zones:configuration} a využívá přímé zadávání příkazů, které obsahují
 definici atributů a zdrojů zóny. Tento proces může probíhat buď interaktivně postupným zadáváním příkazů nebo dávkově na~příkazové řádce.
@@ -483,7 +503,10 @@ neglobálních zón. Tyto šablony se nachází společně s~konfiguracemi ostat
 může zjistit, že adresář obsahuje například šablony \textit{SYSdefault.xml}, \textit{SYSsolaris10.xml} nebo
 \textit{SYSsolaris-kz.xml}, které odpovídají jednotlivým typů neglobálních zón. V~ukázce výpisu programu \ref{code:zonecfg:create:template}
 je demonstrováno rychlé vytvoření konfigurace zóny se jménem \textit{z1}, které využívá systémovou šablonu \textit{SYSdefault}.
-\begin{lstlisting}[caption={Vytvorení zóny ze systémové šablony}, label={code:zonecfg:create:template}]
+\begin{listing}[ht]
+  \caption{Ukázka vytvoření zóny ze systémové šablony}
+  \label{code:zonecfg:create:template}  
+  \begin{minted}{bash}
 zadmin@shost:~$ zonecfg -z z1 create -t SYSdefault
 zadmin@shost:~$ zonecfg -z z1 export
 create -b
@@ -498,8 +521,9 @@ set lower-link=auto
 set configure-allowed-address=true
 set link-protection=mac-nospoof
 set mac-address=auto
-end
-\end{lstlisting}
+end   
+  \end{minted}
+\end{listing}
 Z~ukázky je patrné, že šablona \textit{SYSdefault} nastavuje základní atributy zón s~použitím implicitních hodnot a přidává
 jedno síťové rozhraní pro připojení k~síti.
 
@@ -540,9 +564,9 @@ Instalace zóny se provádí pomocí nástroje \verb|zoneadm(1)|, který poskytu
 pro vytvoření kořenového souborového systému zóny. Dle specifikace \cite{oracle:solaris:zones:installation} a manuálových stránek
 \cite{oracle:manpages:zoneadm} jsou podporovány následující typy instalace:
 \begin{itemize}
- \item Instalace z~repozitáře,
- \item Instalace pomocí archivu,
- \item Klonování zóny.
+ \item instalace z~repozitáře,
+ \item instalace pomocí archivu,
+ \item klonování zóny.
 \end{itemize}
 Výše zmíněné typy instalace se liší hlavně ve způsobu získávání a vytváření zdrojového souborového systému zón. Kritériem pro
 výběr může být například doba trvání instalace, protože mezi jednotlivými typy je možné pozorovat zásadní rozdíly. Administrátor
@@ -583,13 +607,21 @@ balík \textit{pkg:/group/system/solaris-small-server}.
 Administrátor má možnost si vytvořit vlastní XML soubory s~definicemi softwarových balíků. Tyto soubory pak může používat
 při instalaci nových zón. V~ukázce výpisu kódu \ref{code:manifest} je demonstrováno, jak by mohl takový soubor vypadat.
 Pro přehlednost je zobrazena pouze část s~definicí balíků a zbytek XML dokumentu je vynechán.
-\begin{lstlisting}[language={XML}, caption={Ukázkový manifest}, label={code:manifest}]
+\begin{listing}[ht]
+  \caption{Ukázková definice softwarových balíků (manifest)}
+  \label{code:manifest}  
+  \begin{minted}
+  [
+  fontsize=\small
+  ]
+  {XML}
 <software_data action="install">    
     <name>pkg:/group/system/solaris-small-server</name>
     <name>pkg:/developer/versioning/mercurial</name>
     <name>pkg:/developer/versioning/git</name>    
-</software_data>
-\end{lstlisting}
+</software_data>   
+  \end{minted}
+\end{listing}
 \subsection{Instalace z~archivu}
 \label{chapter:zones:instalation:archive}
 Pokud administrátor nechce instalovat zónu přímo z~repozitáře může využít možnosti instalace z~archivu. Archiv je soubor, který obsahuje
@@ -606,7 +638,7 @@ Stejně jako při minulém typu instalace je možné použít systémový profil
 z~archivu je rychlejší než instalace z~repozitáře, ale nekompatibilita globální zóny a archivu může vyústit v~neúspěch instalace.
 \subsection{Klonování}
 \label{chapter:zones:instalation:cloning}
-Posledním podporovaným druhem instalace je klonování zóny. Vstupem klonování je již existující nakonfigurovaná a nainstalovaná
+Posledním druhem instalace je klonování zóny. Vstupem klonování je již existující nakonfigurovaná a nainstalovaná
 neglobální zóna. Tento proces instalace využívá pokročilé techniky souborového systému ZFS, který umožňuje vytváření klonů z~existujících
 souborových systémů. Klon je read-write kopie zdrojového souborového systému. Ve skutečnosti se nevytváří úplná kopie
 souborového systému, ale data se kopírují až v~okamžiku, kdy se klon nebo jeho obraz změní. Jak říká specifikace \cite{oracle:solaris:zones:clonning},
@@ -629,14 +661,23 @@ kteroukoli systémovou službu v~rámci SMF. Tento soubor se skládá z~popisů 
 operačního systému Solaris. Prostřednictvím profilu se například specifikuje počáteční heslo uživatele \textit{root}, konfigurace 
 síťových rozhraní nebo časová zóna systému. Příklad konfigurace uživatele \textit{root} je naznačen v~ukázce výpisu kódu \ref{code:profile}.
 Pro přehlednost jsou vynechány ostatní části souboru.
-\begin{lstlisting}[language={XML}, caption={Konfigurace uživatele root}, float, label={code:profile}]
+\begin{listing}[ht]
+  \caption{Konfigurace uživatele root}
+  \begin{minted}
+  [
+  framesep=2mm,
+  fontsize=\small,
+  ]
+  {XML}
 <property_group type="application" name="root_account">
-  <propval type="astring" name="type" value="%{type}"/>
-  <propval type="astring" name="login" value="root"/>
-  <propval type="astring" name="password" value="%{password}"/>
-  <propval name="expire" value="%{expire}"/>
+ <propval type="astring" name="type" value="%{type}"/>
+ <propval type="astring" name="login" value="root"/>
+ <propval type="astring" name="password" value="%{password}"/>
+ <propval name="expire" value="%{expire}"/>
 </property_group>
-\end{lstlisting}
+  \end{minted}
+  \label{code:profile}
+\end{listing}
 V~ukázce výpisu kódu lze pozorovat, že konfigurace uživatele \textit{root} umožňuje specifikovat jeho počáteční heslo, platnost
 hesla a typ uživatele.
 
@@ -662,14 +703,19 @@ Příkaz \verb|list| umožňuje administrátorovi získat přehled o~zónách p�
 se o~zcela zásadní příkaz, jelikož zobrazuje jména zón, které slouží jako identifikátor. V~každém dalším příkazu je nutné 
 specifikovat jméno zóny, pro kterou chce administrátor danou akci vykonat. V~ukázce výpisu programu \ref{code:list} je zobrazen
 výpis příkazu \verb|list|. Z~výpisu byl vynechán atribut \textit{zonepath}.
-\begin{lstlisting}[language=bash, caption={Výpis příkazu zoneadm list}, float, label={code:list}]
+\begin{verbbox}zoneadm list\end{verbbox}
+\begin{listing}[ht]
+  \caption{Výpis příkazu zoneadm list}
+  \label{code:list}
+  \begin{minted}{bash}
 zadmin@shost:~$ zoneadm list -vic
   ID NAME             STATUS      BRAND      IP    
    0 global           running     solaris    shared
    1 zweb1b-clone     running     solaris    excl     
    - zweb1b           installed   solaris    excl  
-   - z1               configured  solaris    excl  
-\end{lstlisting}
+   - z1               configured  solaris    excl     
+  \end{minted}
+\end{listing}
 \subsection{Start zóny}
 \label{chapter:zones:management:start}
 Aby se mohla zóna dostat do stavu \textit{running}, je nutné, aby pro ni byla v~jádru globální zóny alokována virtuální platforma.

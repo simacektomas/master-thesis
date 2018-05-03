@@ -1,4 +1,3 @@
-\label{chapter:implementation}
 Následující část diplomové práce představuje implementaci nástroje pro automatickou správu Solaris Zones. V~úvodu
 kapitoly je představen použitý programovací jazyk a~důvody pro jeho použití. Hlavní částí
 je popis knihovny, modulu Solaris Zones a~klientské aplikace. Důraz je kladen na popis funkcionality jednotlivých 
@@ -8,8 +7,8 @@ je popis knihovny, modulu Solaris Zones a~klientské aplikace. Důraz je kladen 
 Prvním krokem  při implementaci bylo zvolení vhodného programovacího jazyka. Požadavky stanovené v~kapitole 
 \ref{chapter:design:demands} vyžadují od zvoleného programovacího jazyka následující dvě podmínky:
 \begin{itemize}
- \item Operační systém Solaris,
- \item Možnost tvorby grafického rozhraní.
+ \item operační systém Solaris,
+ \item možnost tvorby grafického rozhraní.
 \end{itemize}
 Nástroj pro automatickou správu virtualizačního kontejneru Solaris Zones využívá
 nástrojů na příkazové řádce a~zpracovává jejich výstup. Pro tento účel bylo vhodné zvolit interpretovaný
@@ -67,9 +66,9 @@ a~docílit tak jiného chování knihovny.
 Povinné rozhraní modulu slouží především ke komunikaci mezi knihovnou a~samotným modulem. Funkcionalitu, kterou modul
 musí poskytovat, je možné shrnout do následujících bodů:
 \begin{itemize}
- \item Inicializační rutina,
- \item Rozhraní poskytované klientům,
- \item Funkce pro validaci šablon.
+ \item inicializační rutina,
+ \item rozhraní poskytované klientům,
+ \item funkce pro validaci šablon.
 \end{itemize}
 Prvním požadavkem na rozhraní modulu je existence inicializační rutiny. Pomocí této rutiny je do modulu předána hlavní
 konfigurace knihovny, která umožňuje modulu zjistit kořenový adresář aplikace a~další parametry. Hlavním smyslem
@@ -113,7 +112,7 @@ Toto směrování za běhu aplikace je umožněno díky programovacímu jazyku R
 programu. Směrování požadavků ke konkrétním modulům knihovny je demonstrováno na obrázku \ref{figure:module:interface}.
 \subsection{Generická šablona}
 \label{chapter:implementation:library:generic}
-Poslední funkcionalitou knihovny je definice generické šablony, která má za~úkol specifikovat virtuální stroj. Hlavním úkolem
+Poslední funkcí knihovny je definice generické šablony, která má za~úkol specifikovat virtuální stroj. Hlavním úkolem
 generické šablony je specifikovat typ virtuálního stroje. Tento atribut určuje, který modul knihovny je zodpovědný
 za zpracování a~validaci. Generická šablona by dále měla obsahovat jméno, které bude nějakým způsobem vystihovat a~popisovat
 specifikovaný virtuální stroj. Knihovna tedy zajišťuje validaci těchto dvou atributů a~v~případě úspěchu předá
@@ -136,13 +135,17 @@ způsob zacházení s~danou šablonou. V~ukázce kódu \ref{code:generic_templat
 Atribut \textit{type} určuje o~jaký typ virtuálního stroje se jedná a~k~jakému modulu knihovny přísluší. Druhou povinnou položkou
 v~šabloně je atribut \textit{name}, který má za~úkol popsat funkcionalitu virtuálního stroje. Tečky v~ukázce
 \ref{code:generic_template} reprezentují atributy specifické pro konkrétní typ šablony. Tyto atributy jsou z~ukázky vynechány.
-\begin{lstlisting}[language=json, caption={Generická šablona}, float,label={code:generic_template}]  
+\begin{listing}[ht]
+  \caption{Demonstrace generické šablony}
+  \label{code:generic_template}
+  \begin{minted}{JSON}
 {
   "name": "template_webserver",
   "type": "szones",
   ...
-}
-\end{lstlisting}
+}   
+  \end{minted} 
+\end{listing}
 \subsubsection{Validace šablony}
 \label{chapter:implementation:library:generic:validation}
 Šablona musí poskytovat validní definici virtuálního stroje, aby z~ní bylo možné konkrétní virtuální stroj zkonstruovat.
@@ -160,7 +163,10 @@ podrobnější schéma, které má definovat konkrétní typ virtuálního stroj
 Aby bylo možné v~programovacím jazyku Ruby validovat JSON dokumenty, je nutné použít knihovnu, která bude implementovat
 JSON schéma. Pro tento účel aplikace využívá volně dostupné řešení \textit{json-schema} \cite{json:schema:ruby}, které implementuje
 funkce validace dokumentů typu JSON pomocí schémat.
-\begin{lstlisting}[language=json, caption={Schéma generické šablony}, float, label={code:generic_tmplate:validation}]  
+\begin{listing}[ht]
+  \caption{Schéma generické šablony}
+  \label{code:generic_tmplate:validation}
+  \begin{minted}{JSON}
 {
   {
   "title": "general-vm-template",
@@ -179,8 +185,9 @@ funkce validace dokumentů typu JSON pomocí schémat.
   },
   "required": [ "name", "type" ],
   "additionalProperties": true
-}
-\end{lstlisting}
+}  
+  \end{minted} 
+\end{listing}
 \section{Modul Solaris Zones}
 \label{chapter:implementation:szones}
 Modul Solaris Zones je hlavním stavebním kamenem celé implementace výsledného nástroje. Tento modul je zařazen do knihovny
@@ -191,10 +198,10 @@ se jedná o~šablony, které specifikují vlastnosti neglobálních zón.
 
 Funkcionalita modulu je rozdělena do několika vrstev, které se vzájemně využívají. Názvy jednotlivých vrstev jsou následující:
 \begin{itemize}
- \item Management šablon,
- \item Nástroje pro správu Solaris Zones,
- \item Administrátorské rutiny,
- \item Funkční rozhraní modulu.
+ \item management šablon,
+ \item nástroje pro správu Solaris Zones,
+ \item administrátorské rutiny,
+ \item funkční rozhraní modulu.
 \end{itemize}
 Architekturu vrstev modulu je možné pozorovat na obrázku \ref{image:implemetation:szones}. V~následujících kapitolách
 bude podrobně popsána funkce jednotlivých vrstev a~jejich vzájemná interakce.
@@ -217,7 +224,10 @@ tři sekce, které korespondují s~jednotlivými soubory vyžadovanými při ins
 Modul implementuje JSON schéma, které využívá pro validaci šablony a~pro mechanizmy jejího zpracování. Úkolem modulu při zpracování
 šablony je reprodukce souborů s~konfigurací, manifestem a~systémovým profilem. Tyto soubory nástroj využívá pro instalaci 
 neglobální zóny s~parametry, které jsou v~dané šabloně specifikovány.
-\begin{lstlisting}[language=json, caption={Kostra šablony neglobální zóny}, float,label={code:szones_template}]  
+\begin{listing}[ht]
+  \caption{Kostra šablony pro neglobální zóny}
+  \label{code:szones_template}
+  \begin{minted}{JSON}
 {  
   "name": "template_webserver",
   "type": "szones",
@@ -227,18 +237,19 @@ neglobální zóny s~parametry, které jsou v~dané šabloně specifikovány.
    },
    "profile": {...} 
 }
-\end{lstlisting}
+  \end{minted} 
+\end{listing}
 Pokud modul zpracovává rutinu, která využívá šablonu, je v~prvním kroku šablona rozdělena do třech zmíněných částí.
 V~následujícím kroku jsou tyto části převedeny do vnitřní reprezentace a~následně zpracovány.
 \subsubsection{Zpracování konfigurace}
 \label{chapter:implementation:szones:template:configuration}
 Konfigurační sekce šablony se skládá z~definice globálních atributů zóny popsaných v~kapitole \ref{chapter:zones:configuration:global_attributes}
-a~z~definice zdrojů zóny, které jsou popsané v~kapitole \ref{chapter:zones:configuration:resources}. Jednoduché globální atributy
+a~z~definice zdrojů zóny, které jsou popsané v~kapitole~\ref{chapter:zones:configuration:resources}. Jednoduché globální atributy
 jsou v~šabloně specifikovány přímo pomocí jejich jména a~hodnoty. Pro globální atribut typu zóny může definice vypadat 
-následovně \lstinline[language=json]{"brand" : "solaris"}.
+následovně \mintinline{JSON}{{"brand": "solaris"}}.
 
 Dále tato sekce šablony obsahuje definici zdrojů zóny, které mají složitější strukturu a~obsahují několik atributů. Z~tohoto
-důvodu šablona obsahuje speciální atribut \lstinline[language=json]{resources}, který je typu pole a~obsahuje definici
+důvodu šablona obsahuje speciální atribut \mintinline{JSON}{{"resources": []}}, který je typu pole a~obsahuje definici
 všech zdrojů zóny. V~rámci jednotlivého zdroje je použita stejná technika definice atributu jako ve výše zmíněném případě
 globálních atributů.
 
@@ -249,7 +260,7 @@ se ukončí příkazem \verb|end|. Takto přetransformovaná konfigurace je při
 \subsubsection{Zpracování manifestu}
 \label{chapter:implementation:szones:template:manifest}
 V~rámci sekce šablony s~názvem \lstinline[language=json]{manifest} může uživatel specifikovat softwarové balíky, které má zóna obsahovat.
-Pro tento účel obsahuje tato část šablony atribut \lstinline[language=json]{packages}, který je typu pole. Hodnotou každého
+Pro tento účel obsahuje tato část šablony atribut \mintinline{JSON}{{"packages": []}}, který je typu pole. Hodnotou každého
 prvku pole je obyčejný textový řetězec, který obsahuje jméno softwarového balíku. V~tomto poli může uživatel specifikovat libovolné
 množství balíků. 
 
@@ -312,10 +323,10 @@ tak zajišťují, že všechny dočasně vytvořené entity budou po ukončení 
 Hlavní součástí administrátorských rutin jsou funkce pro vytváření zón. Tyto rutiny umožňují vytváření vzdálených i
 lokálních neglobálních zón z~následujících zdrojů:
 \begin{itemize}
- \item Ze standardní souborů (konfigurace, manifest, profil),
- \item Ze šablon virtuálních strojů,
- \item Z~jiné existující zóny (vzdálené i lokální),
- \item Z~archivu zóny.
+ \item ze standardní souborů (konfigurace, manifest, profil),
+ \item ze šablon virtuálních strojů,
+ \item z~jiné existující zóny (vzdálené i lokální),
+ \item z~archivu zóny.
 \end{itemize}
 Prvním způsobem je vytvoření zóny pomocí tří standardních souborů obsahující konfiguraci zóny, manifest a~nastavení systémových
 služeb. V~případě vytváření zóny na vzdáleném serveru dojde v~první řadě ke~zkopírování zdrojových souborů na~cílový server.
@@ -421,9 +432,9 @@ Další významnou částí implementovaného nástroje je klientská aplikace. 
 skrývat implementační detaily knihovny a~jejích modulů. Funkcionalitu knihovny tato klientská aplikace zprostředkovává
 uživateli pomocí následujících komponent:
 \begin{itemize}
- \item Uživatelské rozhraní (CLI),
- \item Správa vzdálených hostů,
- \item Uživatelský žurnál.
+ \item uživatelské rozhraní (CLI),
+ \item správa vzdálených hostů,
+ \item uživatelský žurnál.
 \end{itemize}
 Klientská aplikace poskytuje rutiny pro správu Solaris Zones popsané v~kapitole \ref{chapter:implementation:szones}
 Tyto rutiny může uživatel využívat pomocí uživatelského rozhraní aplikace. Hlavním cílem tohoto
@@ -490,8 +501,8 @@ Volitelné parametry tohoto příkazu jsou \textit{boot} a~\textit{force}, kter�
 přepsat existující zóny.
 \subsubsection{Migrate}
 \label{chapter:implementation:client:cli:migrate}
-Příkaz \verb|migrate| zajišťuje přesun neglobálních zón mezi dvěma servery. Tento příkaz umožňuje přenášet větší množství zón
-libovolně rozložených v~infrastruktuře na jeden konkrétní server. Cílový server může být buď lokální nebo vzdálený. Migrace
+Příkaz \verb|migrate| umožňuje přesun neglobálních zón mezi dvěma servery. Tento příkaz umožňuje přenášet větší množství zón
+libovolně rozložených v~in\-fra\-struktuře na jeden konkrétní server. Cílový server může být buď lokální nebo vzdálený. Migrace
 je implementována v~několika způsobech. Jedná se o~migraci pomocí přímé metody nebo pomocí archivu ZFS a~UAR.
 
 Argumenty tohoto příkazu jsou identifikátory neglobálních zón, které chce uživatel přesunout. Pomocí parametru \textit{destination}
@@ -565,14 +576,18 @@ Hlavní soubor databáze se nazývá \textit{hosts.json} a~obsahuje seznam domé
 v~tomto souboru je vytvořen další soubor, který obsahuje specifikaci SSH připojení. Název tohoto souboru odpovídá doménovému
 jménu konkrétního serveru. Všechny soubory databáze jsou uloženy v~datovém formátu JSON. V~ukázce kódu \ref{code:host_spec}
 je zobrazeno implicitní nastavení pro uživatele \textit{zadmin} a~server s~doménovým jménem \textit{shost1}.
-\begin{lstlisting}[language=json, caption={Implicitní nastavení parametrů SSH připojení}, float,label={code:host_spec}]  
+\begin{listing}[ht]
+  \caption{Implicitní nastavení parametrů SSH připojení}
+  \label{code:host_spec}
+  \begin{minted}{JSON} 
 {
   "host_name": "shost1",
   "user": "zadmin",
   "keys": ["~/.ssh/id_rsa"],
   "timeout": 1
 }
-\end{lstlisting}
+  \end{minted}
+\end{listing}
 \subsection{Uživatelský žurnál}
 \label{chapter:implementation:client:journal}
 Poslední komponentou klientské aplikace je uživatelský žurnál. Solaris Zones neposkytují žádný nástroj pro přidělování zón 
@@ -623,7 +638,10 @@ ale změní se diskový obraz. Pro tento účel udržuje žurnál u~každé sled
 definuje diskový obraz zóny. Porovnáním uložených atributů s~aktuálním stavem zóny je možné zjistit, zda bylo se zónou 
 nějakým způsobem manipulováno. Ukládané atributy zóny a~struktura záznamu je patrná z~ukázky kódu \ref{code:journal}.
 V~uživatelském žurnálu je podobný záznam udržován pro každou sledovanou zónu.
-\begin{lstlisting}[language=json, caption={Záznam stavu zóny v~žurnálu}, float,label={code:journal}]  
+\begin{listing}[ht]
+  \caption{Ukázka záznamu v~uživatelském žurnálu}
+  \label{code:journal}
+  \begin{minted}{JSON} 
 "zweb1b-clone:localhost": {
   "zone_name": "zweb1b-clone:localhost",
   "zone_state": "running",
@@ -632,7 +650,8 @@ V~uživatelském žurnálu je podobný záznam udržován pro každou sledovanou
   "zone_brand": "solaris",
   "zone_ip": "excl"
 }
-\end{lstlisting}
+  \end{minted}
+\end{listing}
 \section{Grafické rozhraní}
 \label{chapter:implementation:gui}
 Poslední součástí nástroje pro podporu automatické správy virtualizačního kontejneru Solaris Zones je grafické uživatelské 

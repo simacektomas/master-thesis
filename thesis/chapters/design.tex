@@ -1,4 +1,3 @@
-\label{chapter:design}
 Tato část diplomové práce popisuje návrh aplikace pro podporu automatické správy virtualizačního kontejneru Solaris Zones na
 platformě Solaris. Zaměřuje se především na popis funkcionality a požadavků, které aplikace musí splňovat. V~závěrečné části
 této kapitoly je rozebrána bezpečnost a požadavky na~uživatele, který aplikaci bude moci využívat.
@@ -32,7 +31,7 @@ konfigurace, softwarového vybavení a systémového nastavení, aplikace by mě
 jednotným způsobem. Aplikace tedy musí poskytovat administrátorovi systém pro vytváření definic zón, které bude možné
 používat pro jejich vytváření. Tento požadavek lze specifikovat jako podpora vytváření \textbf{šablon}.
 
-Uživatel musí mít možnost ovládat nástroj pro podporu automatické správy neglobálních zón. To znamená, že aplikace bude
+Uživatel musí mít možnost ovládat nástroj pro podporu správy neglobálních zón. To znamená, že aplikace bude
 poskytovat uživateli své funkce pomocí \textbf{uživatelského rozhraní}. Toto uživatelské rozhraní musí být přehledné a poskytovat
 uživateli všechny informace potřebné pro využívání jeho funkcí. Pomocí tohoto rozhraní bude uživatel zadávat příkazy, které
 aplikace bude vykonávat. Rozhraní by mělo nabízet izolovaný pohled pro každého uživatele, který bude aplikaci využívat.
@@ -44,12 +43,12 @@ znemožní správný běh globální zóny.
 
 Kompletní požadavky na aplikaci pro podporu automatické správy Solaris Zones můžeme shrnout do následujících bodů:
 \begin{itemize}
- \item Operační systém Solaris,
- \item Lokální a vzdálená správa,
- \item Automatizace administračních procesů,
- \item Šablony,
- \item Uživatelské rozhraní,
- \item Bezpečnost.
+ \item operační systém Solaris,
+ \item lokální a vzdálená správa,
+ \item automatizace administračních procesů,
+ \item šablony,
+ \item uživatelské rozhraní,
+ \item bezpečnost.
 \end{itemize}
 Splnění těchto požadavků by mělo vést k~značnému zjednodušení správy virtualizačního kontejneru Solaris Zones. Výsledná
 aplikace by měla zajistit přehled o~neglobálních zónách, které se nacházejí na lokálním serveru a~vzdálených serverech. Aplikace

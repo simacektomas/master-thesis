@@ -1,4 +1,3 @@
-\label{chapter:testing}
 Poslední kapitola této diplomové práce popisuje testování funkcionality nástroje pro podporu automatické správy virtualizačního
 kontejneru Solaris Zones. Zaměřuje se především na testování
 hlavních scénářů použití nástroje a~zkoumá jeho chování. Na začátku této kapitoly je definováno prostředí, ve kterém byly
@@ -11,9 +10,9 @@ obsahuje několik virtualizačních serverů s~operačním systémem Solaris, kt
 Tyto servery jsou propojeny počítačovou sítí, pomocí které je lze ovládat. Tato infrastruktura byla virtualizovaně vytvořena na 
 fyzickém systému s~následujícími parametry:
 \begin{itemize}
- \item Procesor Intel(R) Xeon(R) CPU E3-1230 v3 (3.30Ghz),
+ \item procesor Intel(R) Xeon(R) CPU E3-1230 v3 (3.30Ghz),
  \item RAM 16GB,
- \item Operační systém Windows 10 (64-bit).
+ \item operační systém Windows 10 (64-bit).
 \end{itemize}
 Virtualizace architektury byla docílena pomocí virtualizační technologie Virtualbox, která umožňuje spouštění virtuálních 
 počítačů v~rámci jiného operačního systému. Pomocí této technologie byly vytvořeny tři virtuální stroje s~operačním systémem
@@ -27,9 +26,9 @@ Jelikož provozování virtualizační technologie Solaris Zones vyžaduje nemal
 dostupné prostředky fyzického systému rozdělit mezi virtuální stroje. Z~tohoto důvodu byly každému virtuálnímu počítači
 přiřazeny následující výpočetní prostředky:
 \begin{itemize}
- \item Jedno jádro fyzického procesoru,
+ \item jedno jádro fyzického procesoru,
  \item RAM 3 GB,
- \item Virtuální disk 50 GB (HDD).
+ \item virtuální disk 50 GB (HDD).
 \end{itemize}
 
 Na virtuální počítač s~doménovým jménem \textit{shost} byl nainstalován interpret programovacího jazyka Ruby ve verzi 2.4.2.
@@ -209,9 +208,9 @@ přiřazeny čtyři procesorová jádra. Kromě výše zmíněné změny bylo po
 Prvním objektem měření bylo sledování doby běhu nástroje při vytváření zón v~závislosti na jejich počtu a technice vytváření. Cílovým
 serverem instalace byl lokální server \textit{shost}. Pro toto měření byly použity následující techniky vytváření neglobálních zón:
 \begin{itemize}
- \item Klonování,
- \item Instalace ze šablony,
- \item Instalace ze vzdálené zóny.
+ \item klonování,
+ \item instalace ze šablony,
+ \item instalace ze vzdálené zóny.
 \end{itemize}
 Pro účely klonování byla na lokálním serveru \textit{shost} vytvořena instance šablony \textit{template\_z1}, která sloužila jako 
 předloha pro klonování. Zdrojový souborový systém této zóny se v~průběhu měření opakovaně klonoval a zkoumala se doba běhu
@@ -255,9 +254,9 @@ Tato technika nešetří pouze čas instalace, ale také diskové místo.
 Druhé měření se zabývá různými technikami způsobu migrace zón a~měří dobu jejich trvání v~závislosti na počtu migrovaných zón.
 Implementovaný nástroj umožňuje přenášet zóny mezi servery pomocí následujících technik:
 \begin{itemize}
- \item Přímá migrace,
- \item Migrace pomocí ZFS archivu,
- \item Migrace pomocí UAR archivu.
+ \item přímá migrace,
+ \item migrace pomocí ZFS archivu,
+ \item migrace pomocí UAR archivu.
 \end{itemize}
 První technika využívá k~migraci přímo příkazy souborového systému ZFS a~umožňuje přenášet souborový systém bez nutnosti jeho dočasného
 uložení. Migrace pomocí ZFS archivu je podobná přímé technice, ale v~průběhu migrace se zdrojový souborový systém uloží do archivu,
