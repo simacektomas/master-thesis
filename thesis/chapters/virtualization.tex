@@ -14,12 +14,12 @@ Před popisem jednotlivých virtualizačních technik je nutné definovat pojem 
 je v~anglickém jazyce dle slovníku \cite{oxford:dictionary:virtual} definováno následovně:
 \begin{definition}[Virtual]
   \label{definition:virtual}
-  Almost or nearly as described, but not completely or according to strict definition.
+Almost or nearly as described, but not completely or according to strict definition.
 \end{definition}
 Ve výpočetní technice má tento výraz podle stejného zdroje \cite{oxford:dictionary:virtual} podobnou definici:
 \begin{definition}[Virtual in computing]
   \label{definition:virtual_computing}
-  Not physically existing as such but made by software to appear to do so.
+Not physically existing as such \- but made by software to appear to do so.
 \end{definition}
 
 Proces virtualizace ve výpočetní technice je možné definovat jako vytváření virtuálních prostředků, které skrývají nebo upravují
@@ -68,7 +68,7 @@ Práce podrobně představuje virtualizační techniku Solaris Zones od firmy Or
 (zón) v~rámci jedné instance operačního systému Solaris.
 \subsection{Využití virtualizace v~sítích}
 \label{chapter:virtualization:it:networks}
-Oblast komunikačních sítí je další neméně významnou oblastí pro využití virtualizačních technik. Bez síťové infrastruktury by
+Oblast komunikačních sítí je další významnou oblastí pro využití virtualizačních technik. Bez síťové infrastruktury by
 mezi sebou počítače nemohly komunikovat, a tudíž by jejich využití nemělo takový potenciál. V~dnešní době je tato infrastruktura
 značně rozsáhlá a to v~některých případech ztěžuje její správu. S~virtualizací přichází do sítí možnost dynamické konfigurace
 sítě, což umožňuje rychle měnit její topologii. To vše lze uskutečnit z~jednoho místa a~bez nutnosti zasahovat do fyzických
@@ -167,8 +167,8 @@ tři dobře definovaná rozhraní počítačového systému a je logické, že v
 Dle rozdělení \cite{book:iee:vm_architecture} mohou být virtuální stroje obecně rozděleny na následující dva druhy v~závislosti
 na tom, které rozhraní počítačové architektury virtualizují:
 \begin{itemize}
-  \item \textit{Systémové virtuální stroje},
-  \item \textit{Virtuální stroje v~procesech}.
+  \item \textit{systémové virtuální stroje},
+  \item \textit{virtuální stroje v~procesech}.
 \end{itemize}
 Jak může být z~názvu patrné, \textit{systémové virtuální stroje} poskytují kompletní systémové prostředí, které podporuje
 operační systém a jeho aplikace. Operační systém využívá ke svému běhu \textbf{ISA} fyzického systému. Systémový virtuální
@@ -186,7 +186,7 @@ byla převzata a upravena podle požadavků práce.
 \label{chapter:virtualization:clasification:terms}
 Pro účely diplomové práce zde budou definovány některé pojmy, které se ve~virtualizované architektuře počítačového systému vyskytují. 
 
-Po přidání virtualizačního SW mezi dvě vrstvy počítačového systému vzniknou tři oddělené části. Tuto skutečnost popisuje
+Přidání virtualizačního SW mezi dvě vrstvy počítačového systému vytvoří tři oddělené části. Tuto skutečnost popisuje
 obrázek \ref{figure:system_vs_proces}, který zároveň ukazuje cílové umístění virtualizačního software v~případě systémových
 virtuální strojů (b) a virtuálních strojů v~procesech (a). Softwarové vrstvy, které se v~hierarchii počítačového systému nachází
 nad virtualizačním SW (je jim poskytováno rozhraní), se souhrnně nazývají \textit{guest}. V~případě systémových virtuálních strojů
@@ -264,8 +264,8 @@ nepřekládá instrukce do jiné instrukční sady.
 
 Dle umístnění virtualizačního monitoru v~architektuře počítače, může být tento typ virtuálního stroje rozdělen do následujících kategorií:  
 \begin{itemize}
-  \item Nativní VMM,
-  \item Hosted VMM.
+  \item nativní VMM,
+  \item hosted VMM.
 \end{itemize}
 Rozdíl mezi těmito dvěma typy spočívá v~umístění virtualizačního monitoru v~architektuře počítače. Zatímco 
 \textit{nativní VMM} má přímou kontrolu nad HW počítače, \textit{hosted VMM} běží uvnitř operačního systému, který spravuje
@@ -322,7 +322,6 @@ Výstup tohoto procesu je zobrazen na obrázku \ref{figure:consolidation_img} vp
     \caption{Konsolidace serverů}
     \label{figure:consolidation_img}
 \end{figure}
-
 \subsubsection{Využití scénáře}
 \label{chapter:virtualization:deployment:consolidation:use}
 Dnes je zcela běžnou praxí provozovat jednu aplikaci na jednom dedikovaném serveru. Pokud aplikace využívá jen malé procento
@@ -454,15 +453,10 @@ přístupu k~fyzickým prostředkům systému.
 Virtualizační monitor se nazývá \textit{nativní} nebo také \textit{bare-metal}, pokud má přímý přístup k~HW pomocí vlastních ovladačů.
 Obvykle se \textit{nativní} VMM implementuje ve firmwaru počítače nebo jako hlavní řídící program, který se po~startu systému
 zavede do~hlavní paměti a je mu předáno řízení. Tento přístup poskytuje nejvíce kontroly nad systémem a je také nejefektivnější,
-protože VMM přístup k~HW zařizuje přímo. Architektura nativního VMM je demonstrována na obrázku \ref{figure:native_vmm}.
+protože VMM přístup k~HW zařizuje přímo.
 
 Pokud virtualizační monitor nepodporuje určité typy procesorů nebo periferních zařízení některých HW platforem, může softwarové
 vybavení VMM limitovat přenositelnost na tyto platformy \cite{cvut:presentation:virt1}.
-\begin{figure}
-    \centering    
-    \caption{Nativní (Bare-Metal) VMM}
-    \label{figure:native_vmm}
-\end{figure}
 \subsubsection{Hostovaný VMM}
 \label{chapter:virtualization:vmm:types:hosted}
 Druhým typem architektury je \textit{hostovaný} VMM. Tento název vychází z~faktu, že VMM využívá ke svému běhu existující operační
@@ -470,27 +464,15 @@ systém. Tento operační systém mu poskytuje rozhraní s~HW. Virtualizační m
 protože jsou součástí operačního systému hosta. Aby mohl \textit{hostovaný} VMM správně pracovat, běží některé jeho části (jádro)
 v~privilegovaném režimu procesoru společně s~operačním systémem hosta. Požadavky na HW zařízení jsou jádrem VMM přesměrovány
 do komponenty VMM, která neběží v~privilegovaném režimu. Tato komponenta dále zavolá nativní rozhraní OS a požadavek je 
-vyřízen operačním systémem hosta \cite{cvut:presentation:virt1}. Jednotlivé komponenty \textit{hostovaného} VMM jsou zobrazeny na 
-obrázku \ref{figure:hosted_vmm}.
+vyřízen operačním systémem hosta \cite{cvut:presentation:virt1}.
 
 Tento typ virtualizace je v~dnešní době velice populární, protože umožňuje používat virtualizaci na systémech s~běžícím operačním 
 systémem. Přenositelnost \textit{hostovaného} VMM je zcela určena přenositelností dané implementace. Na druhou stranu tento
 typ VMM není vhodný pro nasazení do prostředí s~vysokými nároky výpočetní výkon, jelikož díky další vrstvě mezi HW a VMM není tak
 efektivní jako \textit{nativní} VMM.
-\begin{figure}
-    \centering    
-    \caption{Hostovaný VMM}
-    \label{figure:hosted_vmm}
-\end{figure}
 \subsubsection{Servisní VM}
 \label{chapter:virtualization:vmm:types:servise}
 Některé typy \textit{nativních} VMM vyžadují pro svoji plnou funkčnost jednu nebo více speciálních instancí VM. Tato instance
 většinou slouží pro správu VMM a~ostatních instancí VM. Nicméně existují i virtualizační monitory, které využívají výhody
 existujících OS a především jejich podpory velké škály HW ovladačů. V~tomto případě je OS spuštěn ve speciální instanci VM
-a je společně s~jeho ovladači využíván jako komponenta VMM \cite{cvut:presentation:virt1}. Tento typ architektury je zobrazen
-na obrázku \ref{figure:servise_vmm}.
-\begin{figure}
-    \centering    
-    \caption{VMM se servisním OS}
-    \label{figure:servise_vmm}
-\end{figure}
+a je společně s~jeho ovladači využíván jako komponenta VMM \cite{cvut:presentation:virt1}.
