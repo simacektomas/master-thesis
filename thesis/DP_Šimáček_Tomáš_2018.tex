@@ -42,14 +42,14 @@
 \authorWithDegrees{Bc. Tomáš Šimáček} %jméno autora včetně současných akademických titulů
 \author{Tomáš Šimáček} %jméno autora bez akademických titulů
 \supervisor{Ing. Michal Šoch, Ph.D.}
-\acknowledgements{Doplňte, máte-li komu a za co děkovat. V~opačném případě úplně odstraňte tento příkaz.}
+\acknowledgements{Rád bych poděkoval vedoucímu práce Ing. Michalu Šochovi, Ph.D. za cenné rady,
+připomínky a nápady v průběhu vzniku této diplomové práce. }
 \abstractCS{\input{chapters/abstract_cs.tex}}
 \abstractEN{\input{chapters/abstract_en.tex}}
 \placeForDeclarationOfAuthenticity{V~Praze}
 \declarationOfAuthenticityOption{4} %volba Prohlášení (číslo 1-6)
 \keywordsCS{\input{chapters/keywords_cs.tex} \cleardoublepage}
 \keywordsEN{\input{chapters/keywords_en.tex}}
-% \website{http://site.example/thesis} %volitelná URL práce, objeví se v tiráži - úplně odstraňte, nemáte-li URL práce
 
 \newtheorem{definition}{Definice}
 
@@ -130,13 +130,12 @@
 \begin{figure}
 	\dirtree{%
 		.1 readme.txt\DTcomment{stručný popis obsahu CD}.
-		.1 exe\DTcomment{adresář se spustitelnou formou implementace}.
-		.1 src.
-		.2 impl\DTcomment{zdrojové kódy implementace}.
-		.2 thesis\DTcomment{zdrojová forma práce ve formátu \LaTeX{}}.
-		.1 text\DTcomment{text práce}.
-		.2 thesis.pdf\DTcomment{text práce ve formátu PDF}.
-		.2 thesis.ps\DTcomment{text práce ve formátu PS}.
+		.1 impl.
+		.2 szmgmt\DTcomment{zdrojové kódy aplikace szmgmt}.
+		.2 szmgmt-1.0.0.gem\DTcomment{instalační balíček aplikace ve formátu .gem}.
+		.1 thesis.
+		.2 src\DTcomment{zdrojové soubory práce ve formátu \LaTeX{}}.
+		.2 DP\_Simacek\_Tomas\_2018.pdf\DTcomment{text práce ve formátu PDF}.
 	}
 \end{figure}
 \end{document}
