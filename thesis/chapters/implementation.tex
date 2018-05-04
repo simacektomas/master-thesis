@@ -138,7 +138,6 @@ v~šabloně je atribut \textit{name}, který má za~úkol popsat funkcionalitu v
 \ref{code:generic_template} reprezentují atributy specifické pro konkrétní typ šablony. Tyto atributy jsou z~ukázky vynechány.
 \begin{listing}[ht]
   \caption{Demonstrace generické šablony}
-  \label{code:generic_template}
   \begin{minted}{JSON}
 {
   "name": "template_webserver",
@@ -146,6 +145,7 @@ v~šabloně je atribut \textit{name}, který má za~úkol popsat funkcionalitu v
   ...
 }   
   \end{minted} 
+  \label{code:generic_template}
 \end{listing}
 \subsubsection{Validace šablony}
 \label{chapter:implementation:library:generic:validation}
@@ -166,7 +166,6 @@ JSON schéma. Pro tento účel aplikace využívá volně dostupné řešení \t
 funkce validace dokumentů typu JSON pomocí schémat.
 \begin{listing}[ht]
   \caption{Schéma generické šablony}
-  \label{code:generic_tmplate:validation}
   \begin{minted}{JSON}
 {
   {
@@ -188,6 +187,7 @@ funkce validace dokumentů typu JSON pomocí schémat.
   "additionalProperties": true
 }  
   \end{minted} 
+  \label{code:generic_tmplate:validation}
 \end{listing}
 \section{Modul Solaris Zones}
 \label{chapter:implementation:szones}
@@ -228,7 +228,6 @@ Modul implementuje JSON schéma, které využívá pro validaci šablony a~pro m
 neglobální zóny s~parametry, které jsou v~dané šabloně specifikovány.
 \begin{listing}[ht]
   \caption{Kostra šablony pro neglobální zóny}
-  \label{code:szones_template}
   \begin{minted}{JSON}
 {  
   "name": "template_webserver",
@@ -240,6 +239,7 @@ neglobální zóny s~parametry, které jsou v~dané šabloně specifikovány.
    "profile": {...} 
 }
   \end{minted} 
+  \label{code:szones_template}
 \end{listing}
 Pokud modul zpracovává rutinu, která využívá šablonu, je v~prvním kroku šablona rozdělena do třech zmíněných částí.
 V~následujícím kroku jsou tyto části převedeny do vnitřní reprezentace a~následně zpracovány.
@@ -580,7 +580,6 @@ jménu konkrétního serveru. Všechny soubory databáze jsou uloženy v~datové
 je zobrazeno implicitní nastavení pro uživatele \textit{zadmin} a~server s~doménovým jménem \textit{shost1}.
 \begin{listing}[ht]
   \caption{Implicitní nastavení parametrů SSH připojení}
-  \label{code:host_spec}
   \begin{minted}{JSON} 
 {
   "host_name": "shost1",
@@ -589,6 +588,7 @@ je zobrazeno implicitní nastavení pro uživatele \textit{zadmin} a~server s~do
   "timeout": 1
 }
   \end{minted}
+  \label{code:host_spec}
 \end{listing}
 \subsection{Uživatelský žurnál}
 \label{chapter:implementation:client:journal}
@@ -642,7 +642,6 @@ nějakým způsobem manipulováno. Ukládané atributy zóny a~struktura záznam
 V~uživatelském žurnálu je podobný záznam udržován pro každou sledovanou zónu.
 \begin{listing}[ht]
   \caption{Ukázka záznamu v~uživatelském žurnálu}
-  \label{code:journal}
   \begin{minted}{JSON} 
 "zweb1b-clone:localhost": {
   "zone_name": "zweb1b-clone:localhost",
@@ -653,6 +652,7 @@ V~uživatelském žurnálu je podobný záznam udržován pro každou sledovanou
   "zone_ip": "excl"
 }
   \end{minted}
+  \label{code:journal}
 \end{listing}
 \section{Grafické rozhraní}
 \label{chapter:implementation:gui}
@@ -662,7 +662,12 @@ Implementované grafické rozhraní slouží jako nadstavba nad tvorbou šablon 
 a~umožňuje uživateli jejich tvorbu a~editaci. Pro tyto účely byl vytvořen graficky orientovaný editor, které pomocí grafických
 elementů umožňuje vyplňování příslušných atributů neglobálních zón. Stejný princip je využitý i pro interaktivní instalaci 
 zón.
-
+\begin{figure}[b]
+    \centering    
+    \caption{Ovládací menu editoru šablon}
+    \includegraphics[scale=0.9]{assets/png/implemetation_gui_menu.png}
+    \label{image:implemetation:gui:menu}
+\end{figure}
 Implementované grafické rozhraní využívá grafické knihovny Swing, která je podporována pouze na platformě JVM. Z~důvodů uvedených
 v~kapitole \ref{chapter:implementation:language:ruby} je použití grafického rozhraní podmíněno využitím interpretu JRuby.
 V~případě, že uživatel spustí grafické rozhraní na jiné platformě, aplikace se ukončí a~grafické rozhraní se nezobrazí. Ostatní
@@ -672,19 +677,19 @@ funkce nástroje nejsou závislé na použitém interpretu.
 Prvním využitím grafického rozhraní je editor pro manipulaci se šablonami zón. Tento editor se spouští pomocí příkazu \verb|editor|,
 který je součástí uživatelského rozhraní klientské aplikace. Po spuštění tohoto příkazu je uživateli zobrazeno grafické okno,
 které slouží pro editaci šablon.
-
+\begin{figure}[t]
+    \centering    
+    \caption{Formulář editoru šablon}
+    \includegraphics[scale=0.35]{assets/png/implemetation_gui_form.png}
+    \label{image:implemetation:gui:form}
+\end{figure}
 Horní část editoru obsahuje ovládací panel, který umožňuje uživateli načítat šablony nebo vytvářet nové. Součástí tohoto panelu
 je také tlačítko pro~ukončení editoru. Pokud uživatel zvolí možnost načtení šablony, je pomocí několika dialogových oken dotázán
 na cestu k~dané šabloně. Po úspěšném zadání cesty se uživateli v~prostřední části editoru zobrazí formulář vyplněný pomocí
 dat z~načtené šablony. Pokud uživatel vybere druhou možnost, kterou je vytvoření šablony, je v~prostřední části editoru zobrazen 
 ten samý formulář, ale vyplněný implicitními hodnotami. Ovládací menu společně s~úvodním oknem editoru je zobrazeno na 
 obrázku \ref{image:implemetation:gui:menu}.
-\begin{figure}[t]
-    \centering    
-    \caption{Ovládací menu editoru šablon}
-    \includegraphics[scale=0.9]{assets/png/implemetation_gui_menu.png}
-    \label{image:implemetation:gui:menu}
-\end{figure}
+
 Formulář pro vyplňování atributu šablony je umístěn ve středu editoru a~tvoří jeho nejpodstatnější část. Jelikož má struktura 
 šablony neglobální zóny tři části, skládá se i hlavní okno editoru ze tří oddělených částí. Tyto části přímo odpovídají jednotlivým
 sekcím šablony a~nazývají se konfigurace, manifest a~nastavení. Jak je patrné z obrázku \ref{image:implemetation:gui:form}, každá
@@ -699,12 +704,6 @@ okna. Druhé tlačítko slouží k~uložení šablony do souboru a~uživatel je 
 V~obou případech dojde k~rekonstrukci datového formátu JSON popsaného v~kapitole \ref{chapter:implementation:szones:template},
 který je vyplněn pomocí hodnot specifikovaných uživatelem v~editoru. Tato konstrukce šablon je pro uživatele jednodušší, protože
 vždy vygeneruje validní šablonu. V~případě manuální tvorby musí uživatel zajistit její validitu.
-\begin{figure}[t]
-    \centering    
-    \caption{Formulář editoru šablon}
-    \includegraphics[scale=0.35]{assets/png/implemetation_gui_form.png}
-    \label{image:implemetation:gui:form}
-\end{figure}
 \subsection{Interaktivní instalace}
 \label{chapter:implementation:gui:interactive}
 Grafické rozhraní je v~nástroji využito ještě v~případě, že uživatel spustí příkaz \verb|deploy| s~parametrem \textit{interactive}.

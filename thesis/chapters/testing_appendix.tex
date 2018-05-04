@@ -1,6 +1,5 @@
 \begin{listing}[ht]
   \caption{Výstup příkazu pro vytvoření neglobálních zón ze šablony}
-  \label{code:test:deployment}
   \begin{minted}[fontsize=\small]{bash}
 zadmin@shost:~$ szmgmt_cli deploy -b zdev zdev \
                                      zdev:shost1 \
@@ -32,11 +31,11 @@ Solaris zones deployment initialized.
       shost2:
         zdev:  success
   \end{minted}
+  \label{code:test:deployment}
 \end{listing}
 
 \begin{listing}[ht]
-  \caption{Výpis uživatelského žurnálu po vytvoření zón}
-  \label{code:test:journal}
+  \caption{Výpis uživatelského žurnálu po vytvoření zón}  
   \begin{minted}[fontsize=\small]{bash}
 zadmin@shost:~$ szmgm_cli journal status
 Tracked zones:
@@ -60,11 +59,11 @@ Tracked zones:
           Zone state: running
            Zone path: /system/zones/zdev
   \end{minted}
+  \label{code:test:journal}
 \end{listing}
 
 \begin{listing}[ht]
-  \caption{Výpis uživatelského žurnálu po změně původní zóny}
-  \label{code:test:journal:change}
+  \caption{Výpis uživatelského žurnálu po změně původní zóny}  
   \begin{minted}[fontsize=\small]{bash}
 zadmin@shost:~$ szmgm_cli journal status
 Tracked zones:
@@ -83,12 +82,12 @@ Untracked zones:
          Zone state: installed
           Zone path: /system/zones/zdev-colne
   \end{minted}
+  \label{code:test:journal:change}
 \end{listing}
 
 \begin{listing}[ht]
-  \caption{Sekvence příkazů pro ověření správnosti vytvoření zóny}
-  \label{code:test:deployment:result}
-  \begin{minted}[fontsize=\small]{} 
+  \caption{Sekvence příkazů pro ověření správnosti vytvoření zóny}  
+  \begin{minted}[fontsize=\small]{bash} 
 zadmin@shost2:~$ zlogin -C  zdev
 [Connected to zone 'zweb' console]
 Hostname: solaris
@@ -105,11 +104,11 @@ simactom@solaris:~$ profiles
 System Administrator
 ...
   \end{minted}
+  \label{code:test:deployment:result}
 \end{listing}
 
 \begin{listing}[ht]
-  \caption{Výpis uživatelského žurnálu před migrací zón}
-  \label{code:test:migration:before}
+  \caption{Výpis uživatelského žurnálu před migrací zón}  
   \begin{minted}[fontsize=\small]{bash}
 zadmin@shost:~$ szmgmt_cli journal status
 Geting fresh information about zones on all registered hosts...
@@ -133,11 +132,11 @@ Tracked zones:
           Zone state: running
            Zone path: /system/zones/zmigr2      
   \end{minted}
+  \label{code:test:migration:before}
 \end{listing}
 
 \begin{listing}[ht]
-  \caption{Výpis příkazu pro migraci neglobálních zón}
-  \label{code:test:migration}
+  \caption{Výpis příkazu pro migraci neglobálních zón}  
   \begin{minted}[fontsize=\small]{bash}
 zadmin@shost:~$ szmgm_cli migrate -t d zmigr \
                                        zmigr1 \
@@ -169,11 +168,11 @@ Solaris zones migration initialized.
         zmigr2: success
         zmigr3: success
   \end{minted}
+  \label{code:test:migration}
 \end{listing}
 
 \begin{listing}[ht]
-  \caption{Výpis zón na jednotlivých serverech po migraci}
-  \label{code:test:migration:list}
+  \caption{Výpis zón na jednotlivých serverech po migraci}  
   \begin{minted}[fontsize=\small]{bash}
 zadmin@shost:~$ zoneadm list -vic
   ID NAME     STATUS            BRAND      IP    
@@ -191,11 +190,11 @@ zadmin@shost2:~$ zoneadm list -vic
    - zmigr3   installed         solaris    excl  
    - zmigr    installed         solaris    excl  
   \end{minted}
+  \label{code:test:migration:list}
 \end{listing}
 
 \begin{listing}[ht]
-  \caption{Výpis uživatelského žurnálu po migraci zón}
-  \label{code:test:migration:after}
+  \caption{Výpis uživatelského žurnálu po migraci zón}  
   \begin{minted}[fontsize=\small]{bash}
 zadmin@shost:~$ szmgmt_cli journal status
 Geting fresh information about zones on all registered hosts...
@@ -218,12 +217,12 @@ Tracked zones:
           Zone state: running
            Zone path: /system/zones/zmigr3
   \end{minted}
+  \label{code:test:migration:after}
 \end{listing}
 
 
 \begin{listing}[ht]
-  \caption{Výpis příkazu pro vytvoření zálohy zón pomocí archivu UAR}
-  \label{code:test:backup}
+  \caption{Výpis příkazu pro vytvoření zálohy zón pomocí archivu UAR}  
   \begin{minted}[fontsize=\small]{bash}
 zadmin@shost:~$ szmgmt_cli backup zback:shost2 \
                                   zback1:shost2 \
@@ -255,11 +254,11 @@ Solaris zones backup initialized (UAR).
         zback2: success
         zback3: success
   \end{minted}
+  \label{code:test:backup}
 \end{listing}
 
 \begin{listing}[ht]
-  \caption{Výpis příkazu pro obnovení zón ze zálohy typu UAR}
-  \label{code:test:recovery}
+  \caption{Výpis příkazu pro obnovení zón ze zálohy typu UAR}  
   \begin{minted}[fontsize=\small]{bash}
 zadmin@shost:~$ szmgmt_cli recover zback:shost2 \
                                    zback1:shost2 \
@@ -299,4 +298,5 @@ tes  ---------------------------------------------------------
         zback2: success
         zback3: success
   \end{minted}
+  \label{code:test:recovery}
 \end{listing}

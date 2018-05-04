@@ -220,13 +220,12 @@ Z~tohoto důvodu je výsledná doba instalace ovlivněná kvalitou internetovéh
 na vzdáleném serveru \textit{shost1} vytvořena neglobální zóna \textit{z1}, která sloužila jako předloha pro instalaci zón. Ve
 výsledné době běhu je tedy zahrnutý i přenos souborového systému ze vzdáleného serveru na lokální server.
 
-Jak je patrné z~tabulce \ref{table:measuremet:creation}, měření bylo prováděno pro různé počty vytvářených zón. Maximální
+Jak je patrné z~tabulce \ref{table:measuremet:creation_table}, měření bylo prováděno pro různé počty vytvářených zón. Maximální
 hodnota byla stanovena na deset zón, protože pro větší počet zón by se výrazně projevovala omezení testovacího prostředí. Pro každou
 kombinaci parametrů bylo měření několikrát opakováno a~výsledek zprůměrován. Přesné hodnoty naměřených časů je možné pozorovat v~tabulce
-\ref{table:measuremet:creation}. Výsledky jsou také graficky znázorněny v~grafu \ref{graph:measuremet:creation}.
-\begin{table}
+\ref{table:measuremet:creation_table}. Výsledky jsou také graficky znázorněny v~grafu \ref{graph:measuremet:creation_graph}.
+\begin{table}[b]
   \centering
-  \label{table:measuremet:creation}
   \caption{Doba běhu vytváření zón v~závislosti na jejich počtu a použité technice}
   \begin{tabular}{ l | c c c c c}
    Počet zón & 1 & 2 & 4 & 8 & 10 \\ \hline
@@ -234,13 +233,14 @@ kombinaci parametrů bylo měření několikrát opakováno a~výsledek zprůmě
    Šablona [s] & xxx & xxxx & xxxx & xxxx & xxxx \\
    Vzdálená zóna [s] & 136.5 & 189.7 & 320.1 & 668.6 & 819.5 \\
   \end{tabular}
+  \label{table:measuremet:creation_table}
 \end{table}
 
 \begin{figure}
   \centering
-  \label{graph:measuremet:creation}
   \includegraphics{assets/pdfs/measurement_migration.pdf}
   \caption{Doba běhu vytváření zón v~závislosti na jejich počtu a použité technice}
+  \label{graph:measuremet:creation_graph}
 \end{figure}
 
 Z~provedeného měření je možné vypozorovat, že technika klonování zón je jednoznačně nejrychlejším způsobem vytváření zón. Časy
@@ -271,7 +271,6 @@ deset neglobálních zón najednou. Naměřené hodnoty doby běhu pro různé p
 pozorovat v~tabulce \ref{table:measuremet:migration}. Graficky jsou tyto hodnoty znázorněny v~grafu \ref{graph:measuremet:migration}.
 \begin{table}
   \centering
-  \label{table:measuremet:migration}
   \caption{Doba běhu migrace zón v~závislosti na použité metodě}
   \begin{tabular}{ l | c c c c c c}
    Počet zón & 1 & 2 & 4 & 8 & 10 &   \\ \hline
@@ -279,13 +278,14 @@ pozorovat v~tabulce \ref{table:measuremet:migration}. Graficky jsou tyto hodnoty
    Technika ZFS [s] & 133.5 & 196.1 & 291.5 & 580 & 723.7 & \\
    Technika UAR [s] & 167.8 & 449.7 & 729.5 & 1448.3 & 1793.6 & \\
   \end{tabular}
+  \label{table:measuremet:migration}
 \end{table}
 
 \begin{figure}
   \centering
-  \label{graph:measuremet:migration}
   \includegraphics{assets/pdfs/measurement_migration.pdf}
   \caption{Doba běhu migrace zón v~závislosti na použité metodě}
+  \label{graph:measuremet:migration}
 \end{figure}
 
 Z~měření je možné vypozorovat, že přímá technika migrace přenáší zóny nejrychleji. Tento výsledek se byl očekáván, jelikož tato technika nevyžaduje
