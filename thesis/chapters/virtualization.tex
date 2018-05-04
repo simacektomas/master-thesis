@@ -318,8 +318,9 @@ je jeden fyzický server s~dostatečnými prostředky, na kterém jsou konsolido
 Výstup tohoto procesu je zobrazen na obrázku \ref{figure:consolidation_img} vpravo.
 \begin{figure}
     \centering    
-    \caption{Konsolidace serverů}
     \label{figure:consolidation_img}
+    \includegraphics[scale=0.51]{assets/pdfs/consolidation.pdf}
+    \caption{Konsolidace serverů}    
 \end{figure}
 \subsubsection{Využití scénáře}
 \label{chapter:virtualization:deployment:consolidation:use}
@@ -343,8 +344,9 @@ Výstupem je několik nezávislých virtuálních počítačů, ve kterých jsou
 je zobrazen na obrázku \ref{figure:isolation} vpravo.
 \begin{figure}
     \centering    
-    \caption{Izolace aplikací}
     \label{figure:isolation}
+    \includegraphics[scale=0.6]{assets/pdfs/isolation.pdf}
+    \caption{Izolace aplikací}
 \end{figure}
 \subsubsection{Využití scénáře}
 \label{chapter:virtualization:deployment:isolation:use}
@@ -378,24 +380,20 @@ provozovat více redundantních hostů pro virtuální počítače, které v~př
 
 Proces migrace VM je demonstrován na obrázku \ref{figure:migration:virtual}, kde je zobrazena konfigurace před migrací
 a po provedení migrace VM.
-\begin{figure}
-    \centering    
-    \caption{Migrace virtuálního stroje}
-    \label{figure:migration:virtual}
-\end{figure}
 \subsubsection{Migrace fyzického stoje na VM}
 \label{chapter:virtualization:deployment:migration:physical}
 Migrace fyzického stroje na virtuální stroj je proces, kdy dochází k~přesunu a virtualizaci systému z~fyzického stroje.
-Vstupem je systém, který je provozován na fyzickém stroji bez VMM. Tato skutečnost je zobrazena na~obrázku 
-\ref{figure:migration:physical} vlevo. Výstupem tohoto procesu je opět virtuální stroj běžící ve~virtuálním prostředí VMM.
+Vstupem je systém, který je provozován na fyzickém stroji bez VMM. Výstupem tohoto procesu je opět virtuální stroj běžící
+ve~virtuálním prostředí VMM.
 
 Virtualizací serverů dochází k~uvolňování fyzického HW a~stejně jako v~případě konsolidace, může společnost značně ušetřit
 na nákladech nutných k~provozu a~správě fyzických serverů. Obecně lze říct, že tento scénář přináší podobné benefity jako
 v~případě konsolidace popsané v~kapitole \ref{chapter:virtualization:deployment:consolidation}.
 \begin{figure}
     \centering    
-    \caption{Migrace fyzického na virtuální stroj}
-    \label{figure:migration:physical}
+    \label{figure:migration:virtual}
+    \includegraphics[scale=0.51]{assets/pdfs/migration.pdf}
+    \caption{Migrace virtuálního stroje mezi virtualizačními monitory}
 \end{figure}
 \section{Virtualizační monitor}
 \label{chapter:virtualization:vmm}

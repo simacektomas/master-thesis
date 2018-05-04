@@ -131,7 +131,7 @@ nainstalovaný softwarový balík \textit{brand/brand-solaris-kz}, který umož�
 VMvare, kde jsou splněné výše zmíněné požadavky je zobrazen na v~ukázce výpisu programu \ref{code:virtinfo}.
 \SaveVerb{virtinfo}|virtinfo(1)|
 \begin{listing}
-  \caption{Výpis příkazu \protect\UseVerb{virtinfo}}
+  \caption{Výpis příkazu \texttt{virtinfo}}
   \label{code:virtinfo}
   \begin{minted}{bash}
 zadmin@shost:~$ virtinfo
@@ -703,9 +703,8 @@ Příkaz \verb|list| umožňuje administrátorovi získat přehled o~zónách p�
 se o~zcela zásadní příkaz, jelikož zobrazuje jména zón, které slouží jako identifikátor. V~každém dalším příkazu je nutné 
 specifikovat jméno zóny, pro kterou chce administrátor danou akci vykonat. V~ukázce výpisu programu \ref{code:list} je zobrazen
 výpis příkazu \verb|list|. Z~výpisu byl vynechán atribut \textit{zonepath}.
-\begin{verbbox}zoneadm list\end{verbbox}
 \begin{listing}[ht]
-  \caption{Výpis příkazu zoneadm list}
+  \caption{Výpis příkazu \texttt{zoneadm list}}
   \label{code:list}
   \begin{minted}{bash}
 zadmin@shost:~$ zoneadm list -vic

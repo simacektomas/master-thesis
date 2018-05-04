@@ -90,8 +90,9 @@ Vlastní implementace modulu není nijak jinak omezena. Jediným logickým omeze
 v~programovacím jazyku Ruby. Pokud modul splní výše zmíněné požadavky, může být jednoduše registrován do knihovny a~klientské
 aplikace ho můžou bezprostředně po~inicializaci knihovny využívat. Na obrázku \ref{figure:module:interface} je názorně zobrazeno, 
 jakým způsobem knihovna využívá rozhraní modulu a~jakým způsobem je modul poskytován klientské aplikaci.
-\begin{figure}
+\begin{figure}[ht]
     \centering    
+    \includegraphics[scale=0.7]{assets/pdfs/module_interface.pdf}
     \caption{Rozhraní modulu}
     \label{figure:module:interface}
 \end{figure}
@@ -205,9 +206,10 @@ Funkcionalita modulu je rozdělena do několika vrstev, které se vzájemně vyu
 \end{itemize}
 Architekturu vrstev modulu je možné pozorovat na obrázku \ref{image:implemetation:szones}. V~následujících kapitolách
 bude podrobně popsána funkce jednotlivých vrstev a~jejich vzájemná interakce.
-\begin{figure}
-    \centering    
-    \caption{Modul Solaris Zones}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.6]{assets/pdfs/module.pdf}
+    \caption{Architektura modulu Solaris Zones}
     \label{image:implemetation:szones}
 \end{figure}
 \subsection{Šablona Solaris Zones}
@@ -259,7 +261,7 @@ V~případě zdrojů je proveden stejný postup s~tím rozdílem, že se před k
 se ukončí příkazem \verb|end|. Takto přetransformovaná konfigurace je připravena k~použití v~nástroji \verb|zonecfg(1)|.
 \subsubsection{Zpracování manifestu}
 \label{chapter:implementation:szones:template:manifest}
-V~rámci sekce šablony s~názvem \lstinline[language=json]{manifest} může uživatel specifikovat softwarové balíky, které má zóna obsahovat.
+V~rámci sekce šablony s~názvem \texttt{manifest} může uživatel specifikovat softwarové balíky, které má zóna obsahovat.
 Pro tento účel obsahuje tato část šablony atribut \mintinline{JSON}{{"packages": []}}, který je typu pole. Hodnotou každého
 prvku pole je obyčejný textový řetězec, který obsahuje jméno softwarového balíku. V~tomto poli může uživatel specifikovat libovolné
 množství balíků. 
@@ -677,7 +679,7 @@ na cestu k~dané šabloně. Po úspěšném zadání cesty se uživateli v~prost
 dat z~načtené šablony. Pokud uživatel vybere druhou možnost, kterou je vytvoření šablony, je v~prostřední části editoru zobrazen 
 ten samý formulář, ale vyplněný implicitními hodnotami. Ovládací menu společně s~úvodním oknem editoru je zobrazeno na 
 obrázku \ref{image:implemetation:gui:menu}.
-\begin{figure}
+\begin{figure}[t]
     \centering    
     \caption{Ovládací menu editoru šablon}
     \includegraphics[scale=0.9]{assets/pdfs/implemetation_gui_menu.png}
@@ -697,7 +699,7 @@ okna. Druhé tlačítko slouží k~uložení šablony do souboru a~uživatel je 
 V~obou případech dojde k~rekonstrukci datového formátu JSON popsaného v~kapitole \ref{chapter:implementation:szones:template},
 který je vyplněn pomocí hodnot specifikovaných uživatelem v~editoru. Tato konstrukce šablon je pro uživatele jednodušší, protože
 vždy vygeneruje validní šablonu. V~případě manuální tvorby musí uživatel zajistit její validitu.
-\begin{figure}
+\begin{figure}[t]
     \centering    
     \caption{Formulář editoru šablon}
     \includegraphics[scale=0.35]{assets/pdfs/implemetation_gui_form.png}
