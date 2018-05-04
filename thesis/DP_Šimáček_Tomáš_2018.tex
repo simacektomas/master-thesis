@@ -14,59 +14,12 @@
 % \usepackage{amsmath} %advanced maths
 % \usepackage{amssymb} %additional math symbols
 
+
 \usepackage{listings}
-
-\usepackage{courier}
-\usepackage{listings}
-\usepackage{color}
-\usepackage{xcolor}
-
-\definecolor{redbg}{RGB}{254, 210, 210}
-\definecolor{redtext}{RGB}{182, 49, 39}
-%\lstset{basicstyle=\footnotesize\ttfamily,breaklines=true}
-\lstset{basicstyle=\ttfamily\color{black},
-commentstyle = \ttfamily\color{red},
-keywordstyle=\ttfamily\color{blue},
-stringstyle=\color{orange}}
-\lstloadlanguages{Ruby}
-\colorlet{punct}{red!60!black}
-\definecolor{background}{HTML}{EEEEEE}
-\definecolor{delim}{RGB}{20,105,176}
-\colorlet{numb}{magenta!60!black}
-
-\lstdefinelanguage{json}{
-    basicstyle=\normalfont\ttfamily,
-    %numbers=left,
-    numberstyle=\scriptsize,
-    stepnumber=1,
-    numbersep=8pt,
-    showstringspaces=false,
-    breaklines=true,
-    %frame=lines,
-    %backgroundcolor=\color{background},
-    literate=
-     *{0}{{{\color{numb}0}}}{1}
-      {1}{{{\color{numb}1}}}{1}
-      {2}{{{\color{numb}2}}}{1}
-      {3}{{{\color{numb}3}}}{1}
-      {4}{{{\color{numb}4}}}{1}
-      {5}{{{\color{numb}5}}}{1}
-      {6}{{{\color{numb}6}}}{1}
-      {7}{{{\color{numb}7}}}{1}
-      {8}{{{\color{numb}8}}}{1}
-      {9}{{{\color{numb}9}}}{1}
-      {:}{{{\color{punct}{:}}}}{1}
-      {,}{{{\color{punct}{,}}}}{1}
-      {\{}{{{\color{delim}{\{}}}}{1}
-      {\}}{{{\color{delim}{\}}}}}{1}
-      {[}{{{\color{delim}{[}}}}{1}
-      {]}{{{\color{delim}{]}}}}{1},
-}
-%\lstset{framextopmargin=50pt,frame=bottomline}
-\renewcommand*{\lstlistingname}{Kód}% Listing -> Kód
-\renewcommand*{\lstlistlistingname}{Seznam ukázek kódů}% List of Listings -> List of Algorithms
-
 \usepackage{tabularx}
+\usepackage[newfloat]{minted}
+\renewcommand*{\listingname}{Výpis kódu}% Listing -> Kód
+\renewcommand*{\lstlistlistingname}{Seznam výpisů kódů}% List of Listings -> List of Algorithms
 
  \usepackage{dirtree} %directory tree visualisation
 
@@ -94,7 +47,7 @@ stringstyle=\color{orange}}
 \abstractEN{\input{chapters/abstract_en.tex}}
 \placeForDeclarationOfAuthenticity{V~Praze}
 \declarationOfAuthenticityOption{4} %volba Prohlášení (číslo 1-6)
-\keywordsCS{\input{chapters/keywords_cs.tex}}
+\keywordsCS{\input{chapters/keywords_cs.tex} \cleardoublepage}
 \keywordsEN{\input{chapters/keywords_en.tex}}
 % \website{http://site.example/thesis} %volitelná URL práce, objeví se v tiráži - úplně odstraňte, nemáte-li URL práce
 
@@ -110,21 +63,27 @@ stringstyle=\color{orange}}
 \end{introduction}
 
 \chapter{Virtualizace}
+  \label{chapter:virtualization}
   \input{chapters/virtualization}
   
 \chapter{Solaris}
+  \label{chapter:solaris}
   \input{chapters/solaris}
 
 \chapter{Solaris Zones}
+  \label{chapter:zones}
   \input{chapters/zones}
   
 \chapter{Návrh aplikace}
+  \label{chapter:design}
   \input{chapters/design}
   
 \chapter{Implementace}
+  \label{chapter:implementation}
   \input{chapters/implementation}
   
 \chapter{Testování a měření}
+  \label{chapter:testing}
   \input{chapters/testing}
 
 \begin{conclusion}
@@ -164,10 +123,10 @@ stringstyle=\color{orange}}
 	\item[ZFS] Zettabyte File System
 \end{description}
 
+\chapter{Testování}
+  \input{chapters/testing_appendix}
+
 \chapter{Obsah přiloženého CD}
-
-%upravte podle skutecnosti
-
 \begin{figure}
 	\dirtree{%
 		.1 readme.txt\DTcomment{stručný popis obsahu CD}.
@@ -180,8 +139,4 @@ stringstyle=\color{orange}}
 		.2 thesis.ps\DTcomment{text práce ve formátu PS}.
 	}
 \end{figure}
-
-\chapter{Testování}
-  \input{chapters/testing_appendix}
-
 \end{document}
