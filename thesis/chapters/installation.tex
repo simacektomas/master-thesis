@@ -1,38 +1,38 @@
 \label{appendix:installation}
 Tato příloha slouží jako uživatelská příručka nástroje pro podporu automatické správy virtualizačního kontejneru Solaris Zones.
-Popisuje postup instalace, spuštění a odstranění nástroje ze systému.
+Popisuje postup instalace, spuštění a~odstranění nástroje ze systému.
 \section{Požadavky}
 \label{appendix:installation:demands}
-I přes to, že nástroj je implementován pomocí multiplatformního programovacího jazyka Ruby, podmínkou pro běh nástroje je operační
-systém Solaris s virtualizačnám kontejnerem Solaris Zones. Důvodem je fakt, že implementovaný nástroj staví svoji funkcionalitu
-nad nástroji \texttt{zoneadm(1)} a \texttt{zonecfg(1)}, které jsou dostupné pouze na této platformě.
+I~přes to, že nástroj je implementován pomocí multiplatformního programovacího jazyka Ruby, podmínkou pro běh nástroje je operační
+systém Solaris s~virtualizačnám kontejnerem Solaris Zones. Důvodem je fakt, že implementovaný nástroj staví svoji funkcionalitu
+nad nástroji \texttt{zoneadm(1)} a~\texttt{zonecfg(1)}, které jsou dostupné pouze na této platformě.
 
-V systému dále musí být nainstalován interpret programovacího jazyka Ruby, který musí splňovat konkrétní podmínky v závislosti na tom,
+V~systému dále musí být nainstalován interpret programovacího jazyka Ruby, který musí splňovat konkrétní podmínky v~závislosti na tom,
 kterou funkcionalitu nástroje chce uživatel využívat. Jestliže uživatel chce využívat grafického rozhraní nástroje, musí pro
 spouštění využívat interpret JRuby, který zprostředkovává potřebné grafické knihovny. Pokud uživatel nepotřebuje používat
 toto grafické rozhraní, není nijak omezen volbou interpretu.
 
 Jak již bylo zmíněno, pro běh nástroje je vyžadována přítomnost systémových příkazů pro ovládání virtualizačního kontejneru Solaris
-Zones. Tyto příkazy jsou dostupné pouze privilegovaným uživatelů a je tedy nutné, aby uživatel nástroje byl oprávněn používat 
-tyto příkazy. Konkrétní privilegia byla již dříve popsána v této práci a pomocí nástroje RBAC je možné tato privilegia přidělovat
+Zones. Tyto příkazy jsou dostupné pouze privilegovaným uživatelů a~je tedy nutné, aby uživatel nástroje byl oprávněn používat 
+tyto příkazy. Konkrétní privilegia byla již dříve popsána v~této práci a~pomocí nástroje RBAC je možné tato privilegia přidělovat
 uživatelům systému.
 \section{Vytvoření instalačního balíčku}
 \label{appendix:installation:package}
-Instalace nástroje se provádí z instalačního balíčku, který má podobu tzv. gemu. Gem je standardní struktura pro distribuci aplikací
-vyvíjených v programovacím jazyce ruby a obsahuje všechny potřebné soubory pro běh dané aplikace. Implementace nástroje právě
-odpovídá této struktuře, a proto je tvorba tohoto balíčku otázkou jednoho příkazu. Pomocí příkazu \texttt{gem build szmgmt.gemspec}
-spuštěného v adresáři se zdrojovými kódy nástroje, dojde k vytvoření balíčku \textit{szmgmt-1.0.0.gem}, který je možné použít
+Instalace nástroje se provádí z~instalačního balíčku, který má podobu tzv. gemu. Gem je standardní struktura pro distribuci aplikací
+vyvíjených v~programovacím jazyce ruby a~obsahuje všechny potřebné soubory pro běh dané aplikace. Implementace nástroje právě
+odpovídá této struktuře, a~proto je tvorba tohoto balíčku otázkou jednoho příkazu. Pomocí příkazu \texttt{gem build szmgmt.gemspec}
+spuštěného v~adresáři se zdrojovými kódy nástroje, dojde k~vytvoření balíčku \textit{szmgmt-1.0.0.gem}, který je možné použít
 pro instalaci nástroje. Uživatel si může tento balíček sám vytvořit výše popsaným způsobem nebo použít předem vytvořený balíček 
 dostupný na přiloženém médiu.
 \section{Instalace balíčku}
 \label{appendix:installation:installation}
 Pomocí výše popsaného instalačního balíčku je možné nástroj přímo nainstalovat do systému. Pro tento účel je nutné použít příkaz
-\texttt{gem install}, kterému se jako parametr předává instalační balíček \textit{szmgmt-1.0.0.gem}. V průběhu instalace jsou nejprve
-staženy a nainstalovány všechny závislosti nástroje. Poté dochází k vlastní instalaci nástroje, kdy jsou zdrojové kódy aplikace
-zkopírovány do systémového repozitáře a vytvořeny spustitelné soubory. Implementovaný nástroj obsahuje dva spustitelné soubory
-\texttt{szmgmt-cli} a \texttt{szmgmt-editor}, které poskytují uživatelské rozhraní pro ovládání nástroje. Tyto soubory jsou v
-rámci instalace přesunuty do adresáře, který se nachází v systémové proměnné \texttt{PATH} a mohou tedy být spouštěny přímo 
-z příkazové řádky.
+\texttt{gem install}, kterému se jako parametr předává instalační balíček \textit{szmgmt-1.0.0.gem}. V~průběhu instalace jsou nejprve
+staženy a~nainstalovány všechny závislosti nástroje. Poté dochází k~vlastní instalaci nástroje, kdy jsou zdrojové kódy aplikace
+zkopírovány do systémového repozitáře a~vytvořeny spustitelné soubory. Implementovaný nástroj obsahuje dva spustitelné soubory
+\texttt{szmgmt-cli} a~\texttt{szmgmt-editor}, které poskytují uživatelské rozhraní pro ovládání nástroje. Tyto soubory jsou
+v~rámci instalace přesunuty do adresáře, který se nachází v~systémové proměnné \texttt{PATH} a~mohou tedy být spouštěny přímo 
+z~příkazové řádky.
 \begin{listing} 
  \caption{Všechny příkazy uživatelského rozhraní}
  \begin{minted}{Ruby}
@@ -57,21 +57,21 @@ Options:
 \end{listing}
 \section{Spuštění aplikace}
 \label{appendix:installation:start}
-Pro spuštění aplikace je nutné použít jeden z výše zmíněných spustitelných souborů. Skrze \texttt{szmgmt-editor} uživatel může
-spustit grafický editor, který slouží pro tvorbu a editaci šablon. Pomocí tohoto editoru může uživatel jednoduše a komfortně
-definovat vlastnosti zón a následně je uložit do šablony, kterou může používat pro vytváření zón s konkrétními parametry.
+Pro spuštění aplikace je nutné použít jeden z~výše zmíněných spustitelných souborů. Skrze \texttt{szmgmt-editor} uživatel může
+spustit grafický editor, který slouží pro tvorbu a~editaci šablon. Pomocí tohoto editoru může uživatel jednoduše a~komfortně
+definovat vlastnosti zón a~následně je uložit do šablony, kterou může používat pro vytváření zón s~konkrétními parametry.
 
-Pomocí \texttt{szmgmt-cli} uživatel může přímo ovládat nástroj a vyvolávat tak konkrétní administrátorské rutiny. Tento nástroj
-vytváří v domovském adresáři uživatele složku \textit{\textasciitilde/.szmgmt}, která slouží pro uchovávání souborů nástroje
-souvisejících s konkrétním uživatelem. Součástí této složky je databáze registrovaných serverů, uživatelský žurnál a adresář
-s logy jednotlivých rutin. Administrátorské rutiny lze vyvolávat pomocí uživatelského rozhraní na příkazové řádce. Toto rozhraní
-nabízí několik příkazů jejichž parametry a funkcionalita již byla dříve popsána v této diplomové práci. Rozhraní je konstruované
+Pomocí \texttt{szmgmt-cli} uživatel může přímo ovládat nástroj a~vyvolávat tak konkrétní administrátorské rutiny. Tento nástroj
+vytváří v~domovském adresáři uživatele složku \textit{\textasciitilde/.szmgmt}, která slouží pro uchovávání souborů nástroje
+souvisejících s~konkrétním uživatelem. Součástí této složky je databáze registrovaných serverů, uživatelský žurnál a~adresář
+s~logy jednotlivých rutin. Administrátorské rutiny lze vyvolávat pomocí uživatelského rozhraní na příkazové řádce. Toto rozhraní
+nabízí několik příkazů jejichž parametry a~funkcionalita již byla dříve popsána v~této diplomové práci. Rozhraní je konstruované
 tak, aby poskytovalo uživateli nápovědu ke každému jeho příkazu. Výpis uživatelského rozhraní je demonstrován ve výpisu kódu
-\ref{code:cli}, kde je možné pozorovat nabízené příkazy a jejich syntaxi. Po každý příkaz uživatelského rozhraní je možné použít
-příkaz \texttt{help}, který zobrazí nápovědu ke konkrétnímu příkazu. Tato funkcionalita je patrná z výpisu kódu \ref{code:cli:help},
+\ref{code:cli}, kde je možné pozorovat nabízené příkazy a~jejich syntaxi. Po každý příkaz uživatelského rozhraní je možné použít
+příkaz \texttt{help}, který zobrazí nápovědu ke konkrétnímu příkazu. Tato funkcionalita je patrná z~výpisu kódu \ref{code:cli:help},
 kde je demonstrována nápověda pro příkaz \texttt{deploy}.
 \begin{listing} 
- \caption{Využití příkazu \texttt{help} v uživatelském rozhraní}
+ \caption{Využití příkazu \texttt{help} v~uživatelském rozhraní}
  \begin{minted}{Ruby}
 zadmin@shost:~$ szmgmt_cli help deploy
 Usage:
@@ -90,9 +90,9 @@ Options:
  \end{minted}
  \label{code:cli:help}
 \end{listing}
-O průběhu administrátorských rutin je uživatel informován pomocí informačních výpisů. Podrobný průběh jednotlivých akcí nástroje
-je uložen v adresáři \textit{\textasciitilde/.szmgmt/logs}, kde se nachází soubor pro každou provedenou rutinu.
+O~průběhu administrátorských rutin je uživatel informován pomocí informačních výpisů. Podrobný průběh jednotlivých akcí nástroje
+je uložen v~adresáři \textit{\textasciitilde/.szmgmt/logs}, kde se nachází soubor pro každou provedenou rutinu.
 \section{Odstranění aplikace}
 \label{appendix:installation:delete}
 Nástroj lze ze systému odstranit jednoduše pomocí příkazu \texttt{gem uninstall szmgmt-1.0.0}, který ze systému odstraní všechny
-zdrojové kódy aplikace a oba spustitelné soubory. Tato akce neodstraní soubory, které se nacházejí v domovském adresáři uživatele.
+zdrojové kódy aplikace a~oba spustitelné soubory. Tato akce neodstraní soubory, které se nacházejí v~domovském adresáři uživatele.
