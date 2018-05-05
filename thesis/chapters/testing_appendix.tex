@@ -1,8 +1,7 @@
 \begin{listing}[ht]
   \caption{Výstup příkazu pro vytvoření neglobálních zón ze šablony}
   \begin{minted}[fontsize=\small]{bash}
-zadmin@shost:~$ szmgmt_cli deploy -b zdev zdev \
-                                     zdev:shost1 \
+zadmin@shost:~$ szmgmt_cli deploy -b zdev zdev zdev:shost1 \
                                      zdev:shost2 \
                                      -s ~/zdev.json 
 Solaris zones deployment initialized.
@@ -10,16 +9,17 @@ Solaris zones deployment initialized.
   Options:
       Boot zones: enable
    Rewrite zones: disable
-          Source: </export/home/zadmin/zdev.json>
-  ---------------------------------------------------------
-  Loading virtual machine specification.
-  Virtual machine specification loaded.
+          Source: </export/home/zadmin/zdev.json>  
   ---------------------------------------------------------
   Connecting concurrently to hosts 'localhost,shost1,shost2'.
   Processing zone 'zdev' deployment on host 'localhost'.
+    See log '~/.szmgmt/log/zdev_deployment_q98wex.log'.
   Processing zone 'zdev1' deployment on host 'localhost'.
+    See log '~/.szmgmt/log/zdev1_deployment_awiej4.log'.
   Processing zone 'zdev' deployment on host 'shost1'.
+    See log '~/.szmgmt/log/zdev_deployment_q98w7e.log'.
   Processing zone 'zdev' deployment on host 'shost2'.
+    See log '~/.szmgmt/log/zdev_deployment_ea4w98.log'.
   ---------------------------------------------------------
   Deployment finished.
     Status:
