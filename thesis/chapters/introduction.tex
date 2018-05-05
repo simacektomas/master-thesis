@@ -1,8 +1,8 @@
 % Chapter: Introduction
 % Author: Tomáš Šimáček
 \label{chapter:introduction}
-Virtualizace je technika, se kterou se dnes v~IT můžeme setkat v~mnoha podobách. Jednou z~hlavních oblastí využití,
-je virtualizace serverů. Virtualizace se také objevuje i v~oblasti komunikačních sítí nebo desktopů. Tato technologie umožňuje vytvářet
+Virtualizace je technika, se kterou se dnes v~IT můžeme setkat v~mnoha podobách. Jednou z~hlavních oblastí jejího využití,
+je virtualizace serverů, ale objevuje se také v oblastech komunikačních sítí nebo desktopů. Tato technologie umožňuje vytvářet
 virtuální prostředky a poskytovat tak kompletní virtuální prostředí. Toto prostředí umožňuje provozovat systémy na~jiných
 fyzických architekturách, než pro jaké jsou určeny.
 
@@ -20,8 +20,9 @@ nebo nasazení aplikací do produkčního prostředí.
 V~dnešní době existuje mnoho operačních systémů, které nějakým způsobem poskytují virtualizaci v~rámci svých služeb. Jedním ze zástupců
 takovýchto systémů je operační systém Solaris. Exkluzivně pro tento operační systém byla vytvořena virtualizační technika Solaris
 Zones, která umožňuje v~rámci jedné instance operačního systému Solaris vytvářet virtuální počítače nazývané zóny. Nástroje pro správu
-této virtualizační technologie umožňují manipulovat se zónami pouze v~rámci lokálního serveru. Tato diplomová práce se věnuje automatizaci
-procesu vytváření, zálohy a migrace těchto zón. Poskytuje také služby pro správu zón, které se nacházejí na vzdálených serverech.
+této virtualizační technologie umožňují spravovat zóny pouze v~rámci lokálního serveru. Tato diplomová práce se věnuje právě možnosti
+správy zón nacházejících se na vzdálených serverech a automatizaci administrátorských procesů vytváření, zálohy, obnovy a migrace 
+těchto zón.
 \section{Cíle práce}
 \label{chapter:introduction:goals}
 Cílem této diplomové práce je seznámení s~operačním systémem Solaris a~jeho aktuální stabilní verzí 11.3. Součástí popisu tohoto
@@ -29,7 +30,7 @@ operačního systému je i představení podporovaných architektur a jeho zákl
 systému ZFS. Především jde však o~popis základních principů virtualizační techniky Solaris Zones, která umožňuje běh více zón v~rámci 
 jedné instance operačního systému Solaris. Nebude chybět ani porovnání běžně používaných virtualizačních technik.
 
-Diplomové práce také souvisí s~virtualizační technikou Solaris Zones a má za úkol detailně popsat možnosti konfigurace a instalace
+Diplomové práce také souvisí se~správou virtualizační techniky Solaris Zones a má za úkol detailně popsat možnosti konfigurace a instalace
 zón. Součástí tohoto popisu bude i popis administrátorských procesů pro zálohování, obnovu a migraci. Popis se také věnuje integraci
 techniky Solaris Zones s~ostatními službami operačního systému Solaris.
 
