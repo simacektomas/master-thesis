@@ -230,7 +230,7 @@ kombinaci parametrů bylo měření několikrát opakováno a~výsledek zprůmě
   \begin{tabular}{ l | c c c c c}
    Počet zón & 1 & 2 & 4 & 8 & 10 \\ \hline
    Klonování [s] & 19.5 & 20.4 & 28.8 & 51.4 & 74.6 \\
-   Šablona [s] & xxx & xxxx & xxxx & xxxx & xxxx \\
+   Šablona [s] & 378.6 & 543.2 & 897.4 & 1648.5 & 2154.1 \\
    Vzdálená zóna [s] & 136.5 & 189.7 & 320.1 & 668.6 & 819.5 \\
   \end{tabular}
   \label{table:measuremet:creation_table}
@@ -238,17 +238,18 @@ kombinaci parametrů bylo měření několikrát opakováno a~výsledek zprůmě
 
 \begin{figure}
   \centering
-  \includegraphics{assets/pdfs/measurement_migration.pdf}
+  \includegraphics{assets/pdfs/measurement_creation.pdf}
   \caption{Doba běhu vytváření zón v~závislosti na jejich počtu a použité technice}
   \label{graph:measuremet:creation_graph}
 \end{figure}
 
 Z~provedeného měření je možné vypozorovat, že technika klonování zón je jednoznačně nejrychlejším způsobem vytváření zón. Časy
 pro ostatní techniky nejsou tak malé, protože tyto způsoby instalace zahrnují vytváření archivů a přenosy velkých objemů dat
-po síti. Velikost jedné neglobální zóny v~průběhu testování byla přibližně 1,5GB. Pokud se má po síti přenášet několik takových
-zón najednou, je nutné přenést opravdu velké množství dat. Paralelní instalace zón pomocí těchto technik klade velké nároky na
-propustnost sítě i pevných disků. Z~výše uvedeného měření plyne, že technika klonování je v~rámci měřených způsobů nejrychlejší.
-Tato technika nešetří pouze čas instalace, ale také diskové místo.
+po síti. Velikost jedné neglobální zóny v~průběhu testování byla přibližně 1,5 GB. Pokud se má po síti přenášet několik takových
+zón najednou, je nutné přenést opravdu velké množství dat. Jak je patrné z tabulky \ref{table:measuremet:creation_table}, měření
+doby běhu instalace ze šablony bylo velmi závislé na propustnosti internetového připojení testovacího prostředí. Z tohoto důvodu
+tato technika instalace v průběhu měření nevykazovala příliš dobré výsledky. Z~výše uvedeného měření plyne, že technika klonování
+je v~rámci měřených způsobů nejrychlejší. Tato technika nešetří pouze čas instalace, ale také diskové místo.
 \subsection{Techniky migrace zón}
 \label{chapter:measurement:migration}
 Druhé měření se zabývá různými technikami způsobu migrace zón a~měří dobu jejich trvání v~závislosti na počtu migrovaných zón.
