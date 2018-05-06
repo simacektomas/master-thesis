@@ -1,0 +1,100 @@
+% Brief description of Solaris operating system
+Solaris nebo dříve SunOS je operační systém původně vytvořený firmou Sun Microsystems. V~současné době je vyvíjený a podporovaný
+firmou Oracle. Je to komplexní unixový operační systém, který v~sobě integruje pokročilé technologie pro virtualizaci, moderní
+souborový systém ZFS, vlastní systém pro~instalaci a správu SW a v~neposlední řadě také podporu cloudu. Díky integraci těchto
+technologií poskytuje Solaris stabilní a rychlé prostředí pro různé scénáře nasazení aplikací a navíc tato integrace vytváří
+pohodlné rozhraní pro~správu tohoto OS. 
+\section{Verze}
+\label{chapter:solaris:version}
+Nejaktuálnější stabilní verze operačního systému Solaris je verze s~označením 11.3. Ke dni 30. ledna 2018 byla uvolněna beta
+verze 11.4 \cite{oracle:solaris:beta}. Pro účely popisu operačního systému Solaris a jeho služeb, zejména služby Solaris Zones,
+bude použita stabilní verze 11.3. Existují i starší verze 11.2 a 11.1, které ale nebudou předmětem zkoumání.
+\section{Podporované architektury}
+\label{chapter:solaris:support}
+Operační systém Solaris v~současné době podporuje následující dvě HW architektury počítačových systémů:
+\begin{itemize}
+ \item x86,
+ \item SPARC.
+\end{itemize}
+Jelikož architektura SPARC není běžně dostupná, bude pro účely této diplomové práce použita architektura x86, přesněji
+její 64 bitová verze.
+\subsection{Architektura x86}
+\label{chapter:solaris:support:x86}
+První počítačovou architekturou podporovanou operačním systémem Solaris je x86. Tato architektura je v~dnešní době velmi rozšířená
+především v~oblasti osobních počítačů a je podporována nejznámějšími OS jako Windows, Linux a Mac. Solaris tuto architekturu
+podporuje jak v~32 bitové verzi \textit{x86-32} tak i~v~64 bitové verzi \textit{x86-64}.
+\subsection{Architektura SPARC}
+\label{chapter:solaris:support:sparc}
+Scalable Processor Architecture neboli SPARC je z~pohledu operačního systému Solaris domovská architektura. Architektura SPARC
+byla stejně jako Solaris původně navržena společností Sun Microsystems a nyní ji spravuje společnost Oracle. Tato architektura
+je tedy od začátku své existence úzce spojena s~operačním systémem Solaris, který se snaží využívat všechny její výhody.
+Uplatnění této architektury je především v~komerčním sektoru, který klade vysoké nároky na přizpůsobivost a možnosti škálování
+potřebného řešení.
+\section{Služby}
+\label{chapter:solaris:services}
+Hlavní předností operačního systému je kvantita a kvalita jeho služeb. Tyto služby umožňují nasazení tohoto OS i ve scénářích,
+kdy by ostatní OS selhaly nebo by nemohly být vůbec použity.  
+\subsection{Service Management Facility}
+\label{chapter:solaris:smf}
+Service Management Facility neboli SMF je systém, který v~operačním systému Solaris spravuje systémové služby. Nahrazuje tím
+tradiční způsob spravování služeb pomocí tzv. \textit{init} skriptů, který byl běžný v~ostatních unixových operačních systémech
+a dokonce i v~dřívějších verzích OS Solaris. Hlavním rozdílem oproti staršímu způsobu je možnost u~služby definovat závislosti
+na~ostatních službách. Na~rozdíl od sériového spouštění \textit{init} skriptů z~adresáře je díky tomuto zlepšení možné při startu
+systému paralelně spouštět více nezávislých služeb najednou, a tím urychlit start systému \cite{cvut:biadu:sysstart}. Pro účel
+startu jsou v~systému definovány speciální služby tzv. \textit{milestone}. Tyto služby mají definovaný
+pouze seznam závislostí, který určuje jaké služby se mají spustit. Při startu se určí, do kterého \textit{milestone} má systém
+nastartovat a~tím je přesně určeno, které služby se mají spustit.
+\subsection{Souborový systém ZettaByte}
+\label{chapter:solaris:zfs}
+Pro ukládání na disk používá Solaris souborový systém ZettaByte neboli ZFS. Je to pokročilý systém, který byl vyvinut společností
+Sun Microsystems a integrován do operačního systému Solaris. ZFS dokáže spravovat velké množství dat díky své 128-bitové 
+architektuře \cite{cvut:thesis:mythesis}. Mezi hlavní funkce ZFS patří ověřování integrity dat, vlastní softwarový RAID nebo
+šifrování dat. Díky principu \textit{copy on write} dokáže udržet data neustále konzistentní, což některé souborové systémy
+nedokážou nebo tento problém řeší složitě. Architektura tohoto souborového systému umožňuje klonování jednotlivých svazků nebo
+rychlou a elegantní tvorbu obrazů disku tzv. \textit{snapshot}, které z~počátku zabírají minimální místo na disku. Datové bloky
+jsou totiž zduplikovány až v~okamžiku, kdy se zdrojový blok nebo jeho klon změní. Tento způsob uchovávání dat společně s~možností
+\textit{deduplikace} stejných datových bloků značně snižuje nároky na diskové místo.
+
+Principů a funkcí ZFS hojně využívají další služby operačního systému Solaris. Příkladem může být uvedena virtualizační technika
+Solaris Zones, která je hlavním tématem této diplomové práce.
+\subsection{Virtualizace}
+\label{chapter:solaris:virtualization}
+Dle specifikace \cite{oracle:solaris:virtualization} nabízí operační systém Solaris ve verzi 11.3 následující techniky virtualizace:
+\begin{itemize}
+ \item virtualizace na úrovni OS,
+ \item virtuální počítače,
+ \item hardware partitions.
+\end{itemize}
+Tyto modely se liší zejména ve způsobu izolace virtualizovaných prostředí a~ve~flexibilitě přidělování prostředků těmto
+prostředím. Čím více model izoluje prostředí od sebe, tím nabízí menší flexibilitu v~přidělování prostředků.
+\subsubsection{Solaris Zones}
+\label{chapter:solaris:virtualization:szones}
+Jedním z~modelů virtualizace nabízené operačním systémem Solaris je \textit{virtualizace na úrovni OS}. Tento model umožňuje
+vytvořit jedno nebo více izolovaných prostředí (zón) pro běh programů v~rámci jedné instance OS. Takto vytvořená prostředí
+jsou izolována na úrovni procesů, souborového systému a síťových rozhraní. Každá zóna má vlastní lokální pohled na systémové
+prostředky, které mohou být dále virtualizované operačním systémem. Virtualizace na úrovni operačního systému poskytuje vysoký
+výkon a flexibilitu, protože nezanechává tak velkou stopu na disku, paměti nebo CPU na rozdíl od ostatních dvou modelů virtualizace. 
+
+Operační systém Solaris poskytuje tento model virtualizace skrze službu Solaris Zones, která je přímo integrována to jádra OS.
+\subsubsection{Virtuální počítače}
+\label{chapter:solaris:virtualization:vm}
+Model \textit{virtuálních počítačů} popsaný v~kapitole \ref{chapter:virtualization:clasification:system_vm:virtual_computer} 
+umožňuje souběžný běh více instancí operačního systému na jednom fyzickém stroji. Každý virtuální počítač má svojí instanci
+operačního systému, který nemusí být stejný ve všech virtuálních strojích. Tento typ virtualizace je umožněn díky virtualizačnímu
+monitoru, který vytváří pro operační systémy iluzi, která izoluje jednotlivé virtuální počítače. Virtuální počítače poskytují na rozdíl od
+virtualizace na úrovni OS menší flexibilitu rozdělování prostředků, ale naopak poskytuje větší úroveň izolace.
+
+Tento typ virtualizace je v~OS Solaris 11.3 podporován produkty Oracle VM Server for x86, Oracle VM Server for SPARC a Oracle
+VM VirtualBox \cite{oracle:virtualization:technologies}. Každá z~těchto implementací se zaměřuje na jinou architekturu nebo
+používá jiný typ virtualizačního monitoru.
+\subsubsection{Hardware partitions}
+\label{chapter:solaris:virtualization:hw_partition}
+Posledním modelem, který je nepřímo podporovaný operačním systémem Solaris, jsou tzv. \textit{hardware partitions}. Je to technika,
+která fyzicky odděluje běh OS na oddělených částech fyzických prostředků. Tohoto způsobu virtualizace je dosaženo
+bez pomocí virtualizačního monitoru, a proto tato technika poskytuje reálný výkon systému. \textit{Hardware partitions} je technika
+poskytující běžícím operačním systémům největší izolaci, ale není tak flexibilní v~konfiguraci prostředků jako výše
+zmíněné modely.
+
+Tento model virtualizace není z~logických důvodů poskytován operačním systémem Solaris, jelikož se jedná o~virtualizaci na HW úrovni.
+Pro~účely nasazení tohoto OS s~touto virtualizační technikou používá Oracle speciální servery SPARC M-Series 
+\cite{oracle:virtualization:technologies}.

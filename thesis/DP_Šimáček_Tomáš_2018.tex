@@ -1,0 +1,140 @@
+% options:
+% thesis=B bachelor's thesis
+% thesis=M master's thesis
+% czech thesis in Czech language
+% slovak thesis in Slovak language
+% english thesis in English language
+% hidelinks remove colour boxes around hyperlinks
+
+\documentclass[thesis=M,czech]{FITthesis}[2012/06/26]
+
+\usepackage[utf8]{inputenc} % LaTeX source encoded as UTF-8
+
+\usepackage{graphicx} %graphics files inclusion
+% \usepackage{amsmath} %advanced maths
+% \usepackage{amssymb} %additional math symbols
+
+
+\usepackage{listings}
+\usepackage{tabularx}
+\usepackage[newfloat]{minted}
+\renewcommand*{\listingname}{Výpis kódu}% Listing -> Kód
+\renewcommand*{\lstlistlistingname}{Seznam výpisů kódů}% List of Listings -> List of Algorithms
+
+ \usepackage{dirtree} %directory tree visualisation
+
+% % list of acronyms
+% \usepackage[acronym,nonumberlist,toc,numberedsection=autolabel]{glossaries}
+% \iflanguage{czech}{\renewcommand*{\acronymname}{Seznam pou{\v z}it{\' y}ch zkratek}}{}
+% \makeglossaries
+
+\newcommand{\tg}{\mathop{\mathrm{tg}}} %cesky tangens
+\newcommand{\cotg}{\mathop{\mathrm{cotg}}} %cesky cotangens
+
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+% ODTUD DAL VSE ZMENTE
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+
+\department{Katedra počítačových systémů}
+\title{Podpora automatické správy virtualizačního kontejneru Solaris Zones na~platformě Solaris}
+\authorGN{Tomáš} %(křestní) jméno (jména) autora
+\authorFN{Šimáček} %příjmení autora
+\authorWithDegrees{Bc. Tomáš Šimáček} %jméno autora včetně současných akademických titulů
+\author{Tomáš Šimáček} %jméno autora bez akademických titulů
+\supervisor{Ing. Michal Šoch, Ph.D.}
+\acknowledgements{Rád bych poděkoval vedoucímu práce Ing. Michalu Šochovi, Ph.D. za cenné rady,
+připomínky a nápady v průběhu vzniku této diplomové práce. }
+\abstractCS{\input{chapters/abstract_cs.tex}}
+\abstractEN{\input{chapters/abstract_en.tex}}
+\placeForDeclarationOfAuthenticity{V~Praze}
+\declarationOfAuthenticityOption{4} %volba Prohlášení (číslo 1-6)
+\keywordsCS{\input{chapters/keywords_cs.tex} \cleardoublepage}
+\keywordsEN{\input{chapters/keywords_en.tex}}
+
+\newtheorem{definition}{Definice}
+
+\begin{document}
+
+% \newacronym{CVUT}{{\v C}VUT}{{\v C}esk{\' e} vysok{\' e} u{\v c}en{\' i} technick{\' e} v Praze}
+% \newacronym{FIT}{FIT}{Fakulta informa{\v c}n{\' i}ch technologi{\' i}}
+
+\begin{introduction}
+  \input{chapters/introduction}
+\end{introduction}
+
+\chapter{Virtualizace}
+  \label{chapter:virtualization}
+  \input{chapters/virtualization}
+  
+\chapter{Solaris}
+  \label{chapter:solaris}
+  \input{chapters/solaris}
+
+\chapter{Solaris Zones}
+  \label{chapter:zones}
+  \input{chapters/zones}
+  
+\chapter{Návrh aplikace}
+  \label{chapter:design}
+  \input{chapters/design}
+  
+\chapter{Implementace}
+  \label{chapter:implementation}
+  \input{chapters/implementation}
+  
+\chapter{Testování a měření}
+  \label{chapter:testing}
+  \input{chapters/testing}
+
+\begin{conclusion}
+  \input{chapters/conclusion}
+\end{conclusion}
+
+\bibliographystyle{csn690}
+\bibliography{references}
+
+\appendix
+
+\chapter{Seznam použitých zkratek}
+% \printglossaries
+\begin{description}
+        \item[BIOS] Basic Input Output System
+        \item[CLI] Command Line Interface
+        \item[DNS] Domain Name System
+        \item[EPT] Extended Page Tables
+        \item[HLL]  High Level Language
+        \item[HW]  Hardware
+        \item[I/O] Input/Output
+        \item[ISA]  Instruction Set Architecture	
+	\item[JSON] JavaScript Object Notation
+	\item[NAT]  Network Address Translation
+	\item[OS]  Operating System	
+	\item[RVI]  Rapid Virtualization Indexing
+	\item[SW]  Software
+	\item[SMF] Solaris Management Facility
+	\item[SSH] Secure Shell		
+	\item[VM]  Virtual Machine
+	\item[VMM] Virtual Machine Monitor
+	\item[XML] Extensible Markup Language
+	\item[ZFS] Zettabyte File System
+\end{description}
+
+\chapter{Uživatelská příručka}
+  \input{chapters/installation}
+  
+\chapter{Testování}
+  \input{chapters/testing_appendix}
+
+\chapter{Obsah přiloženého CD}
+\begin{figure}
+	\dirtree{%
+		.1 readme.txt\DTcomment{stručný popis obsahu CD}.
+		.1 impl.
+		.2 szmgmt\DTcomment{zdrojové kódy aplikace szmgmt}.
+		.2 szmgmt-1.0.0.gem\DTcomment{instalační balíček aplikace ve formátu .gem}.
+		.1 thesis.
+		.2 src\DTcomment{zdrojové soubory práce ve formátu \LaTeX{}}.
+		.2 DP\_Simacek\_Tomas\_2018.pdf\DTcomment{text práce ve formátu PDF}.
+	}
+\end{figure}
+\end{document}

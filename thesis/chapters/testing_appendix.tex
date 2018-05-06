@@ -1,0 +1,302 @@
+\begin{listing}[ht]
+  \caption{Výstup příkazu pro vytvoření neglobálních zón ze šablony}
+  \begin{minted}[fontsize=\small]{bash}
+zadmin@shost:~$ szmgmt_cli deploy -b zdev zdev zdev:shost1 \
+                                     zdev:shost2 \
+                                     -s ~/zdev.json 
+Solaris zones deployment initialized.
+  ---------------------------------------------------------
+  Options:
+      Boot zones: enable
+   Rewrite zones: disable
+          Source: </export/home/zadmin/zdev.json>  
+  ---------------------------------------------------------
+  Connecting concurrently to hosts 'localhost,shost1,shost2'.
+  Processing zone 'zdev' deployment on host 'localhost'.
+    See log '~/.szmgmt/log/zdev_deployment_q98wex.log'.
+  Processing zone 'zdev1' deployment on host 'localhost'.
+    See log '~/.szmgmt/log/zdev1_deployment_awiej4.log'.
+  Processing zone 'zdev' deployment on host 'shost1'.
+    See log '~/.szmgmt/log/zdev_deployment_q98w7e.log'.
+  Processing zone 'zdev' deployment on host 'shost2'.
+    See log '~/.szmgmt/log/zdev_deployment_ea4w98.log'.
+  ---------------------------------------------------------
+  Deployment finished.
+    Status:
+      localhost:
+        zdev:  success
+        zdev1: success
+      shost1:
+        zdev:  success
+      shost2:
+        zdev:  success
+  \end{minted}
+  \label{code:test:deployment}
+\end{listing}
+
+\begin{listing}[ht]
+  \caption{Výpis uživatelského žurnálu po vytvoření zón}  
+  \begin{minted}[fontsize=\small]{bash}
+zadmin@shost:~$ szmgm_cli journal status
+Tracked zones:
+  Host localhost
+      zdev1:localhost
+           Zone type: solaris
+          Zone state: running
+           Zone path: /system/zones/zdev1
+      zdev:localhost
+           Zone type: solaris
+          Zone state: running
+           Zone path: /system/zones/zdev
+  Host shost2
+      zdev:shost2
+           Zone type: solaris
+          Zone state: running                      
+           Zone path: /system/zones/zdev
+  Host shost1
+      zdev:shost1
+           Zone type: solaris
+          Zone state: running
+           Zone path: /system/zones/zdev
+  \end{minted}
+  \label{code:test:journal}
+\end{listing}
+
+\begin{listing}[ht]
+  \caption{Výpis uživatelského žurnálu po změně původní zóny}  
+  \begin{minted}[fontsize=\small]{bash}
+zadmin@shost:~$ szmgm_cli journal status
+Tracked zones:
+  ...
+  Host shost2
+      zweb:shost2
+           Zone type: solaris
+          Zone state: running
+                      MISMATCH - Current state installed.
+           Zone path: /system/zones/zweb
+                      MISMATCH - UUID mismatch.
+Untracked zones:
+  Host shost2
+      zdev-colne:shost2
+          Zone type: solaris
+         Zone state: installed
+          Zone path: /system/zones/zdev-colne
+  \end{minted}
+  \label{code:test:journal:change}
+\end{listing}
+
+\begin{listing}[ht]
+  \caption{Sekvence příkazů pro ověření správnosti vytvoření zóny}  
+  \begin{minted}[fontsize=\small]{bash} 
+zadmin@shost2:~$ zlogin -C  zdev
+[Connected to zone 'zweb' console]
+Hostname: solaris
+solaris console login: admin
+Password:
+admin@solaris:~$ ifconfig net0
+net0: flags=100001000843<UP,BROADCAST,RUNNING,MULTICAST,IPv4>
+    inet 10.164.85.13 netmask ff000000
+admin@solaris:~$ git --version
+git version 1.7.9.2
+admin@solaris:~$ hg --version
+Mercurial Distributed SCM (version 3.4)
+simactom@solaris:~$ profiles
+System Administrator
+...
+  \end{minted}
+  \label{code:test:deployment:result}
+\end{listing}
+
+\begin{listing}[ht]
+  \caption{Výpis uživatelského žurnálu před migrací zón}  
+  \begin{minted}[fontsize=\small]{bash}
+zadmin@shost:~$ szmgmt_cli journal status
+Geting fresh information about zones on all registered hosts...
+Tracked zones:
+  Host localhost
+      zmigr1:localhost
+           Zone type: solaris
+          Zone state: running
+           Zone path: /system/zones/zmigr1
+      zmigr:localhost
+           Zone type: solaris
+          Zone state: running
+           Zone path: /system/zones/zmigr                 
+  Host shost1
+      zmigr3:shost1
+           Zone type: solaris
+          Zone state: running
+           Zone path: /system/zones/zmigr3
+      zmigr2:shost1
+           Zone type: solaris
+          Zone state: running
+           Zone path: /system/zones/zmigr2      
+  \end{minted}
+  \label{code:test:migration:before}
+\end{listing}
+
+\begin{listing}[ht]
+  \caption{Výpis příkazu pro migraci neglobálních zón}  
+  \begin{minted}[fontsize=\small]{bash}
+zadmin@shost:~$ szmgm_cli migrate -t d zmigr \
+                                       zmigr1 \
+                                       zmigr1:shost1 \
+                                       zmigr1:shost1 \
+                                       -d shost2
+Solaris zones migration initialized.
+  ---------------------------------------------------------
+  Options:
+                Boot zones: disable
+    Rewrite existing zones: disable
+  ---------------------------------------------------------
+  Connecting concurrently to hosts 'localhost shost1'.
+  Processing migration of zone 'zmigr1:localhost'. 
+    See log '~/.szmgmt/log/zmigr1_migration_ph5o7o.log'. 
+  Processing migration of zone 'zmigr2:shost1'. 
+    See log '~/.szmgmt/log/zmigr2_migration_uy1frm.log'.
+  Processing migration of zone 'zmigr3:shost1'. 
+    See log '~/.szmgmt/log/zmigr3_migration_lhc24y.log'.
+  Processing migration of zone 'zmigr:localhost'. 
+    See log '~/.szmgmt/log/zmigr_migration_h2rdat.log'.
+  ---------------------------------------------------------
+  Migration finished.
+    Status:
+      localhost:
+        zmigr:  success
+        zmigr1: success
+      shost1:
+        zmigr2: success
+        zmigr3: success
+  \end{minted}
+  \label{code:test:migration}
+\end{listing}
+
+\begin{listing}[ht]
+  \caption{Výpis zón na jednotlivých serverech po migraci}  
+  \begin{minted}[fontsize=\small]{bash}
+zadmin@shost:~$ zoneadm list -vic
+  ID NAME     STATUS            BRAND      IP    
+   0 global   running           solaris    shared
+
+zadmin@shost1:~$ zoneadm list -vic
+  ID NAME     STATUS            BRAND      IP    
+   0 global   running           solaris    shared
+   
+zadmin@shost2:~$ zoneadm list -vic
+  ID NAME     STATUS            BRAND      IP    
+   0 global   running           solaris    shared
+   - zmigr1   installed         solaris    excl  
+   - zmigr2   installed         solaris    excl
+   - zmigr3   installed         solaris    excl  
+   - zmigr    installed         solaris    excl  
+  \end{minted}
+  \label{code:test:migration:list}
+\end{listing}
+
+\begin{listing}[ht]
+  \caption{Výpis uživatelského žurnálu po migraci zón}  
+  \begin{minted}[fontsize=\small]{bash}
+zadmin@shost:~$ szmgmt_cli journal status
+Geting fresh information about zones on all registered hosts...
+Tracked zones:  
+  Host shost2
+      zmigr1:shost2
+           Zone type: solaris
+          Zone state: installed
+           Zone path: /system/zones/zmigr1
+      zmigr2:shost2
+           Zone type: solaris
+          Zone state: installed
+           Zone path: /system/zones/zmigr2
+      zmigr:shost2
+           Zone type: solaris
+          Zone state: installed
+           Zone path: /system/zones/zmigr  
+      zmigr3:shost1
+           Zone type: solaris
+          Zone state: running
+           Zone path: /system/zones/zmigr3
+  \end{minted}
+  \label{code:test:migration:after}
+\end{listing}
+
+
+\begin{listing}[ht]
+  \caption{Výpis příkazu pro vytvoření zálohy zón pomocí archivu UAR}  
+  \begin{minted}[fontsize=\small]{bash}
+zadmin@shost:~$ szmgmt_cli backup zback:shost2 \
+                                  zback1:shost2 \
+                                  zback2:shost1 \
+                                  zback3:shost1
+                -d shost -p /zonepool/backup -t uar
+Solaris zones backup initialized (UAR).
+  ---------------------------------------------------------
+  Options:
+          Backup directory: /zonepool/backup
+          Destination host: shost
+  ---------------------------------------------------------
+  Connecting concurrently to hosts 'shost2, shost1'.
+  Processing zone backup of 'zback2:shost1'. 
+    See log '~/.szmgmt/log/zback2_backup_syikav.log'.
+  Processing zone backup of 'zback:shost2'. 
+    See log '~/.szmgmt/log/zback_backup_71blh4.log'.
+  Processing zone backup of 'zback1:shost2'. 
+    See log '~/.szmgmt/log/zback1_backup_5rks8b.log'.
+  Processing zone backup of 'zback3:shost1'. 
+    See log '~/.szmgmt/log/zback3_backup_shmtgw.log'.
+  ---------------------------------------------------------
+  Backup finished.
+    Status:
+      shost2:
+        zback: success
+        zback1: success
+      shost1:
+        zback2: success
+        zback3: success
+  \end{minted}
+  \label{code:test:backup}
+\end{listing}
+
+\begin{listing}[ht]
+  \caption{Výpis příkazu pro obnovení zón ze zálohy typu UAR}  
+  \begin{minted}[fontsize=\small]{bash}
+zadmin@shost:~$ szmgmt_cli recover zback:shost2 \
+                                   zback1:shost2 \
+                                   zback2:shost1 \
+                                   zback3:shost1 
+               -a \ 
+               /zonepool/backup/zback_backup_1525020859.uar \
+               /zonepool/backup/zback1_backup_1525020859.uar \
+               /zonepool/backup/zback2_backup_1525020859.uar \
+               /zonepool/backup/zback3_backup_1525020859.uar
+Solaris zones recovery initialized.
+  ---------------------------------------------------------
+  Options:
+                Boot zones: disable
+    Rewrite existing zones: disable
+  ---------------------------------------------------------
+  Connecting concurrently to hosts 'shost2, shost1' .
+  Processing zone 'zback1' recovery on host 'shost2'.
+    Aarchive: /zonepool/backup/zback1_backup_1525020859.uar.
+    See log '~/.szmgmt/log/zback1_recovery_vai7x.log'.
+  Processing zone 'zback2' recovery on host 'shost1'.
+    Archive: /zonepool/backup/zback2_backup_1525020859.uar.
+    See log '~/.szmgmt/log/zback2_recovery_lpl0c1.log'.
+  Processing zone 'zback' recovery on host 'shost2'.
+    Archive: /zonepool/backup/zback_backup_1525020859.uar.
+    See log '~/.szmgmt/log/zback_recovery_7ecl60.log'.
+  Processing zone 'zback3' recovery on host 'shost1'.
+    Archive: /zonepool/backup/zback3_backup_1525020859.uar.
+    See log '~/.szmgmt/log/zback3_recovery_7ta1fr.log'.
+tes  ---------------------------------------------------------
+  Recovery finished.
+    Status:
+      shost2:
+        zback: success
+        zback1: success
+      shost1:
+        zback2: success
+        zback3: success
+  \end{minted}
+  \label{code:test:recovery}
+\end{listing}
